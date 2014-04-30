@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    default-lazy-init="true"
+    xmlns:c="http://www.springframework.org/schema/c"
+    xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:util="http://www.springframework.org/schema/util"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd">
+
+    <!--
+        *********************************************************************
+        ***                                                               ***
+        ***   I M P O R T   V E R I F I C A T I O N   B L A C K L I S T   ***
+        ***                                                               ***
+        *********************************************************************
+    -->
+
+    <!--
+        Errors associated with any entity listed in the set below will be ignored during the
+        weekly verify run Jenkins performs on the eduGAIN channel. Include any entities for
+        which there are already Bugzilla tickets so that they won't come up week after
+        week.  Remove entities from this list when their Bugzilla ticket is resolved.
+        
+        Note that inclusion on this list does *not* blacklist the entity, just errors
+        associated with it. If the entity passes our checks, it will still pass through
+        into our aggregates.
+    -->
+    <util:set id="int_edugain_verify_blacklist">
+
+    </util:set>
+    
+</beans>
