@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Members
+    xmlns="http://ukfederation.org.uk/2007/01/members"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://ukfederation.org.uk/2007/01/members ukfederation-members.xsd">
+    <Member>
+        <Name>Ian A. Young</Name>
+        <JoinDate>2007-04-12</JoinDate>
+        <Domains>
+            <Domain verifiedBy="mwarnoc2" type="owned" source="whois" lastVerified="2013-10-16">iay.org.uk</Domain>
+        </Domains>
+        <PrimaryScope>iay.org.uk</PrimaryScope>
+    </Member>
+</Members>
