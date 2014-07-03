@@ -93,19 +93,19 @@
 	
 	
 	<!--
-		*************************************
-		***                               ***
-		***   A L G   N A M E S P A C E   ***
-		***                               ***
-		*************************************
-	-->
+        *************************************
+        ***                               ***
+        ***   A L G   N A M E S P A C E   ***
+        ***                               ***
+        *************************************
+    -->
 	
 	
 	<!--
-		alg:*
-		
-		Normalise namespace to not use a prefix.
-	-->
+        alg:*
+        
+        Normalise namespace to not use a prefix.
+    -->
 	<xsl:template match="alg:*">
 		<xsl:element name="{local-name()}" namespace="urn:oasis:names:tc:SAML:metadata:algsupport">
 			<xsl:apply-templates select="node()|@*"/>

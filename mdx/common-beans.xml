@@ -53,7 +53,8 @@
         Parent for anything based on the Shibboleth component system.
         These all require initialization before use.
     -->
-    <bean id="component_parent" abstract="true" init-method="initialize"/>
+    <bean id="component_parent" abstract="true"
+        init-method="initialize" destroy-method="destroy"/>
     
     <!--
         SimplePipeline
@@ -218,6 +219,24 @@
     <bean id="EntityRegistrationAuthorityFilterStage" abstract="true" parent="stage_parent"
         class="net.shibboleth.metadata.dom.saml.EntityRegistrationAuthorityFilterStage"/>
     
+    <!-- *** Parent beans for Shibboleth spring-extensions factory beans. *** -->
+
+    <!-- anticipates name change in spring-extensions bundled with MDA 0.9 -->
+    <bean id="DOMDocumentFactoryBean" abstract="true"
+        class="net.shibboleth.ext.spring.factory.DomDocumentFactoryBean"/>
+    
+    <bean id="PrivateKeyFactoryBean" abstract="true"
+        class="net.shibboleth.ext.spring.factory.PrivateKeyFactoryBean"/>
+    
+    <bean id="PublicKeyFactoryBean" abstract="true"
+        class="net.shibboleth.ext.spring.factory.PublicKeyFactoryBean"/>
+    
+    <bean id="X509CertificateChainFactoryBean" abstract="true"
+        class="net.shibboleth.ext.spring.factory.X509CertificateChainFactoryBean"/>
+
+    <bean id="X509CertificateFactoryBean" abstract="true"
+        class="net.shibboleth.ext.spring.factory.X509CertificateFactoryBean"/>
+
     <!-- *** Parent beans for Shibboleth MDA components. *** -->
 
     <bean id="EntityFilterStage" abstract="true" parent="stage_parent"
@@ -408,6 +427,7 @@
         Federation registrationAuthority URIs.
     -->
     <bean id="hr_eduhr_registrar" parent="String" c:_0="http://www.srce.hr"/>
+    <bean id="il_iif_registrar"   parent="String" c:_0="http://iif.iucc.ac.il"/>
     
     <!--
         identificationStrategy
@@ -446,6 +466,7 @@
                 <entry key="http://www.idem.garr.it/"         value="IT"/>
                 <entry key="http://laife.lanet.lv/"           value="LV"/>
                 <entry key="http://feide.no/"                 value="NO"/>
+                <entry key="http://aai.pionier.net.pl"        value="PL"/>
                 <entry key="http://aai.arnes.si"              value="SI"/>
                 <entry key="http://www.rediris.es/"           value="ES"/>
                 <entry key="http://www.swamid.se/"            value="SE"/>
@@ -454,10 +475,10 @@
                 <entry key="http://ukfederation.org.uk"       value="UK"/>
                 
                 <!-- Joining eduGAIN -->
-                <entry key="http://aai.pionier.net.pl"        value="PL"/>
-                
-                <!-- not yet eduGAIN members -->
                 <entry key="https://incommon.org"             value="US"/>
+                
+                <!-- eduGAIN candidates -->
+                <entry key-ref="il_iif_registrar"             value="IL"/>
             </map>
         </property>
     </bean>
@@ -785,104 +806,104 @@
         so that the parser is not required to explicitly resolve any imports.
     -->
     <util:list id="schemaResources">
-        <bean parent="FileSystemResource">
+        <bean parent="ClassPathResource">
             <!-- no imports -->
-            <constructor-arg value="#{ systemProperties['basedir'] }/xml/incommon-metadata.xsd"/>
+            <constructor-arg value="schema/incommon-metadata.xsd"/>
         </bean>
-        <bean parent="FileSystemResource">
+        <bean parent="ClassPathResource">
             <!-- no imports -->
-            <constructor-arg value="#{ systemProperties['basedir'] }/xml/xml.xsd"/>
+            <constructor-arg value="schema/xml.xsd"/>
         </bean>
-        <bean parent="FileSystemResource">
+        <bean parent="ClassPathResource">
             <!-- no imports -->
-            <constructor-arg value="#{ systemProperties['basedir'] }/xml/xmldsig-core-schema.xsd"/>
+            <constructor-arg value="schema/xmldsig-core-schema.xsd"/>
         </bean>
-        <bean parent="FileSystemResource">
+        <bean parent="ClassPathResource">
             <!-- imports xmldsig-core-schema.xsd -->
-            <constructor-arg value="#{ systemProperties['basedir'] }/xml/xenc-schema.xsd"/>
+            <constructor-arg value="schema/xenc-schema.xsd"/>
         </bean>
-        <bean parent="FileSystemResource">
+        <bean parent="ClassPathResource">
             <!-- imports xmldsig-core-schema.xsd, xenc-schema.xsd -->
-            <constructor-arg value="#{ systemProperties['basedir'] }/xml/saml-schema-assertion-2.0.xsd"/>
+            <constructor-arg value="schema/saml-schema-assertion-2.0.xsd"/>
         </bean>
-        <bean parent="FileSystemResource">
+        <bean parent="ClassPathResource">
             <!-- imports xmldsig-core-schema.xsd, xenc-schema.xsd, saml-schema-assertion-2.0.xsd, xml.xsd -->
-            <constructor-arg value="#{ systemProperties['basedir'] }/xml/saml-schema-metadata-2.0.xsd"/>
+            <constructor-arg value="schema/saml-schema-metadata-2.0.xsd"/>
         </bean>
-        <bean parent="FileSystemResource">
+        <bean parent="ClassPathResource">
             <!-- no imports -->
-            <constructor-arg value="#{ systemProperties['basedir'] }/xml/ws-addr.xsd"/>
+            <constructor-arg value="schema/ws-addr.xsd"/>
         </bean>
-        <bean parent="FileSystemResource">
+        <bean parent="ClassPathResource">
             <!-- imports ws-addr.xsd -->
-            <constructor-arg value="#{ systemProperties['basedir'] }/xml/ws-securitypolicy-1.2.xsd"/>
+            <constructor-arg value="schema/ws-securitypolicy-1.2.xsd"/>
         </bean>
-        <bean parent="FileSystemResource">
+        <bean parent="ClassPathResource">
             <!-- no imports -->
-            <constructor-arg value="#{ systemProperties['basedir'] }/xml/MetadataExchange.xsd"/>
+            <constructor-arg value="schema/MetadataExchange.xsd"/>
         </bean>
-        <bean parent="FileSystemResource">
-            <constructor-arg value="#{ systemProperties['basedir'] }/xml/oasis-200401-wss-wssecurity-utility-1.0.xsd"/>
+        <bean parent="ClassPathResource">
+            <constructor-arg value="schema/oasis-200401-wss-wssecurity-utility-1.0.xsd"/>
         </bean>
-        <bean parent="FileSystemResource">
+        <bean parent="ClassPathResource">
             <!-- imports oasis-200401-wss-wssecurity-utility-1.0.xsd, xml.xsd, xmldsig-core-schema.xsd -->
-            <constructor-arg value="#{ systemProperties['basedir'] }/xml/oasis-200401-wss-wssecurity-secext-1.0.xsd"/>
+            <constructor-arg value="schema/oasis-200401-wss-wssecurity-secext-1.0.xsd"/>
         </bean>
-        <bean parent="FileSystemResource">
+        <bean parent="ClassPathResource">
             <!-- imports saml-schema-metadata-2.0.xsd, xml.xsd -->
-            <constructor-arg value="#{ systemProperties['basedir'] }/xml/saml-metadata-rpi-v1.0.xsd"/>
+            <constructor-arg value="schema/saml-metadata-rpi-v1.0.xsd"/>
         </bean>
-        <bean parent="FileSystemResource">
+        <bean parent="ClassPathResource">
             <!-- imports xmldsig-core-schema.xsd -->
-            <constructor-arg value="#{ systemProperties['basedir'] }/xml/shibboleth-metadata-1.0.xsd"/>
+            <constructor-arg value="schema/shibboleth-metadata-1.0.xsd"/>
         </bean>
-        <bean parent="FileSystemResource">
+        <bean parent="ClassPathResource">
             <!-- imports saml-schema-assertion-2.0.xsd -->
-            <constructor-arg value="#{ systemProperties['basedir'] }/xml/sstc-metadata-attr.xsd"/>
+            <constructor-arg value="schema/sstc-metadata-attr.xsd"/>
         </bean>
-        <bean parent="FileSystemResource">
+        <bean parent="ClassPathResource">
             <!-- imports saml-schema-metadata-2.0.xsd -->
-            <constructor-arg value="#{ systemProperties['basedir'] }/xml/sstc-request-initiation.xsd"/>
+            <constructor-arg value="schema/sstc-request-initiation.xsd"/>
         </bean>
-        <bean parent="FileSystemResource">
+        <bean parent="ClassPathResource">
             <!-- no imports -->
-            <constructor-arg value="#{ systemProperties['basedir'] }/xml/sstc-saml-holder-of-key-browser-sso.xsd"/>
+            <constructor-arg value="schema/sstc-saml-holder-of-key-browser-sso.xsd"/>
         </bean>
-        <bean parent="FileSystemResource">
+        <bean parent="ClassPathResource">
             <!-- imports saml-schema-metadata-2.0.xsd -->
-            <constructor-arg value="#{ systemProperties['basedir'] }/xml/sstc-saml-idp-discovery.xsd"/>
+            <constructor-arg value="schema/sstc-saml-idp-discovery.xsd"/>
         </bean>
-        <bean parent="FileSystemResource">
+        <bean parent="ClassPathResource">
             <!-- no imports -->
-            <constructor-arg value="#{ systemProperties['basedir'] }/xml/sstc-saml-metadata-algsupport-v1.0.xsd"/>
+            <constructor-arg value="schema/sstc-saml-metadata-algsupport-v1.0.xsd"/>
         </bean>
-        <bean parent="FileSystemResource">
+        <bean parent="ClassPathResource">
             <!-- imports saml-schema-metadata-2.0.xsd, xml.xsd -->
-            <constructor-arg value="#{ systemProperties['basedir'] }/xml/sstc-saml-metadata-ui-v1.0.xsd"/>
+            <constructor-arg value="schema/sstc-saml-metadata-ui-v1.0.xsd"/>
         </bean>
-        <bean parent="FileSystemResource">
+        <bean parent="ClassPathResource">
             <!-- no imports -->
-            <constructor-arg value="#{ systemProperties['basedir'] }/xml/uk-fed-label.xsd"/>
+            <constructor-arg value="schema/uk-fed-label.xsd"/>
         </bean>
-        <bean parent="FileSystemResource">
+        <bean parent="ClassPathResource">
             <!-- imports xenc-schema.xsd -->
-            <constructor-arg value="#{ systemProperties['basedir'] }/xml/ws-authorization.xsd"/>
+            <constructor-arg value="schema/ws-authorization.xsd"/>
         </bean>
-        <bean parent="FileSystemResource">
+        <bean parent="ClassPathResource">
             <!--
                 Imports oasis-200401-wss-wssecurity-secext-1.0.xsd, oasis-200401-wss-wssecurity-utility-1.0.xsd,
                 ws-addr.xsd, MetadataExchange.xsd, saml-schema-metadata-2.0.xsd, ws-securitypolicy-1.2.xsd,
                 ws-authorization.xsd.
             -->
-            <constructor-arg value="#{ systemProperties['basedir'] }/xml/ws-federation.xsd"/>
+            <constructor-arg value="schema/ws-federation.xsd"/>
         </bean>
-        <bean parent="FileSystemResource">
+        <bean parent="ClassPathResource">
             <!-- imports xmldsig-core-schema.xsd, xenc-schema.xsd -->
-            <constructor-arg value="#{ systemProperties['basedir'] }/xml/xenc-schema-11.xsd"/>
+            <constructor-arg value="schema/xenc-schema-11.xsd"/>
         </bean>
-        <bean parent="FileSystemResource">
+        <bean parent="ClassPathResource">
             <!-- imports xmldsig-core-schema.xsd -->
-            <constructor-arg value="#{ systemProperties['basedir'] }/xml/xmldsig11-schema.xsd"/>
+            <constructor-arg value="schema/xmldsig11-schema.xsd"/>
         </bean>
     </util:list>
     

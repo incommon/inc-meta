@@ -139,6 +139,7 @@
                     <li><p><a href="#shib13">Shibboleth 1.3 Remnants</a></p></li>
                     <li><p><a href="#mdui">Entities with mdui:UIInfo support</a></p></li>
                     <li><p><a href="#export">Entities in Export Aggregate</a></p></li>
+                    <li><p><a href="#nosaml2">Entities Without SAML 2.0 Support</a></p></li>
                 </ul>
                 
 
@@ -484,26 +485,6 @@
                         </p>
                     </li>
 
-                    <xsl:variable name="exampleEntities" select="$entities[contains(md:Organization/md:OrganizationURL, 'example')]"/>
-                    <xsl:variable name="exampleEntityCount" select="count($exampleEntities)"/>
-                    <xsl:if test="$exampleEntityCount != 0">
-                        <li>
-                            <p>
-                                <xsl:value-of select="$exampleEntityCount"/>
-                                (<xsl:value-of select="format-number($exampleEntityCount div $entityCount, '0.0%')"/>)
-                                <xsl:choose>
-                                    <xsl:when test="$exampleEntityCount = 1">
-                                        has
-                                    </xsl:when>
-                                    <xsl:otherwise>
-                                        have
-                                    </xsl:otherwise>
-                                </xsl:choose>
-                                legacy "example" <code>OrganizationURL</code> elements.
-                            </p>
-                        </li>
-                    </xsl:if>
-
                     <xsl:variable name="httpEntities" select="$entities[starts-with(@entityID, 'http://')]"/>
                     <xsl:variable name="httpEntityCount" select="count($httpEntities)"/>
                     <xsl:if test="$httpEntityCount != 0">
@@ -570,9 +551,6 @@
                     
                 </ul>
 
-                <xsl:call-template name="entity.breakdown.by.trust">
-                    <xsl:with-param name="entities" select="$entities"/>
-                </xsl:call-template>
                 <xsl:call-template name="entity.breakdown.by.software">
                     <xsl:with-param name="entities" select="$entities"/>
                 </xsl:call-template>
@@ -738,9 +716,6 @@
                     
                 </ul>
 
-                <xsl:call-template name="entity.breakdown.by.trust">
-                    <xsl:with-param name="entities" select="$idps"/>
-                </xsl:call-template>
                 <xsl:call-template name="entity.breakdown.by.software">
                     <xsl:with-param name="entities" select="$idps"/>
                 </xsl:call-template>
@@ -961,9 +936,6 @@
 
                 </ul>
                 
-                <xsl:call-template name="entity.breakdown.by.trust">
-                    <xsl:with-param name="entities" select="$sps"/>
-                </xsl:call-template>
                 <xsl:call-template name="entity.breakdown.by.software">
                     <xsl:with-param name="entities" select="$sps"/>
                 </xsl:call-template>
@@ -985,7 +957,7 @@
                 <p>
                     This section is intended to be largely self-explanatory. 
                     Any items in [...] brackets give additional information about the entity: 
-                    its type, the trust engine, etc. 
+                    its type, the software used, etc. 
                  </p>
                 <ul>
                     <xsl:apply-templates select="$ownerNames" mode="enumerate">
@@ -1185,24 +1157,64 @@
                                         <xsl:text>)</xsl:text>
                                     </xsl:otherwise>
                                 </xsl:choose>
-                                <ul>
-                                    <li>
-                                        <xsl:choose>
-                                            <xsl:when test="descendant::*[contains(@protocolSupportEnumeration,
-                                                'urn:oasis:names:tc:SAML:2.0:protocol')]">
-                                                Supports SAML 2.0
-                                            </xsl:when>
-                                            <xsl:otherwise>
-                                                No SAML 2.0 support
-                                            </xsl:otherwise>
-                                        </xsl:choose>
-                                    </li>
-                                </ul>
+                                <xsl:if test="not(descendant::*[contains(@protocolSupportEnumeration,
+                                    'urn:oasis:names:tc:SAML:2.0:protocol')])">
+                                    <ul>
+                                        <li>
+                                            No SAML 2.0 support
+                                        </li>
+                                    </ul>                                    
+                                </xsl:if>
                             </li>
                         </xsl:for-each>
                     </ul>
                 </xsl:if>
                 
+                <!--
+                    *****************************************************************************
+                    ***                                                                       ***
+                    ***   E N T I T I E S   W I T H O U T   S A M L   2 . 0   S U P P O R T   ***
+                    ***                                                                       ***
+                    *****************************************************************************
+                -->
+                <h2><a name="nosaml2">Entities Without SAML 2.0 Support</a></h2>
+                <h3>Service Providers Without SAML 2.0 Support</h3>
+                <p>
+                    This list shows the entity ID, entity owner and display name for all service provider
+                    entities which do not declare support for the SAML 2.0 protocol. It is sorted by
+                    entity owner. The display name is shown in parentheses if it is taken from the
+                    OrganizationDisplayName element, and without parentheses if it is taken from
+                    MDUI metadata.
+                </p>
+                <p>
+                    The software used by the entity, if known, is included at the end of the listing within
+                    brackets [like this].
+                </p>
+                <ul>
+                    <xsl:for-each select="$sps[md:SPSSODescriptor[not(contains(@protocolSupportEnumeration,
+                        'urn:oasis:names:tc:SAML:2.0:protocol'))]]">
+                        <xsl:sort select="descendant::md:OrganizationName"/>
+                        <li>
+                            <xsl:value-of select="@ID"/>
+                            <xsl:text>: </xsl:text>
+                            <xsl:value-of select="descendant::md:OrganizationName"/>
+                            <xsl:text>: </xsl:text>
+                            <xsl:choose>
+                                <xsl:when test="descendant::mdui:DisplayName">
+                                    <xsl:value-of select="descendant::mdui:DisplayName"/>
+                                </xsl:when>
+                                <xsl:otherwise>
+                                    <xsl:text>(</xsl:text>
+                                    <xsl:value-of select="descendant::md:OrganizationDisplayName"/>
+                                    <xsl:text>)</xsl:text>
+                                </xsl:otherwise>
+                            </xsl:choose>
+                            <xsl:apply-templates select="md:Extensions/ukfedlabel:Software" mode="short"/>
+                        </li>
+                    </xsl:for-each>
+                </ul>
+
+
             </body>
         </html>
     </xsl:template>
@@ -1327,15 +1339,6 @@
                             <xsl:if test="md:IDPSSODescriptor"> [IdP]</xsl:if>
                             <xsl:if test="md:Extensions/wayf:HideFromWAYF"> [H]</xsl:if>
                             <xsl:if test="md:SPSSODescriptor"> [SP]</xsl:if>
-                            <xsl:choose>
-                                <xsl:when test="descendant::ds:X509Data">
-                                    <xsl:text> [DK</xsl:text>
-                                    <xsl:if test="descendant::ds:KeyName">+PKIX</xsl:if>
-                                    <xsl:text>]</xsl:text>
-                                </xsl:when>
-                                
-                                <xsl:when test="descendant::ds:KeyName"> [PKIX]</xsl:when>
-                            </xsl:choose>
                             <xsl:apply-templates select="md:Extensions/ukfedlabel:Software" mode="short"/>
                             <xsl:text> </xsl:text>
                             <code><xsl:value-of select="@entityID"/></code>
@@ -1586,48 +1589,6 @@
         </xsl:if>
 
     </xsl:template>
-    
-    <!--
-        *******************************************************
-        ***                                                 ***
-        ***   T R U S T   M O D E L S   B R E A K D O W N   ***
-        ***                                                 ***
-        *******************************************************
-        
-        Break down a set of entities by the trust models available.
-    -->
-    <xsl:template name="entity.breakdown.by.trust">
-        <xsl:param name="entities"/>
-        <xsl:variable name="entityCount" select="count($entities)"/>
-        <!--
-            Trust fabric statistics
-        -->
-        <xsl:variable name="pkixCapableEntities" select="$entities[descendant::ds:KeyName]"/>
-        <xsl:variable name="dkeyCapableEntities" select="$entities[descendant::ds:X509Data]"/>
-        <xsl:variable name="dkeyEntities" select="set:difference($dkeyCapableEntities, $pkixCapableEntities)"/>
-        <xsl:variable name="hybridEntities" select="set:intersection($pkixCapableEntities, $dkeyCapableEntities)"/>
-        <xsl:variable name="dkeyEntityCount" select="count($dkeyEntities)"/>
-        <xsl:variable name="hybridEntityCount" select="count($hybridEntities)"/>
-        
-        <p>Trust models:</p>
-        <ul>
-            <li>
-                <p>
-                    Hybrid (PKIX and direct key):
-                    <xsl:value-of select="$hybridEntityCount"/>
-                    (<xsl:value-of select="format-number($hybridEntityCount div $entityCount, '0.0%')"/>)
-                </p>
-            </li>
-            <li>
-                <p>
-                    Direct key only:
-                    <xsl:value-of select="$dkeyEntityCount"/>
-                    (<xsl:value-of select="format-number($dkeyEntityCount div $entityCount, '0.0%')"/>)
-                </p>
-            </li>
-        </ul>
-        
-    </xsl:template>        
 
 
 
@@ -1987,41 +1948,8 @@
         <xsl:variable name="kd.count" select="count($kd)"/>
         <p>
             <code>KeyDescriptor</code> elements: <xsl:value-of select="$kd.count"/>
-            (<xsl:value-of select="format-number($kd.count div count($entities), '0.0')"/> per entity),
-            of which:</p>
-        <ul>
-            <li>
-                With embedded keys:
-                <xsl:call-template name="keydescriptor.line">
-                    <xsl:with-param name="kd.count" select="$kd.count"/>
-                    <xsl:with-param name="sub" select="$kd[descendant::ds:X509Data]"/>
-                </xsl:call-template>
-            </li>
-            <li>
-                With only embedded keys:
-                <xsl:call-template name="keydescriptor.line">
-                    <xsl:with-param name="kd.count" select="$kd.count"/>
-                    <xsl:with-param name="sub" select="$kd[descendant::ds:X509Data][not(descendant::ds:KeyName)]"/>
-                </xsl:call-template>
-            </li>
-            <li>
-                With <code>KeyName</code>:
-                <xsl:call-template name="keydescriptor.line">
-                    <xsl:with-param name="kd.count" select="$kd.count"/>
-                    <xsl:with-param name="sub" select="$kd[descendant::ds:KeyName]"/>
-                </xsl:call-template>
-            </li>
-        </ul>
-    </xsl:template>
-    
-    <xsl:template name="keydescriptor.line">
-        <xsl:param name="kd.count"/>
-        <xsl:param name="sub"/>
-        <xsl:variable name="sub.count" select="count($sub)"/>
-        <xsl:value-of select="$sub.count"/>
-        <xsl:text> (</xsl:text>
-        <xsl:value-of select="format-number($sub.count div $kd.count, '0.0%')"/>
-        <xsl:text>)</xsl:text>
+            (<xsl:value-of select="format-number($kd.count div count($entities), '0.0')"/> per entity).
+        </p>
     </xsl:template>
     
 </xsl:stylesheet>
