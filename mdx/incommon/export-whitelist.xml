@@ -24,6 +24,8 @@
 
         <!-- LIGO entities -->
         <value>https://gw-astronomy.org/shibboleth-sp</value>
+        <value>https://gw-astronomy.org/lists/shibboleth-sp</value>
+        <value>https://gw-astronomy.org/wiki/shibboleth-sp</value>
 
     </util:set>
 
