@@ -63,6 +63,16 @@
                 <!-- Include a default registrationAuthority for each entity. -->
                 <ref bean="us_incommon_default_regauth"/>
 
+                <!-- Replace the InCommon R&S category with the REFEDS equivalent. -->
+                <bean id="rands_to_refeds" parent="XSLTransformationStage"
+                    p:id="rands_to_refeds">
+                    <property name="XSLResource">
+                        <bean parent="ClassPathResource">
+                            <constructor-arg value="incommon/rands_to_refeds.xsl"/>
+                        </bean>
+                    </property>
+                </bean>
+
                 <!-- Construct an aggregate from the collection of entities. -->
                 <ref bean="assemble"/>
 
