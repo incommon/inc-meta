@@ -54,7 +54,7 @@
 	-->
 	<xsl:template name="default_regauth">
 		<xsl:text>&#10;</xsl:text>
-		<xsl:text>        </xsl:text>
+		<xsl:text>    </xsl:text>
 		<xsl:element name="mdrpi:RegistrationInfo">
 			<xsl:attribute name="registrationAuthority">
 				<xsl:value-of select="$defaultAuthority"/>

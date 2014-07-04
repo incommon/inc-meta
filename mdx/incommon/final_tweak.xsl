@@ -91,13 +91,10 @@
             -->
 			<xsl:if test="$publisher and not(md:Extensions)">
 				<xsl:text>&#10;</xsl:text>
-				<xsl:text>    </xsl:text>
 				<xsl:element name="md:Extensions">
 					<xsl:call-template name="generate.publicationInfo"/>
 					<xsl:text>&#10;</xsl:text>
-					<xsl:text>    </xsl:text>
 				</xsl:element>
-				<xsl:text>&#10;</xsl:text>
 			</xsl:if>
 
 			<xsl:apply-templates select="node()"/>
@@ -157,7 +154,7 @@
     -->
 	<xsl:template name="generate.publicationInfo">
 		<xsl:text>&#10;</xsl:text>
-		<xsl:text>        </xsl:text>
+		<xsl:text>  </xsl:text>
 		<xsl:element name="mdrpi:PublicationInfo">
 			<xsl:attribute name="publisher">
 				<xsl:value-of select="$publisher"/>
