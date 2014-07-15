@@ -9,8 +9,8 @@
     xmlns:util="http://www.springframework.org/schema/util"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="
-        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd">
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
     
     <!--
         Location of various resources.
@@ -54,7 +54,7 @@
     <bean id="ch_switchaai_signingCertificate" parent="X509CertificateFactoryBean">
         <property name="certificateFile">
             <bean class="java.io.File">
-                <constructor-arg value="#{ systemProperties['basedir'] }/mdx/ch_switchaai/metadata.crt"/>
+                <constructor-arg value="${basedir}/mdx/ch_switchaai/metadata.crt"/>
             </bean>
         </property>
     </bean>
@@ -65,7 +65,7 @@
     <bean id="ch_switchaai_interfedSigningCertificate" parent="X509CertificateFactoryBean">
         <property name="certificateFile">
             <bean class="java.io.File">
-                <constructor-arg value="#{ systemProperties['basedir'] }/mdx/ch_switchaai/interfed.crt"/>
+                <constructor-arg value="${basedir}/mdx/ch_switchaai/interfed.crt"/>
             </bean>
         </property>
     </bean>

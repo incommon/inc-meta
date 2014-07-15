@@ -9,8 +9,8 @@
     xmlns:util="http://www.springframework.org/schema/util"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="
-        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd">
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
     <!--
         Import commonly used beans.
@@ -71,7 +71,7 @@
                     p:id="serialize">
                     <property name="outputFile">
                         <bean class="java.io.File">
-                            <constructor-arg value="#{ systemProperties['basedir'] }/mdx/uk/temp.html"/>
+                            <constructor-arg value="${basedir}/mdx/uk/temp.html"/>
                         </bean>
                     </property>
                 </bean>
@@ -208,7 +208,7 @@
         p:id="fetchImportMetadata">
         <property name="source">
             <bean class="java.io.File">
-                <constructor-arg value="#{ systemProperties['basedir'] }/entities/import.xml"/>
+                <constructor-arg value="${basedir}/entities/import.xml"/>
             </bean>
         </property>
     </bean>
@@ -222,7 +222,7 @@
         p:id="serializeImportedMetadata">
         <property name="outputFile">
             <bean class="java.io.File">
-                <constructor-arg value="#{ systemProperties['basedir'] }/entities/imported.xml"/>
+                <constructor-arg value="${basedir}/entities/imported.xml"/>
             </bean>
         </property>
     </bean>
@@ -264,7 +264,7 @@
                     p:id="normalizeFragment">
                     <property name="XSLResource">
                         <bean parent="FileSystemResource">
-                            <constructor-arg value="#{ systemProperties['basedir'] }/mdx/uk/ns_norm_fragment.xsl"/>
+                            <constructor-arg value="${basedir}/mdx/uk/ns_norm_fragment.xsl"/>
                         </bean>
                     </property>
                 </bean>
@@ -321,8 +321,8 @@
                                 Compromised key blacklists.
                                 
                                 Again, don't need to check for keys below our minimum key size.
-                                This currently means there are no compromised keys to check for.
                             -->
+                            <ref bean="compromised.2048"/>
                         </list>
                     </property>
                 </bean>
@@ -352,7 +352,7 @@
         p:id="serializeImported">
         <property name="outputFile">
             <bean class="java.io.File">
-                <constructor-arg value="#{ systemProperties['basedir'] }/mdx/uk/imported.xml"/>
+                <constructor-arg value="${basedir}/mdx/uk/imported.xml"/>
             </bean>
         </property>
     </bean>
