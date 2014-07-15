@@ -1417,4 +1417,63 @@
         </echoproperties>
     </target>
 
+    <!--
+        *********************************************
+        ***                                       ***
+        ***   I N C O M M O N   S P E C I F I C   ***
+        ***                                       ***
+        *********************************************
+    -->
+
+    <!--
+        Location of most InCommon-specific files.
+    -->
+    <property name="mda.incdir" location="mdx/incommon"/>
+
+    <!--
+        Default local file location from which to read the
+        (not necessarily signed) production aggregate.
+
+        This can be overridden in build.properties.
+
+        In a development environment, use the inc.fetch.production
+        target to read a copy of the current real production
+        aggregate into this location for testing.
+    -->
+    <property name="mda.inc.production.xml" value="${mda.incdir}/production.xml"/>
+
+    <!--
+        Default local file location to which to write the export aggregate.
+
+        This can be overridden in build.properties.
+    -->
+    <property name="mda.inc.exported.xml" value="${mda.incdir}/exported.xml"/>
+
+    <!--
+        inc.fetch.production
+
+        This target is for use in a development environment. It reads the
+        current signed InCommon production aggregate into the local file location
+        specified by mda.inc.production.xml so that it can be used to test the
+        inc.generate.export target.
+    -->
+    <target name="inc.fetch.production">
+        <echo>Fetching InCommon production aggregate to ${mda.inc.production.xml}...</echo>
+        <get src="http://md.incommon.org/InCommon/InCommon-metadata.xml"
+            dest="${mda.inc.production.xml}"/>
+        <echo>Fetch complete.</echo>
+    </target>
+
+    <!--
+        inc.generate.export
+
+        Generate the InCommon export aggregate.
+    -->
+    <target name="inc.generate.export">
+        <echo>Generating InCommon export aggregate in ${mda.inc.exported.xml}</echo>
+        <echo>    from production aggregate in ${mda.inc.production.xml}...</echo>
+        <CHANNEL.do channel="incommon" verb="export"/>
+        <echo>Generation complete.</echo>
+    </target>
+
 </project>

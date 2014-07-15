@@ -27,7 +27,7 @@
         p:id="serializeExported">
         <property name="outputFile">
             <bean class="java.io.File">
-                <constructor-arg value="#{ systemProperties['basedir'] }/mdx/incommon/exported.xml"/>
+                <constructor-arg value="${inc.exported.xml}"/>
             </bean>
         </property>
     </bean>
@@ -39,17 +39,18 @@
         p:id="export">
         <property name="stages">
             <list>
-                <!-- Start with the InCommon production aggregate. -->
-                <ref bean="us_incommon_productionAggregate"/>
-
                 <!--
-                    Check for fatal errors at the aggregate level:
-                        missing or expired validUntil attribute
-                        invalid signature
+                    Start with the InCommon production aggregate.
+
+                    In a production environment, this will be the *unsigned* aggregate,
+                    so we perform minimal checking on its contents.
                 -->
-                <ref bean="check_validUntil"/>
-                <ref bean="us_incommon_checkSignature"/>
-                <ref bean="errorTerminatingFilter"/>
+                <bean id="production_aggregate" parent="DOMResourceSourceStage"
+                    p:id="production_aggregate">
+                    <property name="DOMResource">
+                        <bean parent="ClassPathResource" c:_0="incommon/production.xml"/>
+                    </property>
+                </bean>
 
                 <!-- Break down into individual entities. -->
                 <ref bean="disassemble"/>
@@ -92,7 +93,7 @@
                     p:id="normalise">
                     <property name="XSLResource">
                         <bean parent="FileSystemResource">
-                            <constructor-arg value="#{ systemProperties['basedir'] }/mdx/incommon/ns_norm_export.xsl"/>
+                            <constructor-arg value="${incdir}/ns_norm_export.xsl"/>
                         </bean>
                     </property>
                 </bean>
