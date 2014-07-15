@@ -1492,7 +1492,7 @@
         <echo>Generating InCommon import aggregate in ${mda.inc.imported.xml}</echo>
         <echo>    from production aggregate in ${mda.inc.production.xml}</echo>
         <echo>    and selected eduGAIN entities...</echo>
-        <CHANNEL.do channel="incommon" verb="export"/>
+        <CHANNEL.do channel="incommon" verb="import"/>
         <echo>Generation complete.</echo>
     </target>
 
