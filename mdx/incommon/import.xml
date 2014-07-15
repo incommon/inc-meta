@@ -96,7 +96,7 @@
                 <bean id="production_aggregate" parent="DOMResourceSourceStage"
                     p:id="production_aggregate">
                     <property name="DOMResource">
-                        <bean parent="ClassPathResource" c:_0="incommon/production.xml"/>
+                        <bean parent="FileSystemResource" c:_0="${inc.production.xml}"/>
                     </property>
                 </bean>
 
