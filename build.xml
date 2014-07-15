@@ -1450,6 +1450,13 @@
     <property name="mda.inc.exported.xml" value="${mda.incdir}/exported.xml"/>
 
     <!--
+        Default local file location to which to write the import aggregate.
+
+        This can be overridden in build.properties.
+    -->
+    <property name="mda.inc.imported.xml" value="${mda.incdir}/imported.xml"/>
+
+    <!--
         inc.fetch.production
 
         This target is for use in a development environment. It reads the
@@ -1472,6 +1479,19 @@
     <target name="inc.generate.export">
         <echo>Generating InCommon export aggregate in ${mda.inc.exported.xml}</echo>
         <echo>    from production aggregate in ${mda.inc.production.xml}...</echo>
+        <CHANNEL.do channel="incommon" verb="export"/>
+        <echo>Generation complete.</echo>
+    </target>
+
+    <!--
+        inc.generate.import
+
+        Generate the InCommon import aggregate.
+    -->
+    <target name="inc.generate.import">
+        <echo>Generating InCommon import aggregate in ${mda.inc.imported.xml}</echo>
+        <echo>    from production aggregate in ${mda.inc.production.xml}</echo>
+        <echo>    and selected eduGAIN entities...</echo>
         <CHANNEL.do channel="incommon" verb="export"/>
         <echo>Generation complete.</echo>
     </target>
