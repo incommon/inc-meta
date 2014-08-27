@@ -64,7 +64,12 @@
                 <!-- Include a default registrationAuthority for each entity. -->
                 <ref bean="us_incommon_default_regauth"/>
 
-                <!-- Replace the InCommon R&S category with the REFEDS equivalent. -->
+                <!--
+                    Replace the InCommon R&S category with the REFEDS equivalent.
+
+                    Note: this is temporary, until the REFEDS R&S category is present in
+                    InCommon production metadata
+                -->
                 <bean id="rands_to_refeds" parent="XSLTransformationStage"
                     p:id="rands_to_refeds">
                     <property name="XSLResource">
@@ -72,6 +77,22 @@
                             <constructor-arg value="incommon/rands_to_refeds.xsl"/>
                         </bean>
                     </property>
+                </bean>
+
+                <!-- Filter the entity attributes released to eduGAIN. -->
+                <bean parent="EntityAttributeFilteringStage" p:id="entityAttributes">
+                   <property name="rules">
+                       <list>
+                           <!-- Permit REFEDS R&S category membership -->
+                           <bean parent="EntityCategoryMatcher"
+                                c:category="http://refeds.org/category/research-and-scholarship"/>
+
+                           <!-- Permit REFEDS R&S category support -->
+                           <bean parent="EntityCategorySupportMatcher"
+                               c:category="http://refeds.org/category/research-and-scholarship"/>
+
+                       </list>
+                   </property>
                 </bean>
 
                 <!-- Construct an aggregate from the collection of entities. -->
