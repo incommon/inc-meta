@@ -107,6 +107,8 @@
     <property name="md.prod.unsigned"   value="ukfederation-metadata-unsigned.xml"/>
     <property name="md.test.unsigned"   value="ukfederation-test-unsigned.xml"/>
     <property name="md.export.unsigned" value="ukfederation-export-unsigned.xml"/>
+    <property name="md.export.preview.unsigned"
+                                        value="ukfederation-export-preview-unsigned.xml"/>
     <property name="md.back.unsigned"   value="ukfederation-back-unsigned.xml"/>
     <property name="md.wayf.unsigned"   value="ukfederation-wayf-unsigned.xml"/>
     <property name="md.cdsall.unsigned" value="ukfederation-cdsall-unsigned.xml"/>
@@ -118,6 +120,8 @@
     <property name="md.prod.signed"     value="ukfederation-metadata.xml"/>
     <property name="md.test.signed"     value="ukfederation-test.xml"/>
     <property name="md.export.signed"   value="ukfederation-export.xml"/>
+    <property name="md.export.preview.signed"
+                                        value="ukfederation-export-preview.xml"/>
     <property name="md.back.signed"     value="ukfederation-back.xml"/>
     <property name="md.wayf.signed"     value="ukfederation-wayf.xml"/>
     <property name="md.cdsall.signed"   value="ukfederation-cdsall.xml"/>
@@ -280,6 +284,7 @@
                 <include name="${md.test.signed}"/>
                 <include name="${md.back.signed}"/>
                 <include name="${md.export.signed}"/>
+                <include name="${md.export.preview.signed}"/>
             </fileset>
         </scp>
     </target>
@@ -349,9 +354,10 @@
         <VFY.remote.both i="${md.prod.signed}"/>
         <VFY.remote.both i="${md.wayf.signed}"/>
         <VFY.remote.both i="${md.cdsall.signed}"/>
-        <VFY.remote i="${md.test.signed}"/>
+        <VFY.remote.both i="${md.test.signed}"/>
         <VFY.remote.both i="${md.back.signed}"/>
-        <VFY.remote i="${md.export.signed}"/>
+        <VFY.remote.both i="${md.export.signed}"/>
+        <VFY.remote.both i="${md.export.preview.signed}"/>
         <echo>Verification completed.</echo>
     </target>
 
@@ -413,6 +419,7 @@
                WAYF/CDS aggregates
                test aggregate
                export aggregate
+               export preview aggregate
                fallback aggregate
                statistics
         -->
@@ -427,6 +434,7 @@
         <MDNORM.noblank i="${xml.dir}/${md.cms.unsigned}"/>
         <MDNORM i="${xml.dir}/${md.test.unsigned}"/>
         <MDNORM i="${xml.dir}/${md.export.unsigned}"/>
+        <MDNORM i="${xml.dir}/${md.export.preview.unsigned}"/>
         <MDNORM i="${xml.dir}/${md.back.unsigned}"/>
         <fixcrlf file="${xml.dir}/ukfederation-stats.html" eol="lf" encoding="UTF-8"/>
 
@@ -601,7 +609,7 @@
         <attribute name="i"/>
         <sequential>
             <MDT i="@{i}" o="${null.device}"
-                keystore="${build.dir}/ukfederation-2012.jks"
+                keystore="${mdx.dir}/uk/ukfederation-2012.jks"
                 alias="${keystore.uk.vfy.alias}"/>
         </sequential>
     </macrodef>
@@ -694,7 +702,7 @@
                 <args>
                     <arg value="--verifySignature"/>
                     <arg value="--certificate"/>
-                    <arg value="${build.dir}/ukfederation-2012.pem"/>
+                    <arg value="${mdx.dir}/uk/ukfederation-2012.pem"/>
                     <!--
                     <arg value="- -quiet"/>
                     -->
@@ -809,6 +817,9 @@
         <echo>Signing UK export metadata.</echo>
         <SIGN.uk i="${md.export.unsigned}" o="${md.export.signed}" digest="SHA-256"/>
 
+        <echo>Signing UK export preview metadata.</echo>
+        <SIGN.uk i="${md.export.preview.unsigned}" o="${md.export.preview.signed}" digest="SHA-256"/>
+
         <echo>Signing UK fallback metadata.</echo>
         <SIGN.uk i="${md.back.unsigned}" o="${md.back.signed}" digest="SHA-256"/>
 
@@ -851,10 +862,13 @@
         <VFY.uk.both i="${md.cdsall.signed}"/>
 
         <echo>Verifying signed UK test metadata.</echo>
-        <XMLSECTOOL.VFY.uk i="${md.test.signed}"/>
+        <VFY.uk.both i="${md.test.signed}"/>
 
         <echo>Verifying signed UK export metadata.</echo>
-        <XMLSECTOOL.VFY.uk i="${md.export.signed}"/>
+        <VFY.uk.both i="${md.export.signed}"/>
+
+        <echo>Verifying signed UK export preview metadata.</echo>
+        <VFY.uk.both i="${md.export.preview.signed}"/>
 
         <echo>Verifying signed UK fallback metadata.</echo>
         <VFY.uk.both i="${md.back.signed}"/>

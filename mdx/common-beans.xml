@@ -609,6 +609,7 @@
     -->
     <bean id="md-NameIDFormat"            parent="QName" c:_0-ref="md_namespace" c:_1="NameIDFormat"/>
     <bean id="md-OrganizationDisplayName" parent="QName" c:_0-ref="md_namespace" c:_1="OrganizationDisplayName"/>
+    <bean id="md-OrganizationURL"         parent="QName" c:_0-ref="md_namespace" c:_1="OrganizationURL"/>
 
     <!--
         Basic EntitiesDescriptor disassembler pipeline stage.
@@ -737,6 +738,7 @@
     -->
     
     <bean id="mdui-InformationURL" parent="QName" c:_0-ref="mdui_namespace" c:_1="InformationURL"/>
+    <bean id="mdui-Logo"           parent="QName" c:_0-ref="mdui_namespace" c:_1="Logo"/>
 
     <bean id="stripMDUIDiscoHints" parent="ElementStrippingStage"
         p:id="stripMDUIDiscoHints"
@@ -1022,7 +1024,9 @@
             <set>
                 <ref bean="md-NameIDFormat"/>
                 <ref bean="md-OrganizationDisplayName"/>
+                <ref bean="md-OrganizationURL"/>
                 <ref bean="mdui-InformationURL"/>
+                <ref bean="mdui-Logo"/>
             </set>
         </property>
     </bean>
