@@ -77,6 +77,7 @@
 	-->
 	<xsl:template match="mdattr:EntityAttributes/saml:Attribute[@Name='http://macedir.org/entity-category']
 		/saml:AttributeValue
+		[. != 'http://refeds.org/category/hide-from-discovery']
 		[. != 'http://www.geant.net/uri/dataprotection-code-of-conduct/v1']
 		">
 		<xsl:call-template name="error">
@@ -92,6 +93,7 @@
     -->
 	<xsl:template match="mdattr:EntityAttributes/saml:Attribute[@Name='http://macedir.org/entity-category-support']
 		/saml:AttributeValue
+		[. != 'http://refeds.org/category/research-and-scholarship']
 		">
 		<xsl:call-template name="error">
 			<xsl:with-param name="m">

@@ -609,7 +609,7 @@
         <attribute name="i"/>
         <sequential>
             <MDT i="@{i}" o="${null.device}"
-                keystore="${mdx.dir}/uk/ukfederation-2012.jks"
+                keystore="${mdx.dir}/uk/ukfederation-2014.jks"
                 alias="${keystore.uk.vfy.alias}"/>
         </sequential>
     </macrodef>
@@ -702,7 +702,7 @@
                 <args>
                     <arg value="--verifySignature"/>
                     <arg value="--certificate"/>
-                    <arg value="${mdx.dir}/uk/ukfederation-2012.pem"/>
+                    <arg value="${mdx.dir}/uk/ukfederation-2014.pem"/>
                     <!--
                     <arg value="- -quiet"/>
                     -->
@@ -1258,28 +1258,6 @@
         <exec executable="perl" dir="${build.dir}"
             output="${build.dir}/locations.txt">
             <arg value="${build.dir}/extract_locs.pl"/>
-        </exec>
-    </target>
-
-    <!--
-        Extract authorities
-    -->
-    <target name="extract.authorities">
-        <echo>Extracting key authorities</echo>
-        <XALAN
-            i="${mdx.dir}/uk/trust-roots.xml"
-            o="${mdx.dir}/uk/authorities.pem"
-            x="${mdx.dir}/uk/extract_authorities.xsl"/>
-    </target>
-
-    <!--
-        Check authorities
-    -->
-    <target name="check.authorities">
-        <echo>Checking authority certificates</echo>
-        <exec executable="perl" dir="${mdx.dir}/uk"
-            input="${mdx.dir}/uk/authorities.pem">
-            <arg value="${mdx.dir}/uk/check_authorities.pl"/>
         </exec>
     </target>
 

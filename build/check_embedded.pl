@@ -41,12 +41,10 @@ my $verboseIssuers = 0;
 #
 my %issuerMark;
 
-# From the UK federation trust roots document.
-$issuerMark{'AddTrust External CA Root'} = 'R';
-$issuerMark{'UTN-USERFirst-Hardware'} = 'i';
-$issuerMark{'TERENA SSL CA'} = 'i';
-
 # ex-roots
+$issuerMark{'AddTrust External CA Root'} = 'X';
+$issuerMark{'UTN-USERFirst-Hardware'} = 'x';
+$issuerMark{'TERENA SSL CA'} = 'x';
 $issuerMark{'GlobalSign Root CA'} = 'X';
 $issuerMark{'GlobalSign Organization Validation CA'} = 'x';
 $issuerMark{'GlobalSign Primary Secure Server CA'} = 'x';
@@ -143,18 +141,23 @@ while (<>) {
 		@args = split;
 		$entity = $args[1];
 		$keyname = $args[3];
+
+		#
+		# Tidy entity ID if it includes a UK ID as well.
+		#
+		if ($entity =~ /^\[(.+)\](.+)$/) {
+			$entity = $2 . ' (' . $1 . ')';
+		}
 		
 		#
 		# Output header line.
 		#
-		$oline = "Entity $entity ";
+		$oline = "Entity $entity";
 		$hasKeyName = !($keyname eq '(none)');
-		if ($hasKeyName) {
-			$oline .= "has KeyName $keyname";
-		} else {
-			$oline .= "has no KeyName";
-		}
 		push(@olines, $oline);
+		if ($hasKeyName) {
+			error("descriptor has unexpected KeyName $keyname");
+		}
 
 		#
 		# Start building a new blob.
@@ -280,7 +283,6 @@ while (<>) {
 				#
 				if ($notAfter =~ /(\d\d\d\d)/) {
 					my $year = $1;
-					$expiryYear = $year;
 					if ($year > $maxYear) {
 						$maxYear = $year;
 					}
@@ -363,101 +365,6 @@ while (<>) {
 
 
 		#
-		# Check KeyName if one has been supplied.
-		#
-		if ($hasKeyName && !defined($names{lc $keyname})) {
-			my $nameList = join ", ", sort keys %names;
-			error("KeyName mismatch: $keyname not in {$nameList}");
-		}
-		
-		#
-		# Use openssl to ask whether this matches our trust fabric or not.
-		#
-		my $error = '';
-		$serverOK = 1;
-		$cmd = "openssl verify -CAfile ../mdx/uk/authorities.pem -purpose sslserver $filename |";
-		open(SSL, $cmd) || die "could not open openssl subcommand 2";
-		while (<SSL>) {
-			chomp;
-			if (/error/) {
-				$error = $_;
-				$serverOK = 0;
-			}
-		}
-		close SSL;
-		$clientOK = 1;
-		$cmd = "openssl verify -CAfile ../mdx/uk/authorities.pem -purpose sslclient $filename |";
-		open(SSL, $cmd) || die "could not open openssl subcommand 3";
-		while (<SSL>) {
-			chomp;
-			if (/error/) {
-				$error = $_;
-				$clientOK = 0;
-			}
-		}
-		close SSL;
-		
-		#
-		# Irrespective of what went wrong, client and server results should match.
-		#
-		if ($clientOK != $serverOK) {
-			error("client/server purpose result mismatch: $clientOK != $serverOK");
-		}
-		
-		#
-		# Reduce error if possible.
-		#
-		if ($error =~ m/^error \d+ at \d+ depth lookup:\s*(.*)$/) {
-			$error = $1;
-		}
-		
-		#
-		# Now, adjust for our expectations.
-		#
-		if (!$hasKeyName) {
-			#
-			# Pretty much any certificate is fine if we don't have a KeyName.
-			#
-			if ($error eq 'self signed certificate') {
-				$error = '';
-				comment("self signed certificate");
-			} elsif ($error eq 'unable to get local issuer certificate') {
-				$error = '';
-				comment("unknown issuer: $issuerCN");
-			} elsif ($clientOK) {
-				# $error = "certificate matches trust fabric; add KeyName?";
-			}
-		} else {
-			#
-			# If a KeyName is present, we must match the trust fabric.
-			#
-			if ($error eq 'self signed certificate') {
-				$error = 'self signed certificate: remove KeyName?';
-			} elsif ($error eq 'unable to get local issuer certificate') {
-				$error = "non trust fabric issuer: $issuerCN: remove KeyName?";
-			}
-
-			#
-			# KeyName with an expired certificate indicates some kind of misconfiguration.
-			# Either the KeyDescriptor isn't working, or the expired certificate is still
-			# in use (in which case the KeyName is superfluous) or a different certificate
-			# is in use via PKIX (which means we have the wrong one).
-			#
-			if ($days < 0) {
-				error("expired certificate has KeyName; acquire/ensure correct certificate and remove KeyName");
-			}
-		}
-
-		if ($error eq 'certificate has expired' && $days < 0) {
-			# an equivalent message has already been issued
-			$error = '';
-		}
-
-		if ($error ne '') {
-			error($error);
-		}
-		
-		#
 		# Handle public key size.
 		#
 		$pubSizeCount{$pubSize}++;
@@ -478,13 +385,6 @@ while (<>) {
 				warning("issuer '$issuerCN' suspect; verify");
 			}
 		}
-		if ($hasKeyName && ($issuerCN =~ /(Global|Veri)Sign/)) {
-			warning("issuer \"$issuerCN\" to be retired; certificate expires $notAfter; remove KeyName?");
-			$issuerMark{$issuerCN} = '*';
-		}
-		if ($hasKeyName && ($expiryYear > 2014)) {
-			warning("expires $notAfter, which is later than 2014");
-		}
 
 		#
 		# Count issuers.
@@ -496,9 +396,6 @@ while (<>) {
 				$issuers{$issuer}++;
 			} else {
 				$issuers{$issuerCN}++;
-			}
-			if ($hasKeyName) {
-				$knIssuers{$issuerCN}++;
 			}
 		}
 
@@ -539,14 +436,6 @@ if ($distinct_certs > 1) {
 	print "Certificate issuers:\n";
 	foreach $issuer (sort keys %issuers) {
 		my $count = $issuers{$issuer};
-		my $mark = $issuerMark{$issuer} ? $issuerMark{$issuer}: ' ';
-		print " $mark $issuer: $count\n";
-	}
-	print "\n";
-
-	print "KeyName certificate issuers:\n";
-	foreach $issuer (sort keys %knIssuers) {
-		my $count = $knIssuers{$issuer};
 		my $mark = $issuerMark{$issuer} ? $issuerMark{$issuer}: ' ';
 		print " $mark $issuer: $count\n";
 	}

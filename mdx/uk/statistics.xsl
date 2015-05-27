@@ -15,17 +15,18 @@
     xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
     xmlns:init="urn:oasis:names:tc:SAML:profiles:SSO:request-init"
     xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"
+    xmlns:mdattr="urn:oasis:names:tc:SAML:metadata:attribute"
     xmlns:mdui="urn:oasis:names:tc:SAML:metadata:ui"
+    xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:members="http://ukfederation.org.uk/2007/01/members"
-    xmlns:wayf="http://sdss.ac.uk/2006/06/WAYF"
     xmlns:ukfedlabel="http://ukfederation.org.uk/2006/11/label"
     xmlns:math="http://exslt.org/math"
     xmlns:date="http://exslt.org/dates-and-times"
     xmlns:dyn="http://exslt.org/dynamic"
     xmlns:set="http://exslt.org/sets"
     xmlns:idpdisc="urn:oasis:names:tc:SAML:profiles:SSO:idp-discovery-protocol"
-    exclude-result-prefixes="xsl alg ds init md mdui xsi members wayf ukfedlabel math date dyn set idpdisc"
+    exclude-result-prefixes="xsl alg ds init md mdattr mdui saml xsi members ukfedlabel math date dyn set idpdisc"
     version="1.0">
 
     <xsl:output method="html" omit-xml-declaration="yes"/>
@@ -42,20 +43,12 @@
         <xsl:variable name="now" select="date:date-time()"/>
 
         <!--
-            Break down the "members" document, which despite its name
-            describes all known entity owners, whether members or non-members.
+            Break down the "members" document.
         -->
         <!-- federation members -->
         <xsl:variable name="members" select="$memberDocument//members:Member"/>
         <xsl:variable name="memberCount" select="count($members)"/>
         <xsl:variable name="memberNames" select="$members/members:Name"/>
-        <!-- federation non-member owners -->
-        <xsl:variable name="nonMembers" select="$memberDocument//members:NonMember"/>
-        <xsl:variable name="nonMemberCount" select="count($nonMembers)"/>
-        <xsl:variable name="nonMemberNames" select="$nonMembers/members:Name"/>
-        <!-- owners are the union of the above -->
-        <xsl:variable name="owners" select="$members | $nonMembers"/>
-        <xsl:variable name="ownerNames" select="$memberDocument//members:Name"/>
         
         <xsl:variable name="entities" select="//md:EntityDescriptor"/>
         <xsl:variable name="entityCount" select="count($entities)"/>
@@ -80,9 +73,6 @@
         <xsl:variable name="dualEntities" select="$entities[md:IDPSSODescriptor][md:SPSSODescriptor]"/>
         <xsl:variable name="dualEntityCount" select="count($dualEntities)"/>
         
-        <xsl:variable name="concealedCount" select="count($idps[md:Extensions/wayf:HideFromWAYF])"/>
-        <xsl:variable name="accountableCount"
-            select="count($idps[md:Extensions/ukfedlabel:AccountableUsers])"/>
         <xsl:variable name="federationMemberEntityCount"
             select="count($entities[md:Extensions/ukfedlabel:UKFederationMember])"/>
         
@@ -137,8 +127,8 @@
                     <li><p><a href="#membersByScope">Members by Primary Scope</a></p></li>
                     <li><p><a href="#undeployedMembers">Members Lacking Deployment</a></p></li>
                     <li><p><a href="#shib13">Shibboleth 1.3 Remnants</a></p></li>
-                    <li><p><a href="#mdui">Entities with mdui:UIInfo support</a></p></li>
-                    <li><p><a href="#export">Entities in Export Aggregate</a></p></li>
+                    <li><p><a href="#exportOptOut">Export Aggregate: Entities Opted Out</a></p></li>
+                    <li><p><a href="#exportOptIn">Export Aggregate: Entities Explicitly Opted In</a></p></li>
                     <li><p><a href="#nosaml2">Entities Without SAML 2.0 Support</a></p></li>
                 </ul>
                 
@@ -404,28 +394,6 @@
                     </li>
                 </ul>
 
-                <h3>Additional Non-member Entity Owners</h3>
-                <p>
-                    In addition, the UK federation operator maintains agreements with certain
-                    other organisations so that metadata for entities belonging to those
-                    organisations can be published within the UK federation metadata for the
-                    benefit of UK federation members.
-                </p>
-                <p>Number of non-member relationships: <xsl:value-of select="$nonMemberCount"/></p>
-                <table border="1" cellspacing="2" cellpadding="4">
-                    <tr>
-                        <th align="left">Non-member agreement</th>
-                        <th>Entities</th>
-                        <th>IdPs</th>
-                        <th>SPs</th>
-                        <th>OSrc</th>
-                        <th align="left">Scope</th>
-                    </tr>
-                    <xsl:apply-templates select="$nonMembers" mode="count">
-                        <xsl:with-param name="entities" select="$entities"/>
-                    </xsl:apply-templates>
-                </table>
-                
 
                 <!--
                     *********************************************
@@ -577,10 +545,18 @@
                 <p>Of these:</p>
                 <ul>
                     <li>
-                        <p>Hidden from main WAYF: <xsl:value-of select="$concealedCount"/>
+                        <xsl:variable name="concealedCount"
+                            select="count($idps[md:Extensions/mdattr:EntityAttributes/saml:Attribute
+                                [@Name = 'http://macedir.org/entity-category']
+                                [@NameFormat = 'urn:oasis:names:tc:SAML:2.0:attrname-format:uri']
+                                [saml:AttributeValue[.='http://refeds.org/category/hide-from-discovery']]
+                            ])"/>
+                        <p>Hidden from main CDS: <xsl:value-of select="$concealedCount"/>
                         (<xsl:value-of select="format-number($concealedCount div $idpCount, '0.0%')"/>).</p>
                     </li>
                     <li>
+                        <xsl:variable name="accountableCount"
+                            select="count($idps[md:Extensions/ukfedlabel:AccountableUsers])"/>
                         <p>Asserting user accountability: <xsl:value-of select="$accountableCount"/>
                         (<xsl:value-of select="format-number($accountableCount div $idpCount, '0.0%')"/>).</p>
                     </li>
@@ -644,7 +620,10 @@
                                         <li>
                                             <xsl:value-of select="@ID"/>
                                             <xsl:text>: </xsl:text>
-                                            <xsl:if test="md:Extensions/wayf:HideFromWAYF"> [H]</xsl:if>
+                                            <xsl:if test="md:Extensions/mdattr:EntityAttributes/saml:Attribute
+                                                [@Name = 'http://macedir.org/entity-category']
+                                                [@NameFormat = 'urn:oasis:names:tc:SAML:2.0:attrname-format:uri']
+                                                [saml:AttributeValue[.='http://refeds.org/category/hide-from-discovery']]"> [H]</xsl:if>
                                             <xsl:value-of select="@entityID"/>
                                         </li>
                                     </xsl:for-each>
@@ -960,7 +939,7 @@
                     its type, the software used, etc. 
                  </p>
                 <ul>
-                    <xsl:apply-templates select="$ownerNames" mode="enumerate">
+                    <xsl:apply-templates select="$memberNames" mode="enumerate">
                         <xsl:with-param name="entities" select="$entities"/>
                     </xsl:apply-templates>
                 </ul>
@@ -982,7 +961,10 @@
                 </p>
                 <ul>
                     <xsl:for-each select="$idps[not(md:Extensions/ukfedlabel:AccountableUsers)]
-                            [not(md:Extensions/wayf:HideFromWAYF)]">
+                        [not(md:Extensions/mdattr:EntityAttributes/saml:Attribute
+                            [@Name = 'http://macedir.org/entity-category']
+                            [@NameFormat = 'urn:oasis:names:tc:SAML:2.0:attrname-format:uri']
+                            [saml:AttributeValue[.='http://refeds.org/category/hide-from-discovery']])]">
                         <xsl:sort select="md:Organization/md:OrganizationDisplayName"/>
                         <li>
                             <xsl:value-of select="@ID"/>:
@@ -1061,8 +1043,9 @@
                 <h2><a name="shib13">Shibboleth 1.3 Remnants</a></h2>
                 <p>
                     The following lists show entities that are believed to be running the
-                    Shibboleth 1.3 software, which is now beyond its official end of life
-                    date.  As heuristics have been used to create these lists, they may
+                    Shibboleth 1.3 software, which reached its official end of life
+                    date on 30-June-2010.
+                    As heuristics have been used to create these lists, they may
                     not be completely accurate.
                 </p>
 
@@ -1078,19 +1061,19 @@
  
  
                 <!--
-                    *************************************************
-                    ***                                           ***
-                    ***   m d u i : U I I n f o   S U P P O R T   ***
-                    ***                                           ***
-                    *************************************************
+                    ***************************************
+                    ***                                 ***
+                    ***   E X P O R T   O P T   O U T   ***
+                    ***                                 ***
+                    ***************************************
                 -->
                 
-                <h2><a name="mdui">Entities with mdui:UIInfo support</a></h2>
-                <xsl:variable name="uiInfoEntities" select="$entities[descendant::mdui:UIInfo]"/>
-                <xsl:variable name="uiInfoEntitiesCount" select="count($uiInfoEntities)"/>
-                <xsl:if test="$uiInfoEntitiesCount != 0">
+                <h2><a name="exportOptOut">Export Aggregate: Entities Opted Out</a></h2>
+                <xsl:variable name="entities.export.opt.out" select="$entities[descendant::ukfedlabel:ExportOptOut]"/>
+                <xsl:variable name="entities.export.opt.out.count" select="count($entities.export.opt.out)"/>
+                <xsl:if test="$entities.export.opt.out.count != 0">
                     <ul>
-                        <xsl:for-each select="$uiInfoEntities">
+                        <xsl:for-each select="$entities.export.opt.out">
                             <li>
                                 <xsl:value-of select="@ID"/>
                                 <xsl:text>: </xsl:text>
@@ -1099,6 +1082,14 @@
                                 </xsl:if>
                                 <xsl:if test="md:SPSSODescriptor">
                                     <xsl:text>[SP] </xsl:text>
+                                    <xsl:choose>
+                                        <xsl:when test="descendant::md:RequestedAttribute">
+                                            <xsl:text>[RqA] </xsl:text>
+                                        </xsl:when>
+                                        <xsl:otherwise>
+                                            <xsl:text>[!RqA] </xsl:text> 
+                                        </xsl:otherwise>
+                                    </xsl:choose>
                                 </xsl:if>
                                 <xsl:choose>
                                     <xsl:when test="descendant::mdui:DisplayName">
@@ -1110,21 +1101,28 @@
                                         <xsl:text>)</xsl:text>
                                     </xsl:otherwise>
                                 </xsl:choose>
+                                <xsl:if test="not(descendant::*[contains(@protocolSupportEnumeration,
+                                    'urn:oasis:names:tc:SAML:2.0:protocol')])">
+                                    <ul>
+                                        <li>
+                                            No SAML 2.0 support
+                                        </li>
+                                    </ul>                                    
+                                </xsl:if>
                             </li>
                         </xsl:for-each>
                     </ul>
                 </xsl:if>
                 
-                
                 <!--
-                    *******************************************
-                    ***                                     ***
-                    ***   E X P O R T   A G G R E G A T E   ***
-                    ***                                     ***
-                    *******************************************
+                    *************************************
+                    ***                               ***
+                    ***   E X P O R T   O P T   I N   ***
+                    ***                               ***
+                    *************************************
                 -->
                 
-                <h2><a name="export">Entities in Export Aggregate</a></h2>
+                <h2><a name="exportOptIn">Export Aggregate: Entities Explicitly Opted In</a></h2>
                 <xsl:variable name="entities.export" select="$entities[descendant::ukfedlabel:ExportOptIn]"/>
                 <xsl:variable name="entities.export.count" select="count($entities.export)"/>
                 <xsl:if test="$entities.export.count != 0">
@@ -1213,8 +1211,17 @@
                         </li>
                     </xsl:for-each>
                 </ul>
+                <xsl:call-template name="entity.breakdown.by.software">
+                    <xsl:with-param name="entities" select="$sps[md:SPSSODescriptor[not(contains(@protocolSupportEnumeration,
+                        'urn:oasis:names:tc:SAML:2.0:protocol'))]]"/>
+                </xsl:call-template>
 
-
+                <h3>Identity Providers Without SAML 2.0 Support</h3>
+                <xsl:call-template name="entity.breakdown.by.software">
+                    <xsl:with-param name="entities" select="$idps[md:IDPSSODescriptor[not(contains(@protocolSupportEnumeration,
+                        'urn:oasis:names:tc:SAML:2.0:protocol'))]]"/>
+                </xsl:call-template>
+                
             </body>
         </html>
     </xsl:template>
@@ -1337,8 +1344,12 @@
                             <xsl:text>:</xsl:text>
                             <xsl:if test="not(md:Extensions/ukfedlabel:UKFederationMember)"> [not-M]</xsl:if>
                             <xsl:if test="md:IDPSSODescriptor"> [IdP]</xsl:if>
-                            <xsl:if test="md:Extensions/wayf:HideFromWAYF"> [H]</xsl:if>
+                            <xsl:if test="md:Extensions/mdattr:EntityAttributes/saml:Attribute
+                                [@Name = 'http://macedir.org/entity-category']
+                                [@NameFormat = 'urn:oasis:names:tc:SAML:2.0:attrname-format:uri']
+                                [saml:AttributeValue[.='http://refeds.org/category/hide-from-discovery']]"> [H]</xsl:if>
                             <xsl:if test="md:SPSSODescriptor"> [SP]</xsl:if>
+                            <xsl:if test="descendant::mdui:UIInfo"> [UIInfo]</xsl:if>
                             <xsl:apply-templates select="md:Extensions/ukfedlabel:Software" mode="short"/>
                             <xsl:text> </xsl:text>
                             <code><xsl:value-of select="@entityID"/></code>
@@ -1734,9 +1745,20 @@
                 select="set:difference($entities.openathens.in, $entities.openathens)"/>
             
             <!--
+                Classify Shibboleth 3 IdPs entities.
+            -->
+            <xsl:variable name="entities.shib.3.in" select="$entities.openathens.out"/>
+            <xsl:variable name="entities.shib.3"
+                select="$entities.shib.3.in[
+                md:Extensions/ukfedlabel:Software[@name='Shibboleth'][@version = '3']
+                ]"/>
+            <xsl:variable name="entities.shib.3.out"
+                select="set:difference($entities.shib.3.in, $entities.shib.3)"/>
+            
+            <!--
                 Classify Shibboleth 2.0 IdPs and SPs.
             -->
-            <xsl:variable name="entities.shib.2.in" select="$entities.openathens.out"/>
+            <xsl:variable name="entities.shib.2.in" select="$entities.shib.3.out"/>
             <xsl:variable name="entities.shib.2"
                 select="$entities.shib.2.in[
                     md:IDPSSODescriptor/md:SingleSignOnService[contains(@Location, '/profile/Shibboleth/SSO')] |
@@ -1815,19 +1837,25 @@
             -->
             
             <xsl:call-template name="entity.breakdown.by.software.line">
-                <xsl:with-param name="entities" select="$entities.shib.13"/>
-                <xsl:with-param name="name">Shibboleth 1.3</xsl:with-param>
+                <xsl:with-param name="entities" select="$entities.shib.3"/>
+                <xsl:with-param name="name">Shibboleth 3.x</xsl:with-param>
                 <xsl:with-param name="total" select="$entityCount"/>
-                <xsl:with-param name="show.max" select="10"/>
             </xsl:call-template>
-
+            
             <xsl:call-template name="entity.breakdown.by.software.line">
                 <xsl:with-param name="entities" select="$entities.shib.2"/>
                 <xsl:with-param name="name">Shibboleth 2.x</xsl:with-param>
                 <xsl:with-param name="total" select="$entityCount"/>
             </xsl:call-template>
             
-            <xsl:variable name="entities.shib" select="$entities.shib.13 | $entities.shib.2"/>
+            <xsl:call-template name="entity.breakdown.by.software.line">
+                <xsl:with-param name="entities" select="$entities.shib.13"/>
+                <xsl:with-param name="name">Shibboleth 1.3</xsl:with-param>
+                <xsl:with-param name="total" select="$entityCount"/>
+                <xsl:with-param name="show.max" select="10"/>
+            </xsl:call-template>
+
+            <xsl:variable name="entities.shib" select="$entities.shib.13 | $entities.shib.2 | $entities.shib.3"/>
             <xsl:call-template name="entity.breakdown.by.software.line">
                 <xsl:with-param name="entities" select="$entities.shib"/>
                 <xsl:with-param name="name">Shibboleth combined</xsl:with-param>

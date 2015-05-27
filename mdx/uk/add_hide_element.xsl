@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-	hide_idps.xsl
+	add_hide_element.xsl
 
-    Hide IdPs (which we assume have been imported) from the WAYF/CDS.
-    
-    Requires that IdPs already have EntityDescriptor/Extensions elements to put
-    the HideFromWAYF element into.
-    
+	Adds the UK federation "Hide from WAYF" marker element to IdPs which are already
+	labelled as members of the REFEDS "Hide from Discovery" entity category.
+
 -->
 <xsl:stylesheet version="1.0"
 	xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"
+	xmlns:mdattr="urn:oasis:names:tc:SAML:metadata:attribute"
+	xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"
 	xmlns:wayf="http://sdss.ac.uk/2006/06/WAYF"
 	
 	xmlns="urn:oasis:names:tc:SAML:2.0:metadata"
@@ -21,7 +21,12 @@
 	<!--Force UTF-8 encoding for the output.-->
 	<xsl:output omit-xml-declaration="no" method="xml" encoding="UTF-8" indent="yes"/>
 
-	<xsl:template match="md:EntityDescriptor[md:IDPSSODescriptor]/md:Extensions">
+	<xsl:template match="md:EntityDescriptor[md:IDPSSODescriptor]/md:Extensions
+		[mdattr:EntityAttributes/saml:Attribute
+			[@Name = 'http://macedir.org/entity-category']
+			[@NameFormat = 'urn:oasis:names:tc:SAML:2.0:attrname-format:uri']
+			[saml:AttributeValue[.='http://refeds.org/category/hide-from-discovery']]
+		]">
 		<xsl:copy>
 			<xsl:text>&#10;</xsl:text>
 			<xsl:text>        </xsl:text>
