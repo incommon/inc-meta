@@ -67,7 +67,6 @@
 		Document root.
 	-->
 	<xsl:template match="/">
-		<xsl:call-template name="document.comment"/>
 		<xsl:apply-templates/>
 	</xsl:template>
 
@@ -83,7 +82,6 @@
 				<xsl:value-of select="$documentID"/>
 			</xsl:attribute>
 			<xsl:apply-templates select="@*"/>
-			<xsl:call-template name="document.comment"/>
 
 			<!--
                 Add an Extensions element if there isn't one, but we need one
@@ -99,37 +97,6 @@
 
 			<xsl:apply-templates select="node()"/>
 		</EntitiesDescriptor>
-	</xsl:template>
-
-	<!--
-		Comment to be added to the top of the document, and just inside the document element.
-	-->
-	<xsl:template name="document.comment">
-        <xsl:text>&#10;</xsl:text>
-		<xsl:comment>
-			<xsl:text>&#10;&#9;I N C O M M O N   F E D E R A T I O N   M E T A D A T A&#10;</xsl:text>
-			<xsl:text>&#10;</xsl:text>
-			<xsl:if test="$extraText">
-				<xsl:text>&#9;*** </xsl:text>
-				<xsl:value-of select="$extraText"/>
-				<xsl:text> ***&#10;</xsl:text>
-				<xsl:text>&#10;</xsl:text>
-			</xsl:if>
-			<xsl:text>&#9;Aggregate built </xsl:text>
-            <xsl:value-of select="$normalisedNow"/>
-            <xsl:if test="string($normalisedNow) != string($now)">
-                <xsl:text> (</xsl:text>
-                <xsl:value-of select="$now"/>
-                <xsl:text> local)</xsl:text>
-            </xsl:if>
-			<xsl:text>&#10;</xsl:text>
-			<xsl:text>&#10;</xsl:text>
-			<xsl:text>&#9;Aggregate valid for </xsl:text>
-			<xsl:value-of select="$validityDays"/>
-			<xsl:text> days, until </xsl:text>
-			<xsl:value-of select="$validUntil"/>
-			<xsl:text>&#10;</xsl:text>
-		</xsl:comment>
 	</xsl:template>
 
 	<!--
