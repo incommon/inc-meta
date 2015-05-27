@@ -61,7 +61,7 @@
 	-->
 	<xsl:variable name="normalisedNow" select="mdxDates:dateAdd($now, 0)"/>
 	<xsl:variable name="documentID"
-		select="concat('incommon', translate($normalisedNow, ':-', ''))"/>
+		select="concat('INC', translate($normalisedNow, ':-Z', ''))"/>
 
 	<!--
 		Document root.
