@@ -147,7 +147,14 @@
                 </bean>
 
                 <!-- Normalise the use of namespace prefixes in the resulting XML document. -->
-                <ref bean="normaliseNamespaces"/>
+                <bean id="normalise" parent="XSLTransformationStage"
+                    p:id="normalise">
+                    <property name="XSLResource">
+                        <bean parent="FileSystemResource">
+                            <constructor-arg value="${incdir}/ns_norm_import.xsl"/>
+                        </bean>
+                    </property>
+                </bean>
 
                 <!-- Write the resulting aggregate out to a file. -->
                 <ref bean="serializeImported"/>
