@@ -81,6 +81,7 @@
 			<xsl:attribute name="ID">
 				<xsl:value-of select="$documentID"/>
 			</xsl:attribute>
+			<xsl:attribute name="Name">urn:mace:incommon</xsl:attribute>
 			<xsl:apply-templates select="@*"/>
 
 			<!--
