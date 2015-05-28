@@ -74,6 +74,10 @@
                             <bean parent="EntityCategorySupportMatcher"
                                 c:category="http://refeds.org/category/research-and-scholarship"/>
 
+                            <!-- Permit REFEDS Hide From Discovery category membership -->
+                            <bean parent="EntityCategoryMatcher"
+                                c:category="http://refeds.org/category/hide-from-discovery"/>
+
                         </list>
                     </property>
                 </bean>
