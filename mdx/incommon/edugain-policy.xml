@@ -10,11 +10,6 @@
         http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
     <!--
-        Import entity whitelist.
-    -->
-    <import resource="classpath:incommon/import-whitelist.xml"/>
-
-    <!--
         edugainPolicy
 
         Applies policy to entities sourced from eduGAIN.
@@ -47,11 +42,25 @@
                     <property name="whitelistingRegistrationAuthorities" value="false"/>
                 </bean>
 
-                <!-- Remove all but the entities we want to import. -->
-                <bean id="applyEntityWhitelist" parent="EntityFilterStage"
-                    p:id="applyEntityWhitelist"
-                    p:whitelistingEntities="true"
-                    p:designatedEntities-ref="incommon_edugain_import_whitelist"/>
+                <!--
+                    Remove all but those eduGAIN entities we intend to import in this
+                    phase of the roadmap.
+
+                    Phase 1: import only IdPs that support global R&S.
+                -->
+                <bean p:id="selectEntities" parent="XPathFilteringStage"
+                    p:XPathExpression="not(/md:EntityDescriptor
+                        [md:IDPSSODescriptor]
+                        [md:Extensions
+                            /mdattr:EntityAttributes
+                            /saml:Attribute
+                                [@NameFormat = 'urn:oasis:names:tc:SAML:2.0:attrname-format:uri']
+                                [@Name = 'http://macedir.org/entity-category-support']
+                            /saml:AttributeValue
+                                [. = 'http://refeds.org/category/research-and-scholarship']
+                        ]
+                    )"
+                />
 
                 <!-- Filter the entity attributes imported from eduGAIN. -->
                 <bean parent="EntityAttributeFilteringStage" p:id="entityAttributes">
