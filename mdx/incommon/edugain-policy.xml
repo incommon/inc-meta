@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    default-lazy-init="true"
+    xmlns:c="http://www.springframework.org/schema/c"
+    xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:util="http://www.springframework.org/schema/util"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <!--
+        Import entity whitelist.
+    -->
+    <import resource="classpath:incommon/import-whitelist.xml"/>
+
+    <!--
+        edugainPolicy
+
+        Applies policy to entities sourced from eduGAIN.
+
+        Entities may be transformed by policy, or marked as being in error.
+
+        Entities with errors are NOT removed here, so that this policy can be
+        used in contexts where reporting is more appropriate than just removal.
+    -->
+    <bean id="edugainPolicy" parent="CompositeStage"
+        p:id="edugainPolicy">
+        <property name="composedStages">
+            <list>
+
+                <!--
+                    removeInCommonEntities
+
+                    Filter out entities that declare themselves as registered
+                    by our federation.  We don't want those coming back in
+                    from another registrar or metadata exchange as they may be
+                    old versions of entities we have deregistered, or spoofed.
+                -->
+                <bean p:id="removeInCommonEntities" parent="EntityRegistrationAuthorityFilterStage">
+                    <property name="designatedRegistrationAuthorities">
+                        <list>
+                            <ref bean="us_incommon_registrar"/>
+                        </list>
+                    </property>
+                    <property name="requiringRegistrationInformation" value="true"/>
+                    <property name="whitelistingRegistrationAuthorities" value="false"/>
+                </bean>
+
+                <!-- Remove all but the entities we want to import. -->
+                <bean id="applyEntityWhitelist" parent="EntityFilterStage"
+                    p:id="applyEntityWhitelist"
+                    p:whitelistingEntities="true"
+                    p:designatedEntities-ref="incommon_edugain_import_whitelist"/>
+
+                <!-- Filter the entity attributes imported from eduGAIN. -->
+                <bean parent="EntityAttributeFilteringStage" p:id="entityAttributes">
+                   <property name="rules">
+                       <list>
+                           <!-- Permit REFEDS R&S category membership -->
+                           <bean parent="EntityCategoryMatcher"
+                                c:category="http://refeds.org/category/research-and-scholarship"/>
+
+                           <!-- Permit REFEDS R&S category support -->
+                           <bean parent="EntityCategorySupportMatcher"
+                               c:category="http://refeds.org/category/research-and-scholarship"/>
+
+                       </list>
+                   </property>
+                </bean>
+
+                <ref bean="standardImportActions"/>
+            </list>
+        </property>
+    </bean>
+
+</beans>

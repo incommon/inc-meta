@@ -21,7 +21,7 @@
         Import channel-specific beans.
     -->
     <import resource="classpath:incommon/beans.xml"/>
-    <import resource="classpath:incommon/import-whitelist.xml"/>
+    <import resource="classpath:incommon/edugain-policy.xml"/>
 
     <!--
         Import eduGAIN channel beans.
@@ -37,55 +37,19 @@
         </property>
     </bean>
 
-    <!--
-        removeInCommonEntities
-
-        Filter out entities which declare themselves as registered
-        by our federation.  We don't want those coming back in
-        from another registrar or metadata exchange as they may be
-        old versions of entities we have deregistered, or spoofed.
-    -->
-    <bean id="removeInCommonEntities" parent="EntityRegistrationAuthorityFilterStage"
-        p:id="removeInCommonEntities">
-        <property name="designatedRegistrationAuthorities">
-            <list>
-                <ref bean="us_incommon_registrar"/>
-            </list>
-        </property>
-        <property name="requiringRegistrationInformation" value="true"/>
-        <property name="whitelistingRegistrationAuthorities" value="false"/>
-    </bean>
-
     <bean id="incommon_edugain_importPipeline" parent="SimplePipeline"
         p:id="incommon_edugain_importPipeline">
         <property name="stages">
             <list>
                 <ref bean="int_edugain_productionEntities"/>
-                <ref bean="removeInCommonEntities"/>
 
-                <!-- Remove all but the entities we want to import. -->
-                <bean id="applyEntityWhitelist" parent="EntityFilterStage"
-                    p:id="applyEntityWhitelist"
-                    p:whitelistingEntities="true"
-                    p:designatedEntities-ref="incommon_edugain_import_whitelist"/>
 
-                <!-- Filter the entity attributes imported from eduGAIN. -->
-                <bean parent="EntityAttributeFilteringStage" p:id="entityAttributes">
-                   <property name="rules">
-                       <list>
-                           <!-- Permit REFEDS R&S category membership -->
-                           <bean parent="EntityCategoryMatcher"
-                                c:category="http://refeds.org/category/research-and-scholarship"/>
+                <!-- Populate identifiers for future actions. -->
+                <ref bean="populateItemIds"/>
+                <ref bean="populateRegistrationAuthorities"/>
 
-                           <!-- Permit REFEDS R&S category support -->
-                           <bean parent="EntityCategorySupportMatcher"
-                               c:category="http://refeds.org/category/research-and-scholarship"/>
-
-                       </list>
-                   </property>
-                </bean>
-
-                <ref bean="standardImportActions"/>
+                <!-- Apply policy. -->
+                <ref bean="edugainPolicy"/>
 
                 <!--
                     Silently remove entities which are marked as
