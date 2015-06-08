@@ -43,7 +43,6 @@
             <list>
                 <ref bean="int_edugain_productionEntities"/>
 
-
                 <!-- Populate identifiers for future actions. -->
                 <ref bean="populateItemIds"/>
                 <ref bean="populateRegistrationAuthorities"/>
@@ -85,6 +84,10 @@
 
                 <!-- Include a default registrationAuthority for each entity. -->
                 <ref bean="us_incommon_default_regauth"/>
+
+                <!-- Populate identifiers for future actions. -->
+                <ref bean="populateItemIds"/>
+                <ref bean="populateRegistrationAuthorities"/>
 
                 <!-- Merge in selected entities from eduGAIN. -->
                 <bean id="mergeProductionMDXEntities" parent="PipelineMergeStage.deduplicate"
