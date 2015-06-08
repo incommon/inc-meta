@@ -1488,4 +1488,39 @@
         <echo>Generation complete.</echo>
     </target>
 
+    <!--
+        inc.edugain.report
+
+        Report on the eduGAIN entities filtered out because of errors detected.
+    -->
+    <target name="inc.edugain.report">
+        <echo>Looking for errors in eduGAIN entities...</echo>
+        <CHANNEL.do channel="incommon" verb="report"/>
+        <echo>Report complete.</echo>
+    </target>
+
+    <!--
+        inc.edugain.report.phase2
+
+        Report on the eduGAIN entities filtered out because of errors detected
+        under the phase 2 policy.
+    -->
+    <target name="inc.edugain.report.phase2">
+        <echo>Looking for errors in eduGAIN entities under phase 2 policy...</echo>
+        <CHANNEL.do channel="incommon" verb="report-phase2"/>
+        <echo>Report complete.</echo>
+    </target>
+
+    <!--
+        inc.edugain.report.phase3
+
+        Report on the eduGAIN entities filtered out because of errors detected
+        under the phase 3 policy.
+    -->
+    <target name="inc.edugain.report.phase3">
+        <echo>Looking for errors in eduGAIN entities under phase 3 policy...</echo>
+        <CHANNEL.do channel="incommon" verb="report-phase3"/>
+        <echo>Report complete.</echo>
+    </target>
+
 </project>
