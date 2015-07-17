@@ -46,20 +46,10 @@
                     Remove all but those eduGAIN entities we intend to import in this
                     phase of the roadmap.
 
-                    Phase 1: import only IdPs that support global R&S.
+                    Phase 1: import only SP entities.
                 -->
                 <bean p:id="selectEntities" parent="XPathFilteringStage"
-                    p:XPathExpression="not(/md:EntityDescriptor
-                        [md:IDPSSODescriptor]
-                        [md:Extensions
-                            /mdattr:EntityAttributes
-                            /saml:Attribute
-                                [@NameFormat = 'urn:oasis:names:tc:SAML:2.0:attrname-format:uri']
-                                [@Name = 'http://macedir.org/entity-category-support']
-                            /saml:AttributeValue
-                                [. = 'http://refeds.org/category/research-and-scholarship']
-                        ]
-                    )"
+                    p:XPathExpression="not(/md:EntityDescriptor[md:SPSSODescriptor])"
                 />
 
                 <!-- Filter the entity attributes imported from eduGAIN. -->

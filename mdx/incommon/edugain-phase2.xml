@@ -42,29 +42,6 @@
                     <property name="whitelistingRegistrationAuthorities" value="false"/>
                 </bean>
 
-                <!--
-                    Remove all but those eduGAIN entities we intend to import in this
-                    phase of the roadmap.
-
-                    Phase 2: import all SPs, plus IdPs that support global R&S.
-                -->
-                <bean p:id="selectEntities" parent="XPathFilteringStage"
-                    p:XPathExpression="not(/md:EntityDescriptor
-                        [md:IDPSSODescriptor]
-                        [md:Extensions
-                            /mdattr:EntityAttributes
-                            /saml:Attribute
-                                [@NameFormat = 'urn:oasis:names:tc:SAML:2.0:attrname-format:uri']
-                                [@Name = 'http://macedir.org/entity-category-support']
-                            /saml:AttributeValue
-                                [. = 'http://refeds.org/category/research-and-scholarship']
-                        ]
-                    or
-                        /md:EntityDescriptor
-                            [md:SPSSODescriptor]
-                    )"
-                />
-
                 <!-- Filter the entity attributes imported from eduGAIN. -->
                 <bean parent="EntityAttributeFilteringStage" p:id="entityAttributes">
                     <property name="rules">
