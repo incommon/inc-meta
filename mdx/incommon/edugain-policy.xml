@@ -83,7 +83,7 @@
                 <ref bean="cleanImport"/>
                 <ref bean="stripAAMDUI"/>
                 <ref bean="trimImportElementWhitespace"/>
-                <ref bean="removeEmptyExtensions"/>
+                <ref bean="stripEmptyExtensions"/>
                 <ref bean="checkSchemas"/>
 
                 <!--
