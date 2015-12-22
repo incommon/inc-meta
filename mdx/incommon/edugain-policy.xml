@@ -107,6 +107,15 @@
                     p:XSLResource="classpath:incommon/check_idp_no_saml2.xsl"/>
 
                 <!--
+                    Technical Policy rule 5.
+
+                    Filter all imported SP entities that do not have at least one SAML2 AssertionConsumerService
+                    endpoint that supports the HTTP-POST binding.
+                -->
+                <bean id="check_sp_non_saml2" parent="XSLValidationStage"
+                    p:XSLResource="classpath:incommon/check_sp_no_saml2.xsl"/>
+
+                <!--
                     Technical Policy rule 6.
 
                     Filter all imported entities that have the same entityID as an existing
