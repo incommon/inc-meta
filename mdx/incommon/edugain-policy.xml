@@ -108,12 +108,35 @@
                 -->
 
                 <!--
-                    The following two namespaces are always stripped because they are
-                    specific to the UK registrar and can't be valid when imported from
-                    some other source.
+                    Policy rules below this point are not called out explicitly in the
+                    published policy wiki page.
                 -->
-                <ref bean="stripUkfedlabelNamespace"/>
-                <ref bean="stripWayfNamespace"/>
+
+                <!--
+                    Strip all elements and attributes that are in namespaces
+                    other than the ones we accept from partners.
+                -->
+                <bean id="whitelistImportedNamespaces" parent="NamespacesStrippingStage"
+                    p:whitelisting="true">
+                    <property name="namespaces">
+                        <set>
+                            <ref bean="alg_namespace"/>
+                            <ref bean="ds_namespace"/>
+                            <ref bean="hoksso_namespace"/>
+                            <ref bean="icmd_namespace"/>
+                            <ref bean="idpdisc_namespace"/>
+                            <ref bean="init_namespace"/>
+                            <ref bean="md_namespace"/>
+                            <ref bean="mdattr_namespace"/>
+                            <ref bean="mdrpi_namespace"/>
+                            <ref bean="mdui_namespace"/>
+                            <ref bean="saml_namespace"/>
+                            <ref bean="shibmd_namespace"/>
+                            <ref bean="xenc_namespace"/>
+                            <ref bean="xml_namespace"/>
+                        </set>
+                    </property>
+                </bean>
 
                 <ref bean="cleanImport"/>
                 <ref bean="stripAAMDUI"/>
