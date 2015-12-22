@@ -24,7 +24,7 @@
             <list>
 
                 <!--
-                    removeInCommonEntities
+                    Technical Policy rule 1.
 
                     Filter out entities that declare themselves as registered
                     by our federation.  We don't want those coming back in
@@ -41,7 +41,11 @@
                     <property name="whitelistingRegistrationAuthorities" value="false"/>
                 </bean>
 
-                <!-- Filter the entity attributes imported from eduGAIN. -->
+                <!--
+                    Technical Policy rule 2.
+
+                    Filter all entity attributes not on the entity attribute whitelist.
+                -->
                 <bean id="entityAttributes" parent="EntityAttributeFilteringStage">
                     <property name="rules">
                         <list>
@@ -60,6 +64,48 @@
                         </list>
                     </property>
                 </bean>
+
+                <!--
+                    Technical Policy rule 3.
+
+                    Filter all imported entities with weak keys.
+                -->
+                <bean p:id="certificateValidation" parent="X509ValidationStage">
+                    <property name="validators">
+                        <list>
+                            <!-- Error on RSA key length less than 2048 bits. -->
+                            <bean parent="X509RSAKeyLengthValidator"
+                                p:warningBoundary="0" p:errorBoundary="2048"/>
+                            <!-- Error on small RSA public exponents. -->
+                            <bean parent="X509RSAExponentValidator"/>
+
+                            <!--
+                                Debian weak key blacklists.
+
+                                Don't need to check for keys below our minimum key size.
+                            -->
+                            <ref bean="debian.2048"/>
+                            <ref bean="debian.4096"/>
+
+                            <!--
+                                Compromised key blacklists.
+
+                                Again, don't need to check for keys below our minimum key size.
+                            -->
+                            <ref bean="compromised.2048"/>
+                        </list>
+                    </property>
+                </bean>
+
+                <!--
+                    Technical Policy rule 6.
+
+                    Filter all imported entities that have the same entityID as an existing
+                    entity in the InCommon aggregate.
+
+                    This policy rule is implemented by the merge strategy used when these
+                    entities are merged in with the ones from InCommon.
+                -->
 
                 <!--
                     The following two namespaces are always stripped because they are
@@ -111,33 +157,6 @@
                         <ref bean="check_regscope"/>
                         <ref bean="check_namespaces"/>
                 -->
-
-                <bean p:id="certificateValidation" parent="X509ValidationStage">
-                    <property name="validators">
-                        <list>
-                            <!-- Error on RSA key length less than 2048 bits. -->
-                            <bean parent="X509RSAKeyLengthValidator"
-                                p:warningBoundary="0" p:errorBoundary="2048"/>
-                            <!-- Error on small RSA public exponents. -->
-                            <bean parent="X509RSAExponentValidator"/>
-
-                            <!--
-                                Debian weak key blacklists.
-
-                                Don't need to check for keys below our minimum key size.
-                            -->
-                            <ref bean="debian.2048"/>
-                            <ref bean="debian.4096"/>
-
-                            <!--
-                                Compromised key blacklists.
-
-                                Again, don't need to check for keys below our minimum key size.
-                            -->
-                            <ref bean="compromised.2048"/>
-                        </list>
-                    </property>
-                </bean>
 
             </list>
         </property>
