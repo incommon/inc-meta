@@ -42,16 +42,6 @@
                     <property name="whitelistingRegistrationAuthorities" value="false"/>
                 </bean>
 
-                <!--
-                    Remove all but those eduGAIN entities we intend to import in this
-                    phase of the roadmap.
-
-                    Phase 1: import only SP entities.
-                -->
-                <bean p:id="selectEntities" parent="XPathFilteringStage"
-                    p:XPathExpression="not(/md:EntityDescriptor[md:SPSSODescriptor])"
-                />
-
                 <!-- Filter the entity attributes imported from eduGAIN. -->
                 <bean parent="EntityAttributeFilteringStage" p:id="entityAttributes">
                     <property name="rules">
