@@ -18,12 +18,6 @@
     <import resource="classpath:int_edugain/entity-blacklist.xml"/>
     
     <!--
-        Import eduGAIN participant beans for namespace stripping stages.
-    -->
-    <import resource="classpath:cz_eduid/beans.xml"/>
-    <import resource="classpath:hu_eduid/beans.xml"/>
-    
-    <!--
         Location of various resources.
     -->
     <!-- production aggregate -->
@@ -38,8 +32,7 @@
     <!--
         Fetches the eduGAIN production aggregate.
     -->
-    <bean id="int_edugain_productionAggregate" parent="DOMResourceSourceStage"
-        p:id="int_edugain_productionAggregate">
+    <bean id="int_edugain_productionAggregate" parent="DOMResourceSourceStage">
         <property name="DOMResource">
             <bean parent="HTTPResource">
                 <constructor-arg name="client" ref="httpClient"/>
@@ -51,8 +44,7 @@
     <!--
         Fetch the eduGAIN test aggregate.
     -->
-    <bean id="int_edugain_testAggregate" parent="DOMResourceSourceStage"
-        p:id="int_edugain_testAggregate">
+    <bean id="int_edugain_testAggregate" parent="DOMResourceSourceStage">
         <property name="DOMResource">
             <bean parent="HTTPResource">
                 <constructor-arg name="client" ref="httpClient"/>
@@ -64,19 +56,13 @@
     <!--
         eduGAIN signing certificate.
     -->
-    <bean id="int_edugain_signingCertificate" parent="X509CertificateFactoryBean">
-        <property name="certificateFile">
-            <bean class="java.io.File">
-                <constructor-arg value="${basedir}/mdx/int_edugain/mds-2014.cer"/>
-            </bean>
-        </property>
-    </bean>
+    <bean id="int_edugain_signingCertificate" parent="X509CertificateFactoryBean"
+        p:resource="classpath:int_edugain/mds-2014.cer"/>
     
     <!--
         Check a signature against the eduGAIN signing certificate.
     -->
-    <bean id="int_edugain_checkSignature" parent="XMLSignatureValidationStageSHA256"
-        p:id="int_edugain_checkSignature">
+    <bean id="int_edugain_checkSignature" parent="XMLSignatureValidationStageSHA256">
         <property name="verificationCertificate" ref="int_edugain_signingCertificate"/>
     </bean>
 
@@ -84,15 +70,13 @@
         Remove blacklisted entities.
     -->
     <bean id="int_edugain_removeBlacklistedEntities" parent="EntityFilterStage"
-        p:id="int_edugain_removeBlacklistedEntities"
         p:whitelistingEntities="false"
         p:designatedEntities-ref="int_edugain_entity_blacklist"/>
 
     <!--
         Fetch the production entities as a collection.
     -->
-    <bean id="int_edugain_productionEntities" parent="CompositeStage"
-        p:id="int_edugain_productionEntities">
+    <bean id="int_edugain_productionEntities" parent="CompositeStage">
         <property name="composedStages">
             <list>
                 <ref bean="int_edugain_productionAggregate"/>
@@ -111,12 +95,6 @@
                 <ref bean="int_edugain_removeBlacklistedEntities"/>
 
                 <!--
-                    Strip participant-specific namespaces.
-                -->
-                <ref bean="cz_eduid_stripMetadataNamespace"/>
-                <ref bean="hu_eduid_stripEntityAttributesNamespace"/>
-                
-                <!--
                     All eduGAIN entities should have mdrpi:RegistrationInfo elements, but
                     we can't check the actual values.
                 -->
@@ -128,8 +106,7 @@
     <!--
         Fetch the test entities as a collection.
     -->
-    <bean id="int_edugain_testEntities" parent="CompositeStage"
-        p:id="int_edugain_testEntities">
+    <bean id="int_edugain_testEntities" parent="CompositeStage">
         <property name="composedStages">
             <list>
                 <ref bean="int_edugain_testAggregate"/>
@@ -147,12 +124,6 @@
 
                 <ref bean="int_edugain_removeBlacklistedEntities"/>
                 
-                <!--
-                    Strip participant-specific namespaces.
-                -->
-                <ref bean="cz_eduid_stripMetadataNamespace"/>
-                <ref bean="hu_eduid_stripEntityAttributesNamespace"/>
-
                 <!--
                     All eduGAIN entities should have mdrpi:RegistrationInfo elements, but
                     we can't check the actual values.
