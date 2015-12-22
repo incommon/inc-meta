@@ -98,6 +98,15 @@
                 </bean>
 
                 <!--
+                    Technical Policy rule 4.
+
+                    Filter all imported IdP entities that do not have a SAML2 SingleSignOnService endpoint
+                    that supports the HTTP-Redirect binding.
+                -->
+                <bean id="check_idp_non_saml2" parent="XSLValidationStage"
+                    p:XSLResource="classpath:incommon/check_idp_no_saml2.xsl"/>
+
+                <!--
                     Technical Policy rule 6.
 
                     Filter all imported entities that have the same entityID as an existing
