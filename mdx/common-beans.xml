@@ -511,7 +511,7 @@
         
         Standard item identifier strategy.
     -->
-    <bean id="identificationStrategy" class="uk.org.ukfederation.mda.UKItemIdentificationStrategy">
+    <bean id="identificationStrategy" class="net.shibboleth.metadata.dom.saml.mdrpi.RegistrationAuthorityItemIdentificationStrategy">
         <property name="ignoredRegistrationAuthorities">
             <set>
                 <ref bean="us_incommon_registrar"/>
