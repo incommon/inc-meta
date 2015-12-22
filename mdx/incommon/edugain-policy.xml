@@ -19,8 +19,7 @@
         Entities with errors are NOT removed here, so that this policy can be
         used in contexts where reporting is more appropriate than just removal.
     -->
-    <bean id="edugainPolicy" parent="CompositeStage"
-        p:id="edugainPolicy">
+    <bean id="edugainPolicy" parent="CompositeStage">
         <property name="composedStages">
             <list>
 
@@ -32,7 +31,7 @@
                     from another registrar or metadata exchange as they may be
                     old versions of entities we have deregistered, or spoofed.
                 -->
-                <bean p:id="removeInCommonEntities" parent="EntityRegistrationAuthorityFilterStage">
+                <bean id="removeInCommonEntities" parent="EntityRegistrationAuthorityFilterStage">
                     <property name="designatedRegistrationAuthorities">
                         <list>
                             <ref bean="us_incommon_registrar"/>
@@ -43,7 +42,7 @@
                 </bean>
 
                 <!-- Filter the entity attributes imported from eduGAIN. -->
-                <bean parent="EntityAttributeFilteringStage" p:id="entityAttributes">
+                <bean id="entityAttributes" parent="EntityAttributeFilteringStage">
                     <property name="rules">
                         <list>
                             <!-- Permit REFEDS R&S category membership -->

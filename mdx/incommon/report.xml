@@ -28,8 +28,7 @@
     -->
     <import resource="classpath:int_edugain/beans.xml"/>
 
-    <bean id="incommon_edugain_importPipeline" parent="SimplePipeline"
-        p:id="incommon_edugain_importPipeline">
+    <bean id="incommon_edugain_importPipeline" parent="SimplePipeline">
         <property name="stages">
             <list>
             </list>
@@ -39,8 +38,7 @@
     <!--
         Report on errors detected in eduGAIN metadata.
     -->
-    <bean id="report" parent="SimplePipeline"
-        p:id="report">
+    <bean id="report" parent="SimplePipeline">
         <property name="stages">
             <list>
                 <ref bean="int_edugain_productionEntities"/>

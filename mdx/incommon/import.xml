@@ -28,8 +28,7 @@
     -->
     <import resource="classpath:int_edugain/beans.xml"/>
 
-    <bean id="serializeImported" parent="SerializationStage"
-        p:id="serializeImported">
+    <bean id="serializeImported" parent="SerializationStage">
         <property name="outputFile">
             <bean class="java.io.File">
                 <constructor-arg value="${inc.imported.xml}"/>
@@ -37,8 +36,7 @@
         </property>
     </bean>
 
-    <bean id="incommon_edugain_importPipeline" parent="SimplePipeline"
-        p:id="incommon_edugain_importPipeline">
+    <bean id="incommon_edugain_importPipeline" parent="SimplePipeline">
         <property name="stages">
             <list>
                 <ref bean="int_edugain_productionEntities"/>
@@ -62,8 +60,7 @@
     <!--
         Construct InCommon eduGAIN import aggregate.
     -->
-    <bean id="import" parent="SimplePipeline"
-        p:id="import">
+    <bean id="import" parent="SimplePipeline">
         <property name="stages">
             <list>
                 <!--
@@ -72,8 +69,7 @@
                     In a production environment, this will be the *unsigned* aggregate,
                     so we perform minimal checking on its contents.
                 -->
-                <bean id="production_aggregate" parent="DOMResourceSourceStage"
-                    p:id="production_aggregate">
+                <bean id="production_aggregate" parent="DOMResourceSourceStage">
                     <property name="DOMResource">
                         <bean parent="FileSystemResource" c:_0="${inc.production.xml}"/>
                     </property>
@@ -90,8 +86,7 @@
                 <ref bean="populateRegistrationAuthorities"/>
 
                 <!-- Merge in selected entities from eduGAIN. -->
-                <bean id="mergeProductionMDXEntities" parent="PipelineMergeStage.deduplicate"
-                    p:id="mergeProductionMDXortedEntities">
+                <bean id="mergeProductionMDXEntities" parent="PipelineMergeStage.deduplicate">
                     <property name="mergedPipelines">
                         <list>
                             <ref bean="incommon_edugain_importPipeline"/>
@@ -103,8 +98,7 @@
                 <ref bean="assemble"/>
 
                 <!-- Apply final tweaks to the aggregate. -->
-                <bean id="finalise" parent="incommon_finalise_parent"
-                    p:id="finalise">
+                <bean id="finalise" parent="incommon_finalise_parent">
                     <property name="transformParameters">
                         <map>
                             <entry key="extraText" value="Contains InCommon and eduGAIN metadata"/>
@@ -115,13 +109,7 @@
 
                 <!-- Normalise the use of namespace prefixes in the resulting XML document. -->
                 <bean id="normalise" parent="XSLTransformationStage"
-                    p:id="normalise">
-                    <property name="XSLResource">
-                        <bean parent="FileSystemResource">
-                            <constructor-arg value="${incdir}/ns_norm_import.xsl"/>
-                        </bean>
-                    </property>
-                </bean>
+                    p:XSLResource="classpath:incommon/ns_norm_import.xsl"/>
 
                 <!-- Write the resulting aggregate out to a file. -->
                 <ref bean="serializeImported"/>
