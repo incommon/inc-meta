@@ -514,7 +514,7 @@
     <bean id="identificationStrategy" class="uk.org.ukfederation.mda.UKItemIdentificationStrategy">
         <property name="ignoredRegistrationAuthorities">
             <set>
-                <ref bean="uk_ukf_registrar"/>
+                <ref bean="us_incommon_registrar"/>
             </set>
         </property>
         <property name="registrationAuthorityDisplayNames">
