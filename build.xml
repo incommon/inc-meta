@@ -1300,6 +1300,13 @@
     <property name="mda.inc.imported.xml" value="${mda.incdir}/imported.xml"/>
 
     <!--
+        Default local file location to which to write the eduGAIN aggregate.
+
+        This can be overridden in build.properties.
+    -->
+    <property name="mda.inc.edugain.xml" value="${mda.incdir}/edugain.xml"/>
+
+    <!--
         inc.fetch.production
 
         This target is for use in a development environment. It reads the
@@ -1327,6 +1334,17 @@
     </target>
 
     <!--
+        inc.edugain.download
+
+        Downloads the eduGAIN aggregate and writes it into a file if successful.
+    -->
+    <target name="inc.edugain.download">
+        <echo>Downloading eduGAIN aggregate to ${mda.inc.edugain.xml}...</echo>
+        <CHANNEL.do channel="incommon" verb="download-edugain"/>
+        <echo>Download to ${mda.inc.edugain.xml} completed.</echo>
+    </target>
+
+    <!--
         inc.generate.import
 
         Generate the InCommon import aggregate.
@@ -1334,7 +1352,7 @@
     <target name="inc.generate.import">
         <echo>Generating InCommon import aggregate in ${mda.inc.imported.xml}</echo>
         <echo>    from production aggregate in ${mda.inc.production.xml}</echo>
-        <echo>    and selected eduGAIN entities...</echo>
+        <echo>    and selected eduGAIN entities from ${mda.inc.edugain.xml}...</echo>
         <CHANNEL.do channel="incommon" verb="import"/>
         <echo>Generation complete.</echo>
     </target>
@@ -1345,7 +1363,7 @@
         Report on the eduGAIN entities filtered out because of errors detected.
     -->
     <target name="inc.edugain.report">
-        <echo>Looking for errors in eduGAIN entities...</echo>
+        <echo>Looking for errors in eduGAIN entities from ${mda.inc.edugain.xml}...</echo>
         <CHANNEL.do channel="incommon" verb="report"/>
         <echo>Report complete.</echo>
     </target>

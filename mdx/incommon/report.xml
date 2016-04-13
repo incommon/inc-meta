@@ -41,7 +41,33 @@
     <bean id="report" parent="SimplePipeline">
         <property name="stages">
             <list>
-                <ref bean="int_edugain_productionEntities"/>
+                <!--
+                    Load the saved eduGAIN aggregate from a file.
+                -->
+                <bean id="edugain_aggregate" parent="DOMResourceSourceStage">
+                    <property name="DOMResource">
+                        <bean parent="FileSystemResource" c:_0="${inc.edugain.xml}"/>
+                    </property>
+                </bean>
+
+                <!--
+                    Check for fatal errors at the aggregate level:
+                        missing or expired validUntil attribute
+                        invalid signature
+                -->
+                <ref bean="check_validUntil"/>
+                <ref bean="int_edugain_checkSignature"/>
+                <ref bean="errorTerminatingFilter"/>
+
+                <ref bean="disassemble"/>
+
+                <ref bean="int_edugain_removeBlacklistedEntities"/>
+
+                <!--
+                    All eduGAIN entities should have mdrpi:RegistrationInfo elements, but
+                    we can't check the actual values.
+                -->
+                <ref bean="check_hasreginfo"/>
 
                 <!-- Populate identifiers for future actions. -->
                 <ref bean="populateItemIds"/>
