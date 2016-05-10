@@ -253,8 +253,10 @@
                 <ref bean="check_adfs"/>
                 <ref bean="check_algsupport"/>
                 <ref bean="check_bindings"/>
+                <ref bean="check_entityid_prefix"/>
                 <ref bean="check_hoksso"/>
                 <ref bean="check_idpdisc"/>
+                <ref bean="check_idp_tls"/>
                 <ref bean="check_incmd"/>
                 <ref bean="check_init"/>
                 <ref bean="check_mdiop"/>
@@ -267,6 +269,7 @@
                 <ref bean="check_saml2int"/>
                 <!-- <ref bean="check_saml2meta"/> -->
                 <ref bean="check_shibboleth"/>
+                <ref bean="check_sp_tls"/>
                 <ref bean="check_uk_trust"/>
                 
                 <bean id="checkCertificates" parent="X509ValidationStage">

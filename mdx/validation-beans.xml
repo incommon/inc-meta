@@ -324,6 +324,32 @@
     -->
     
     <!--
+        check_cr
+        
+        Check for the presence of CR characters in text content or attribute values.
+        This protects against SSPCPP-684 in the Shibboleth SP.
+    -->
+    <bean id="check_cr" parent="CRDetectionStage"/>
+
+    <!--
+        check_entityid_prefix
+    -->
+    <bean id="check_entityid_prefix" parent="XSLValidationStage"
+        p:XSLResource="classpath:_rules/check_entityid_prefix.xsl"/>
+
+    <!--
+        check_idp_tls
+    -->
+    <bean id="check_idp_tls" parent="XSLValidationStage"
+        p:XSLResource="classpath:_rules/check_idp_tls.xsl"/>
+
+    <!--
+        check_sp_tls
+    -->
+    <bean id="check_sp_tls" parent="XSLValidationStage"
+        p:XSLResource="classpath:_rules/check_sp_tls.xsl"/>
+
+    <!--
         check_misc
     -->
     <bean id="check_misc" parent="XSLValidationStage"
@@ -563,8 +589,11 @@
                 <ref bean="check_adfs"/>
                 <ref bean="check_algsupport"/>
                 <ref bean="check_bindings"/>
+                <ref bean="check_cr"/>
+                <ref bean="check_entityid_prefix"/>
                 <ref bean="check_hoksso"/>
                 <ref bean="check_idpdisc"/>
+                <ref bean="check_idp_tls"/>
                 <ref bean="check_incmd"/>
                 <ref bean="check_init"/>
                 <ref bean="check_mdattr"/>
@@ -579,6 +608,7 @@
                 <ref bean="check_saml2meta"/>
                 <ref bean="check_saml_strings"/>
                 <ref bean="check_shibboleth"/>
+                <ref bean="check_sp_tls"/>
                 <ref bean="check_uk_algorithms"/>
                 <ref bean="check_uk_trust"/>
                 <ref bean="check_uk_wayf"/>

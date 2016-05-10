@@ -83,8 +83,7 @@
     -->
     <property name="tools.dir" value="tools"/>
     <property name="tools.ant" value="${tools.dir}/ant"/>
-    <property name="tools.mda" value="${tools.dir}/aggregator-cli-0.9.0"/>
-    <property name="tools.mda.old" value="${tools.dir}/aggregator-cli-0.8.0"/>
+    <property name="tools.mda" value="${tools.dir}/aggregator-cli-0.9.1"/>
     <property name="tools.mdnorm" value="${tools.dir}/mdnorm"/>
     <property name="tools.metadatatool" value="${tools.dir}/metadatatool"/>
     <property name="tools.xmlsectool" value="${tools.dir}/xmlsectool"/>
@@ -154,7 +153,7 @@
         be more than some invocations require, but there's no harm in having a higher
         limit for all of them.
     -->
-    <property name="java.max.memory" value="768m"/>
+    <property name="java.max.memory" value="1024m"/>
 
     <!--
         Full paths to a couple of temporary file locations.
@@ -462,7 +461,7 @@
         The individual properties listed here can be augmented or overridden
         by properties defined in the external properties files, e.g., build.properties.
     -->
-    <property name="mda.java.endorsed.dirs" value="${tools.mda.old}/lib/endorsed"/>
+    <property name="mda.java.endorsed.dirs" value="${tools.dir}/endorsed"/>
     <property name="mda.basedir" value="${basedir}"/>
 
     <!--

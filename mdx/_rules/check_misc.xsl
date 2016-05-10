@@ -33,18 +33,6 @@
 
 
 	<!--
-		Entity IDs should start with one of "http://", "https://" or "urn:mace:".
-	-->
-	<xsl:template match="md:EntityDescriptor[not(starts-with(@entityID, 'urn:mace:'))]
-		[not(starts-with(@entityID, 'http://'))]
-		[not(starts-with(@entityID, 'https://'))]">
-		<xsl:call-template name="error">
-			<xsl:with-param name="m">entity ID <xsl:value-of select="@entityID"/> does not start with acceptable prefix</xsl:with-param>
-		</xsl:call-template>
-	</xsl:template>
-
-
-	<!--
 		Check for OrganizationDisplayName elements containing line breaks.
 	-->
 	<xsl:template match="md:OrganizationDisplayName[contains(., '&#10;')]">
@@ -63,22 +51,6 @@
 	<xsl:template match="*[contains(@Location, ' ')]">
 		<xsl:call-template name="error">
 			<xsl:with-param name="m"><xsl:value-of select='local-name()'/> Location contains space character</xsl:with-param>
-		</xsl:call-template>
-	</xsl:template>
-	
-	
-	<!--
-		Check for Locations that don't start with https://
-		
-		This may be a little strict, and might be better confined to md:* elements.
-		In addition, we might at some point require more complex rules: whitelisting certain
-		entities, or permitting http:// to Locations associated with certain bindngs.
-		
-		At present, however, this simpler rule produces no false positives.
-	-->
-	<xsl:template match="*[@Location and not(starts-with(@Location,'https://'))]">
-		<xsl:call-template name="error">
-			<xsl:with-param name="m"><xsl:value-of select='local-name()'/> Location does not start with https://</xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 	
