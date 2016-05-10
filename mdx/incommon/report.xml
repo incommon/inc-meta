@@ -79,7 +79,7 @@
                 <!--
                     Announce any entities marked as having errors or warnings.
                 -->
-                <ref bean="errorAnnouncer"/>
+                <ref bean="warningAndErrorAnnouncer"/>
             </list>
         </property>
     </bean>

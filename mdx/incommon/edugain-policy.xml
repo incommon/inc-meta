@@ -133,6 +133,34 @@
                 -->
 
                 <!--
+                    The following technical policy rules do not yet appear in the
+                    published wiki page.
+                -->
+
+                <!--
+                    Filter entities whose entityID does not start with one of the
+                    following prefixes: urn:mace:, http://, https://.
+                -->
+                <ref bean="check_entityid_prefix"/>
+
+                <!--
+                    Filter all imported IdP entities with an endpoint location that
+                    is not HTTPS-protected.
+                -->
+                <ref bean="check_idp_tls"/>
+
+                <!--
+                    Filter all imported mdui:Logo elements (not entities) with a URL
+                    that is not HTTPS-protected.
+                -->
+                <ref bean="stripMDUILogoHttp"/>
+
+                <!--
+                    Filter entities containing literal CR characters.
+                -->
+                <ref bean="check_cr"/>
+
+                <!--
                     Policy rules below this point are not called out explicitly in the
                     published policy wiki page.
                 -->
