@@ -18,6 +18,13 @@
 
         Entities with errors are NOT removed here, so that this policy can be
         used in contexts where reporting is more appropriate than just removal.
+
+        Rule number references are to the published Interfederation Technical Policy
+        page:
+
+            https://spaces.internet2.edu/display/InCFederation/Interfederation+Technical+Policy
+
+        The numbers given here are up to date as of 2016-05-10.
     -->
     <bean id="edugainPolicy" parent="CompositeStage">
         <property name="composedStages">
