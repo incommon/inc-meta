@@ -215,13 +215,15 @@
                     For reference, here is an expanded list of the individual checking beans
                     so that we can review and reintroduce those which seem appropriate.
 
-                    CHECK_imported:
                         CHECK_std:
                             <ref bean="check_adfs"/>
                             <ref bean="check_algsupport"/>
                             <ref bean="check_bindings"/>
+                            (check_cr included)
+                            (check_entityid_prefix included)
                             <ref bean="check_hoksso"/>
                             <ref bean="check_idpdisc"/>
+                            (check_idp_tls included)
                             <ref bean="check_incmd"/>
                             <ref bean="check_init"/>
                             <ref bean="check_mdattr"/>
@@ -235,12 +237,13 @@
                             <ref bean="check_saml2int"/>
                             <ref bean="check_saml2meta"/>
                             <ref bean="check_saml_strings"/>
+                            (check_shib_noregscope included)
                             <ref bean="check_shibboleth"/>
+                            (check_sp_tls included)
                             <ref bean="check_uk_algorithms"/>
                             <ref bean="check_uk_trust"/>
                             <ref bean="check_uk_wayf"/>
                         <ref bean="check_dup_display"/>
-                        <ref bean="check_regscope"/>
                         <ref bean="check_namespaces"/>
                 -->
 
