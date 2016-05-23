@@ -161,6 +161,16 @@
                 <ref bean="check_cr"/>
 
                 <!--
+                    Filter entities with regular expression scopes.
+                -->
+                <ref bean="check_shib_regscope"/>
+
+                <!--
+                    Filter entities without regexp attributes.
+                -->
+                <ref bean="check_shib_noregscope"/>
+
+                <!--
                     Policy rules below this point are not called out explicitly in the
                     published policy wiki page.
                 -->
