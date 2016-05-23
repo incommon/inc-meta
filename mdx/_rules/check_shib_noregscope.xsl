@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-	check_regscope.xsl
+	check_shib_noregscope.xsl
 
-	Check for the presence of Shibboleth Scope elements containing regular expressions.
-	
+    Check for Shibboleth Scope elements lacking a regexp attribute, which can cause
+    problems with signature generation and validation because the schema includes
+    a default value.
+
 -->
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
@@ -17,14 +19,10 @@
 		Common support functions.
 	-->
 	<xsl:import href="check_framework.xsl"/>
-	
-	<xsl:template match="shibmd:Scope[@regexp='true']">
+
+	<xsl:template match="shibmd:Scope[not(@regexp)]">
 		<xsl:call-template name="error">
-			<xsl:with-param name="m">
-				<xsl:text>regular expression in scope '</xsl:text>
-				<xsl:value-of select="."/>
-				<xsl:text>'</xsl:text>
-			</xsl:with-param>
+			<xsl:with-param name="m">Scope <xsl:value-of select="."/> lacks @regexp</xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 	
