@@ -24,7 +24,7 @@
 
             https://spaces.internet2.edu/display/InCFederation/Interfederation+Technical+Policy
 
-        The numbers given here are up to date as of 2016-05-10.
+        The numbers given here are up to date as of 2016-08-12.
     -->
     <bean id="edugainPolicy" parent="CompositeStage">
         <property name="composedStages">
@@ -32,6 +32,11 @@
 
                 <!--
                     Technical Policy rule 1.
+
+                    "Silently remove all imported entities with XML attribute
+                    mdrpi:RegistrationInfo[@registrationAuthority='https://incommon.org']
+
+                    Entities so marked must come from primary sources only."
 
                     Filter out entities that declare themselves as registered
                     by our federation.  We don't want those coming back in
@@ -51,7 +56,8 @@
                 <!--
                     Technical Policy rule 2.
 
-                    Filter all entity attributes not on the entity attribute whitelist.
+                    "Silently remove all entity attributes not on the Entity Attribute
+                    Whitelist."
                 -->
                 <bean id="entityAttributes" parent="EntityAttributeFilteringStage">
                     <property name="rules">
@@ -75,7 +81,35 @@
                 <!--
                     Technical Policy rule 3.
 
-                    Filter all imported entities with weak keys.
+                    "Remove and log the removal of all imported mdui:Logo elements
+                    (not entities) with a URL that is not HTTPS-protected."
+                -->
+                <ref bean="stripMDUILogoHttp"/>
+
+                <!--
+                    Technical Policy rule 4.
+
+                    "Fiter out (remove and log the removal of) all imported
+                    entities matching one or more of the following conditions:"
+
+                    This rule is performed by the error-detecting beans below
+                    in combination with the caller of this CompositeStage
+                    taking action on any resulting ErrorStatus objects in
+                    item metadata.
+                -->
+
+                <!--
+                    Technical Policy rule 4.a.
+
+                    Mark entities with an entityID that does not begin with one of the
+                    following prefixes: urn:mace:, http://, https://.
+                -->
+                <ref bean="check_entityid_prefix"/>
+
+                <!--
+                    Technical Policy rule 4.b.
+
+                    Mark entities with weak keys.
                 -->
                 <bean p:id="certificateValidation" parent="X509ValidationStage">
                     <property name="validators">
@@ -105,28 +139,57 @@
                 </bean>
 
                 <!--
-                    Technical Policy rule 4.
+                    Technical Policy rule 4.c.i.
 
-                    Filter all imported IdP entities that do not have a SAML2 SingleSignOnService endpoint
+                    Filter entities without regexp attributes.
+                -->
+                <ref bean="check_shib_noregscope"/>
+
+                <!--
+                    Technical Policy rule 4.c.ii.
+
+                    Disallow regexp="true".
+                -->
+                <ref bean="check_shib_regscope"/>
+
+                <!--
+                    Technical Policy rule 4.d.
+
+                    Mark IdP entities with an endpoint location that
+                    is not HTTPS-protected.
+                -->
+                <ref bean="check_idp_tls"/>
+
+                <!--
+                    Technical Policy rule 4.e.
+
+                    Mark IdP entities that do not have a SAML2 SingleSignOnService endpoint
                     that supports the HTTP-Redirect binding.
                 -->
                 <bean id="check_idp_non_saml2" parent="XSLValidationStage"
                     p:XSLResource="classpath:incommon/check_idp_no_saml2.xsl"/>
 
                 <!--
-                    Technical Policy rule 5.
+                    Technical Policy rule 4.f.
 
-                    Filter all imported SP entities that do not have at least one SAML2 AssertionConsumerService
+                    Mark SP entities that do not have at least one SAML2 AssertionConsumerService
                     endpoint that supports the HTTP-POST binding.
                 -->
                 <bean id="check_sp_non_saml2" parent="XSLValidationStage"
                     p:XSLResource="classpath:incommon/check_sp_no_saml2.xsl"/>
 
                 <!--
-                    Technical Policy rule 6.
+                    Technical Policy rule 4.g.
 
-                    Filter all imported entities that have the same entityID as an existing
-                    entity in the InCommon aggregate.
+                    Mark entities containing literal CR characters.
+                -->
+                <ref bean="check_cr"/>
+
+                <!--
+                    Technical Policy rule 5.
+
+                    "Silently remove all imported entities that have the same entityID as an existing
+                    entity in the InCommon aggregate."
 
                     This policy rule is implemented by the merge strategy used when these
                     entities are merged in with the ones from InCommon.
@@ -137,38 +200,7 @@
                     published wiki page.
                 -->
 
-                <!--
-                    Filter entities whose entityID does not start with one of the
-                    following prefixes: urn:mace:, http://, https://.
-                -->
-                <ref bean="check_entityid_prefix"/>
-
-                <!--
-                    Filter all imported IdP entities with an endpoint location that
-                    is not HTTPS-protected.
-                -->
-                <ref bean="check_idp_tls"/>
-
-                <!--
-                    Filter all imported mdui:Logo elements (not entities) with a URL
-                    that is not HTTPS-protected.
-                -->
-                <ref bean="stripMDUILogoHttp"/>
-
-                <!--
-                    Filter entities containing literal CR characters.
-                -->
-                <ref bean="check_cr"/>
-
-                <!--
-                    Filter entities with regular expression scopes.
-                -->
-                <ref bean="check_shib_regscope"/>
-
-                <!--
-                    Filter entities without regexp attributes.
-                -->
-                <ref bean="check_shib_noregscope"/>
+                <!-- none -->
 
                 <!--
                     Policy rules below this point are not called out explicitly in the
