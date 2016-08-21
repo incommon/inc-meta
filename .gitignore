@@ -1,3 +1,10 @@
+# Editor backup files
+*~
+.*swp
+
+# GUI metadata files
+.DS_Store
+Thumbs.db
 
 # /
 /private
@@ -9,10 +16,6 @@
 # /charting/
 /charting/cache
 /charting/temp.tmp
-
-# /entities/
-/entities/import.xml
-/entities/imported.xml
 
 # /mdx/at_aconet/
 /mdx/at_aconet/imported.xml
@@ -129,27 +132,3 @@
 
 # /mdx/us_incommon/
 /mdx/us_incommon/imported.xml
-
-# /xml/
-/xml/ukfederation-trust-12-unsigned.xml
-/xml/ukfederation-sites-12-unsigned.xml
-/xml/ukfederation-wayf-unsigned.xml
-/xml/entities.xml
-/xml/sdss-wayf-unsigned.xml
-/xml/ukfederation-metadata-unsigned.xml
-/xml/embedded.pem
-/xml/member-dates.txt
-/xml/ukfederation-metadata-master.xml
-/xml/ukfederation-export-unsigned.xml
-/xml/ukfederation-export-preview-unsigned.xml
-/xml/ukfederation-test-unsigned.xml
-/xml/ukfederation-export.xml
-/xml/ukfederation-stats.html
-/xml/ukfederation-test.xml
-/xml/ukfederation-back-unsigned.xml
-/xml/test-metadata.xml
-/xml/test-metadata-master.xml
-/xml/temp.xml
-/xml/temp2.xml
-/xml/ukfederation-cdsall-unsigned.xml
-/xml/cms-metadata.xml

@@ -340,6 +340,7 @@
     <bean id="mdattr_namespace"     parent="String" c:_="urn:oasis:names:tc:SAML:metadata:attribute"/>
     <bean id="mdrpi_namespace"      parent="String" c:_="urn:oasis:names:tc:SAML:metadata:rpi"/>
     <bean id="mdui_namespace"       parent="String" c:_="urn:oasis:names:tc:SAML:metadata:ui"/>
+    <bean id="remd_namespace"       parent="String" c:_="http://refeds.org/metadata"/>
     <bean id="saml_namespace"       parent="String" c:_="urn:oasis:names:tc:SAML:2.0:assertion"/>
     <bean id="samlp_namespace"      parent="String" c:_="urn:oasis:names:tc:SAML:2.0:protocol"/>
     <bean id="shibmd_namespace"     parent="String" c:_="urn:mace:shibboleth:metadata:1.0"/>
@@ -372,6 +373,7 @@
                 <entry key="mdattr"     value-ref="mdattr_namespace"/>
                 <entry key="mdrpi"      value-ref="mdrpi_namespace"/>
                 <entry key="mdui"       value-ref="mdui_namespace"/>
+                <entry key="remd"       value-ref="remd_namespace"/>
                 <entry key="saml"       value-ref="saml_namespace"/>
                 <entry key="samlp"      value-ref="samlp_namespace"/>
                 <entry key="shibmd"     value-ref="shibmd_namespace"/>
@@ -468,9 +470,9 @@
         Federation registrationAuthority URIs.
     -->
     <bean id="ar_mate_registrar"         parent="String" c:_="http://www.federacionmate.gob.ar"/>
-    <bean id="am_afire_registrar"        parent="String" c:_="http://afire.asnet.am"/>
+    <bean id="am_afire_registrar"        parent="String" c:_="https://aai.asnet.am"/>
     <bean id="at_aconet_registrar"       parent="String" c:_="http://eduid.at"/>
-    <bean id="au_aaf_registrar"          parent="String" c:_="http://aaf.edu.au/"/>
+    <bean id="au_aaf_registrar"          parent="String" c:_="https://aaf.edu.au/"/>
     <bean id="be_belnet_registrar"       parent="String" c:_="http://federation.belnet.be/"/>
     <bean id="br_cafe_registrar"         parent="String" c:_="http://cafe.rnp.br"/>
     <bean id="ca_caf_registrar"          parent="String" c:_="http://www.canarie.ca"/>
@@ -529,7 +531,9 @@
                     
                     http://www.edugain.org/technical/status.php
                 -->
+                <entry key-ref="am_afire_registrar"           value="AM"/>
                 <entry key-ref="at_aconet_registrar"          value="AT"/>
+                <entry key-ref="au_aaf_registrar"             value="AU"/>
                 <entry key-ref="be_belnet_registrar"          value="BE"/>
                 <entry key-ref="br_cafe_registrar"            value="BR"/>
                 <entry key-ref="ca_caf_registrar"             value="CA"/>
@@ -568,8 +572,6 @@
                 
                 <!-- eduGAIN voting-only members -->
                 <entry key-ref="ar_mate_registrar"            value="AR"/>
-                <entry key-ref="am_afire_registrar"           value="AM"/>
-                <entry key-ref="au_aaf_registrar"             value="AU"/>
                 
                 <!-- eduGAIN candidates -->
             </map>
@@ -942,6 +944,10 @@
         <bean parent="ClassPathResource">
             <!-- no imports -->
             <constructor-arg value="schema/incommon-metadata.xsd"/>
+        </bean>
+        <bean parent="ClassPathResource">
+            <!-- no imports -->
+            <constructor-arg value="schema/refeds-metadata.xsd"/>
         </bean>
         <bean parent="ClassPathResource">
             <!-- no imports -->
