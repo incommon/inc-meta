@@ -104,6 +104,22 @@
                 <!-- Break down into individual entities. -->
                 <ref bean="disassemble"/>
 
+                <!--
+                    In case we are testing with InCommon production metadata
+                    that already includes imported entities, remove those
+                    before proceeding to avoid them overwriting the
+                    new imported version.
+                -->
+                <bean id="keepInCommonEntities" parent="EntityRegistrationAuthorityFilterStage">
+                    <property name="designatedRegistrationAuthorities">
+                        <list>
+                            <ref bean="us_incommon_registrar"/>
+                        </list>
+                    </property>
+                    <property name="requiringRegistrationInformation" value="true"/>
+                    <property name="whitelistingRegistrationAuthorities" value="true"/>
+                </bean>
+
                 <!-- Include a default registrationAuthority for each entity. -->
                 <ref bean="us_incommon_default_regauth"/>
 
