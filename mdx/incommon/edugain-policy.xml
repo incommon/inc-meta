@@ -74,6 +74,28 @@
                             <bean parent="EntityCategoryMatcher"
                                 c:category="http://refeds.org/category/hide-from-discovery"/>
 
+                            <!-- Permit SIRTFI entity attribute -->
+                            <bean parent="MultiPredicateMatcher">
+                                <property name="nameFormatPredicate">
+                                    <bean class="com.google.common.base.Predicates"
+                                        factory-method="equalTo"
+                                        c:_="urn:oasis:names:tc:SAML:2.0:attrname-format:uri"
+                                    />
+                                </property>
+                                <property name="namePredicate">
+                                    <bean class="com.google.common.base.Predicates"
+                                        factory-method="equalTo"
+                                        c:_="urn:oasis:names:tc:SAML:attribute:assurance-certification"
+                                    />
+                                </property>
+                                <property name="valuePredicate">
+                                    <bean class="com.google.common.base.Predicates"
+                                        factory-method="equalTo"
+                                        c:_="https://refeds.org/sirtfi"
+                                    />
+                                </property>
+                            </bean>
+
                         </list>
                     </property>
                 </bean>
@@ -225,6 +247,7 @@
                             <ref bean="mdattr_namespace"/>
                             <ref bean="mdrpi_namespace"/>
                             <ref bean="mdui_namespace"/>
+                            <ref bean="remd_namespace"/>
                             <ref bean="saml_namespace"/>
                             <ref bean="shibmd_namespace"/>
                             <ref bean="xenc_namespace"/>
