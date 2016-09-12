@@ -31,6 +31,21 @@
             <list>
 
                 <!--
+                    Check entities against the MDATTR specification.
+
+                    This is not called out in the technical policy, so would
+                    normally be placed at the end of the policy. We need to
+                    perform this check at the start so that any entity attribute
+                    filtering we perform below does not accidentally bring the
+                    entity into apparent compliance.
+
+                    See https://issues.shibboleth.net/jira/browse/MDA-168
+
+                    (EntityAttributeFilteringStage mishandles multiple containers)
+                -->
+                <ref bean="check_mdattr"/>
+
+                <!--
                     Technical Policy rule 1.
 
                     "Silently remove all imported entities with XML attribute
@@ -281,7 +296,7 @@
                             (check_idp_tls included)
                             <ref bean="check_incmd"/>
                             <ref bean="check_init"/>
-                            <ref bean="check_mdattr"/>
+                            (check_mdattr included)
                             <ref bean="check_mdiop"/>
                             <ref bean="check_mdrpi"/>
                             <ref bean="check_mdui"/>
