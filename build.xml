@@ -2406,6 +2406,13 @@
     <property name="mda.inc.imported.xml" value="${mda.incdir}/imported.xml"/>
 
     <!--
+        Default local file location to which to write the IdP-only aggregate.
+
+        This can be overridden in build.properties.
+    -->
+    <property name="mda.inc.imported-idp.xml" value="${mda.incdir}/imported-idp.xml"/>
+
+    <!--
         Default local file location to which to write the eduGAIN aggregate.
 
         This can be overridden in build.properties.
@@ -2457,6 +2464,7 @@
     -->
     <target name="inc.generate.import">
         <echo>Generating InCommon import aggregate in ${mda.inc.imported.xml}</echo>
+        <echo>    (IdP-only aggregate in ${mda.inc.imported-idp.xml})</echo>
         <echo>    from production aggregate in ${mda.inc.production.xml}</echo>
         <echo>    and selected eduGAIN entities from ${mda.inc.edugain.xml}...</echo>
         <CHANNEL.do channel="incommon" verb="import"/>

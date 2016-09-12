@@ -28,6 +28,101 @@
     -->
     <import resource="classpath:int_edugain/beans.xml"/>
 
+    <!--
+        ***********************************************************
+        ***                                                     ***
+        ***   C O M M O N   O U T P U T   P R O C E S S I N G   ***
+        ***                                                     ***
+        ***********************************************************
+    -->
+
+    <bean id="common.output" parent="CompositeStage">
+        <property name="composedStages">
+            <list>
+                <!-- Construct a new aggregate from the collection of entities. -->
+                <ref bean="assemble"/>
+
+                <!-- Apply final tweaks to the aggregate. -->
+                <bean id="finalise" parent="incommon_finalise_parent">
+                    <property name="transformParameters">
+                        <map>
+                            <entry key="extraText" value="Contains InCommon and eduGAIN metadata"/>
+                            <entry key="publisher" value-ref="us_incommon_registrar"/>
+                        </map>
+                    </property>
+                </bean>
+
+                <!-- Normalise the use of namespace prefixes in the resulting XML document. -->
+                <bean id="normalise" parent="XSLTransformationStage"
+                    p:XSLResource="classpath:incommon/ns_norm_import.xsl"/>
+            </list>
+        </property>
+    </bean>
+
+
+    <!--
+        *****************************************
+        ***                                   ***
+        ***   I D P - O N L Y   O U T P U T   ***
+        ***                                   ***
+        *****************************************
+    -->
+
+    <!--
+        idp.serialize
+
+        Writes the IdP-only aggregate out to a file.
+    -->
+    <bean id="idp.serialize" parent="SerializationStage">
+        <property name="outputFile">
+            <bean class="java.io.File">
+                <constructor-arg value="${inc.imported-idp.xml}"/>
+            </bean>
+        </property>
+    </bean>
+
+    <!--
+        idp.selector
+
+        Entities in the IdP-only aggregate are restricted to identity providers.
+    -->
+    <bean id="idp.selector" parent="XPathItemSelectionStrategy">
+        <constructor-arg value="/md:EntityDescriptor[md:IDPSSODescriptor]"/>
+        <constructor-arg ref="commonNamespaces"/>
+    </bean>
+
+    <!--
+        idp.pipeline
+
+        Generates the IdP-only aggregate. The selector has already taken care
+        of removing non-IdP entities.
+    -->
+    <bean id="idp.pipeline" parent="SimplePipeline">
+        <property name="stages">
+            <list>
+                <!-- Perform common steps in constructing an output aggregate. -->
+                <ref bean="common.output"/>
+
+                <!-- Write the resulting aggregate out to a file. -->
+                <ref bean="idp.serialize"/>
+            </list>
+        </property>
+    </bean>
+
+
+    <!--
+        *************************************************
+        ***                                           ***
+        ***   A L L   E N T I T I E S   O U T P U T   ***
+        ***                                           ***
+        *************************************************
+    -->
+
+    <!--
+        serializeImported
+
+        Writes the import aggregate out to a file.
+    -->
     <bean id="serializeImported" parent="SerializationStage">
         <property name="outputFile">
             <bean class="java.io.File">
@@ -35,6 +130,15 @@
             </bean>
         </property>
     </bean>
+
+
+    <!--
+        *************************************
+        ***                               ***
+        ***   E D U G A I N   I N P U T   ***
+        ***                               ***
+        *************************************
+    -->
 
     <bean id="incommon_edugain_importPipeline" parent="SimplePipeline">
         <property name="stages">
@@ -83,8 +187,18 @@
         </property>
     </bean>
 
+
     <!--
-        Construct InCommon eduGAIN import aggregate.
+        *************************************
+        ***                               ***
+        ***   M A I N   P I P E L I N E   ***
+        ***                               ***
+        *************************************
+    -->
+
+    <!--
+        The main "import" pipeline is responsible for generating the
+        all-entities output aggregate.
     -->
     <bean id="import" parent="SimplePipeline">
         <property name="stages">
@@ -136,22 +250,22 @@
                     </property>
                 </bean>
 
-                <!-- Construct a new aggregate from the resulting collection of entities. -->
-                <ref bean="assemble"/>
-
-                <!-- Apply final tweaks to the aggregate. -->
-                <bean id="finalise" parent="incommon_finalise_parent">
-                    <property name="transformParameters">
-                        <map>
-                            <entry key="extraText" value="Contains InCommon and eduGAIN metadata"/>
-                            <entry key="publisher" value-ref="us_incommon_registrar"/>
-                        </map>
+                <!-- Fork new pipelines to generate special aggregates. -->
+                <bean id="demux" parent="PipelineDemultiplexerStage">
+                    <property name="pipelineAndSelectionStrategies">
+                        <list>
+                            <!-- IdP-only aggregate. -->
+                            <bean class="net.shibboleth.utilities.java.support.collection.Pair">
+                                <constructor-arg ref="idp.pipeline"/>
+                                <constructor-arg ref="idp.selector"/>
+                            </bean>
+                        </list>
                     </property>
+                    <property name="waitingForPipelines" value="true"/>
                 </bean>
 
-                <!-- Normalise the use of namespace prefixes in the resulting XML document. -->
-                <bean id="normalise" parent="XSLTransformationStage"
-                    p:XSLResource="classpath:incommon/ns_norm_import.xsl"/>
+                <!-- Perform common steps in constructing an output aggregate. -->
+                <ref bean="common.output"/>
 
                 <!-- Write the resulting aggregate out to a file. -->
                 <ref bean="serializeImported"/>
