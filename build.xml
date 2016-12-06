@@ -218,7 +218,6 @@
         External specialised directories.
     -->
     <property name="aggregates.dir" value="${shared.ws.dir}/${git.repo.project.products}/aggregates"/>
-    <property name="edugain.dir" value="${shared.ws.dir}/${git.repo.project.data}/edugain"/>
     <property name="entities.dir" value="${shared.ws.dir}/${git.repo.project.data}/entities"/>
     <property name="members.dir" value="${shared.ws.dir}/${git.repo.project.data}/members"/>
     <property name="output.dir" value="${shared.ws.dir}/build"/>
@@ -230,6 +229,7 @@
     -->
     <property name="build.dir" value="${basedir}/build"/>
     <property name="mdx.dir" value="${basedir}/mdx"/>
+    <property name="edugain.dir" value="${mdx.dir}/int_edugain"/>
     <property name="rules.dir" value="${mdx.dir}/_rules"/>
     <property name="utilities.dir" value="${basedir}/utilities"/>
 
