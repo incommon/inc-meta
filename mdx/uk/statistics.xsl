@@ -124,7 +124,6 @@
                     <li><p><a href="#entities">Entity Statistics</a></p></li>
                     <li><p><a href="#byOwner">Entities by Owner</a></p></li>
                     <li><p><a href="#accountableIdPs">Identity Provider Accountability</a></p></li>
-                    <li><p><a href="#membersByScope">Members by Primary Scope</a></p></li>
                     <li><p><a href="#undeployedMembers">Members Lacking Deployment</a></p></li>
                     <li><p><a href="#shib13">Shibboleth 1.3 Remnants</a></p></li>
                     <li><p><a href="#exportOptOut">Export Aggregate: Entities Opted Out</a></p></li>
@@ -151,14 +150,6 @@
                    to an aggregate IdP.
                    Other IdP outsourcing, and any SP outsourcing, is not recorded in the table.
                 </p>
-                <p>
-                    The final column in the table, Primary Scope, records a scope (or security domain)
-                    owned by the member and designated as its main (or only) scope. 
-                    ('Primary Scope' is a useful concept, but is not precisely defined. 
-                    It is only recorded if the member in question owns an IdP or outsources its IdP provision - 
-                    and perhaps not even then, as it it sometimes unclear which of the scopes 
-                    it owns should be designated as 'primary'.) 
-                </p>
                 <table border="1" cellspacing="2" cellpadding="4">
                     <tr>
                         <th align="left">Member</th>
@@ -166,7 +157,6 @@
                         <th>IdPs</th>
                         <th>SPs</th>
                         <th>OSrc</th>
-                        <th align="left">Primary Scope</th>
                     </tr>
                     <xsl:apply-templates select="$members" mode="count">
                         <xsl:with-param name="entities" select="$entities"/>
@@ -974,33 +964,6 @@
                 </ul>
 
                 <!--
-                    ***********************************************************
-                    ***                                                     ***
-                    ***   M E M B E R S   B Y   P R I M A R Y   S C O P E   ***
-                    ***                                                     ***
-                    ***********************************************************
-                -->
-                <h2><a name="membersByScope">Members by Primary Scope</a></h2>
-                <p>Primary Scope is a useful concept, but is not precisely defined. 
-                   It is only recorded if the member in question owns an IdP or outsources its IdP provision - 
-                   and perhaps not even then, as it it sometimes unclear which of the scopes 
-                   it owns should be designated as 'primary'.</p>
-                <table border="1" cellspacing="2" cellpadding="4">
-                    <tr>
-                        <th align="left">Primary Scope</th>
-                        <th align="left">Member</th>
-                    </tr>
-                    <xsl:variable name="membersWithScopes" select="$members[members:PrimaryScope]"/>
-                    <xsl:for-each select="$membersWithScopes">
-                        <xsl:sort select="members:PrimaryScope"/>
-                        <tr>
-                            <td><code><xsl:value-of select="members:PrimaryScope"/></code></td>
-                            <td><xsl:value-of select="members:Name"/></td>
-                        </tr>
-                    </xsl:for-each>
-                </table>
-                
-                <!--
                     ***************************************************************
                     ***                                                         ***
                     ***   M E M B E R S   L A C K I N G   D E P L O Y M E N T   ***
@@ -1238,7 +1201,6 @@
         <xsl:param name="entities"/>
         <xsl:variable name="myName" select="string(members:Name)"/>
         <xsl:variable name="matched" select="$entities[md:Organization/md:OrganizationName = $myName]"/>
-        <xsl:variable name="primaryScope" select="members:PrimaryScope"/>
         <tr>
             <td>
                 <xsl:value-of select="$myName"/>
@@ -1315,18 +1277,6 @@
                     </xsl:otherwise>
                 </xsl:choose>
             </td>
-            
-            <!-- Primary Scope, if present -->
-            <td align="left">
-                <xsl:choose>
-                    <xsl:when test="count($primaryScope) = 0">
-                        &#160;
-                    </xsl:when>
-                    <xsl:otherwise>
-                        <code><xsl:value-of select="$primaryScope"/></code>
-                    </xsl:otherwise>
-                </xsl:choose>
-            </td>
         </tr>
     </xsl:template>
     
@@ -1342,7 +1292,6 @@
                         <li>
                             <xsl:value-of select="@ID"/>
                             <xsl:text>:</xsl:text>
-                            <xsl:if test="not(md:Extensions/ukfedlabel:UKFederationMember)"> [not-M]</xsl:if>
                             <xsl:if test="md:IDPSSODescriptor"> [IdP]</xsl:if>
                             <xsl:if test="md:Extensions/mdattr:EntityAttributes/saml:Attribute
                                 [@Name = 'http://macedir.org/entity-category']
@@ -1948,6 +1897,7 @@
                 <xsl:if test="($show != 0) or ($n &lt;= $show.max)">
                     <ul>
                         <xsl:for-each select="$entities">
+                            <xsl:sort select="@ID"/>
                             <li>
                                 <xsl:value-of select="@ID"/>:
                                 <code><xsl:value-of select="@entityID"/></code>

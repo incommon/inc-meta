@@ -125,38 +125,39 @@
     
     
     <!--
-        uk_membersResource
-        
-        A Resource referencing the members.xml document.
-    -->
-    <bean id="uk_membersResource" parent="FileSystemResource">
-        <constructor-arg value="${members.dir}/members.xml"/>
-    </bean>
-    
-    
-    <!--
         uk_membersDocument
         
         This bean contains the contents of the members.xml file as a DOM Document.
     -->
     <bean id="uk_membersDocument" parent="DOMDocumentFactoryBean">
-        <property name="resource" ref="uk_membersResource"/>
+        <property name="resource">
+            <bean parent="FileSystemResource" c:_="${members.dir}/members.xml"/>
+        </property>
         <property name="parserPool" ref="parserPool"/>
     </bean>
     
     
     <!--
+        uk_membersSchemaDocument
+        
+        This bean loads the schema for the members.xml file as a DOM Document.
+    -->
+    <bean id="uk_membersSchemaDocument" parent="DOMDocumentFactoryBean">
+        <property name="resource">
+            <bean parent="FileSystemResource" c:_="${members.dir}/ukfederation-members.xsd"/>
+        </property>
+        <property name="parserPool" ref="parserPool"/>
+    </bean>
+    
+
+    <!--
         uk_members
         
         This bean implements an API for access to the contents of the members.xml document.
     -->
-    <bean id="uk_members" class="uk.org.ukfederation.members.Members">
-        <constructor-arg>
-            <bean class="java.io.File">
-                <constructor-arg value="${members.dir}/members.xml"/>
-            </bean>
-        </constructor-arg>
-    </bean>
+    <bean id="uk_members" class="uk.org.ukfederation.members.Members"
+        c:_0-ref="uk_membersDocument"
+        c:_1-ref="uk_membersSchemaDocument"/>
     
     
     <!--

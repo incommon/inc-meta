@@ -1,9 +1,7 @@
 #!/usr/bin/env perl -w
 
 #
-# scopes.pl
-#
-# Extracts statistics about number of scopes from the published metadata.
+# mdui.pl
 #
 use lib "../build";
 use Xalan;
@@ -28,23 +26,11 @@ if ($allMonths) {
 
 # ingest files
 foreach $month (@months) {
-	my $fn = "cache/$month.xml";
-	my %scopes;
-	open(TXT, xalanCall . " -IN $fn -XSL scopes.xsl|") || die "could not open input file";
-	while (<TXT>) {
-		chop;
-		my $scope = $_;
-		$scopes{$scope} = 1;
-	}
-	my $prefix = scalar(@months) == 1 ? '' : "$month: ";
-	my $c = scalar(keys(%scopes));
-	push @count, "$prefix$c";
-	close TXT;
-}
+	print "Processing $month\n";
 
-print "count\n";
-foreach $n (@count) {
-	print "$n\n";
+	my $command = xalanCall . " -IN cache/$month.xml -XSL statistics_mdui.xsl";
+	# print "command is $command\n";
+	system($command); # || print "ignoring claimed failure in sub command\n";
+	# print "Xalan run on $fn\n";
+	print "\n";
 }
-
-1;
