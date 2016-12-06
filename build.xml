@@ -2571,6 +2571,22 @@
     </target>
 
     <!--
+        inc.generate.mdq
+
+        Generate per-entity metadata for the InCommon federation.
+    -->
+    <target name="inc.generate.mdq" depends="get.sign.uk.keyPassword">
+        <property name="mda.mdq.input" value="${mda.inc.imported.xml}"/>
+        <property name="mda.sign.keyPassword" value="${sign.uk.keyPassword}"/>
+        <echo>Generating per-entity metadata in ${mda.mdq.output}</echo>
+        <echo>    from unsigned aggregate in ${mda.mdq.input}</echo>
+        <delete dir="${mdq.output.dir}" quiet="true"/>
+        <mkdir dir="${mdq.output.dir}"/>
+        <CHANNEL.do channel="incommon" verb="mdq-multisign"/>
+        <echo>Generation complete.</echo>
+    </target>
+
+    <!--
         inc.edugain.report
 
         Report on the eduGAIN entities filtered out because of errors detected.
