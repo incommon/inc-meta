@@ -301,6 +301,7 @@
                             <ref bean="check_mdrpi"/>
                             <ref bean="check_mdui"/>
                             <ref bean="check_misc"/>
+                            <ref bean="check_rands"/>
                             <ref bean="check_reqattr"/>
                             <ref bean="check_saml1"/>
                             <ref bean="check_saml2"/>
@@ -309,12 +310,21 @@
                             <ref bean="check_saml_strings"/>
                             (check_shib_noregscope included)
                             <ref bean="check_shibboleth"/>
+                            <ref bean="check_sirtfi"/>
                             (check_sp_tls included)
                             <ref bean="check_uk_algorithms"/>
                             <ref bean="check_uk_trust"/>
                             <ref bean="check_uk_wayf"/>
                         <ref bean="check_dup_display"/>
                         <ref bean="check_namespaces"/>
+
+                        In addition, the UK federation has the following
+                        in production for its own entities, but not yet
+                        applied to eduGAIN metadata:
+
+                        * check_rands:
+                            * check_rands_member
+                            * check_rands_support
                 -->
 
             </list>
