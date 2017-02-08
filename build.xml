@@ -2244,6 +2244,9 @@
     <target name="flow.verifyEdugain.output">
         <CHANNEL.do verb="verify" channel="int_edugain"/>
     </target>
+    <target name="flow.verifyEdugain.output.new">
+        <CHANNEL.do verb="verify.new" channel="int_edugain"/>
+    </target>
     <target name="flow.verifyEdugain.output.all">
         <CHANNEL.do verb="verify.all" channel="int_edugain"/>
     </target>
@@ -2294,7 +2297,7 @@
     <target name="check.mailing.list" depends="flow.uk.collect">
         <echo>Checking mailing list entries.</echo>
         <exec executable="perl" dir="${build.dir}">
-            <arg value="${build.dir}/addresses.pl"/>
+            <arg value="${utilities.dir}/addresses.pl"/>
         </exec>
     </target>
 
@@ -2423,7 +2426,7 @@
         <exec executable="perl" dir="${utilities.dir}"
             input="${temp.dir}/embedded.pem">
             <arg value="${utilities.dir}/check_embedded.pl"/>
-            <arg value="-q"/>
+            <arg value="${entities.dir}/expiry_whitelist.txt"/>
         </exec>
         <delete file="${temp.dir}/embedded.pem" quiet="true" verbose="false"/>
     </target>
