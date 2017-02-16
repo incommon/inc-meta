@@ -228,7 +228,6 @@
                             <ref bean="alg_namespace"/>
                             <ref bean="ds_namespace"/>
                             <ref bean="hoksso_namespace"/>
-                            <ref bean="icmd_namespace"/>
                             <ref bean="idpdisc_namespace"/>
                             <ref bean="init_namespace"/>
                             <ref bean="md_namespace"/>
