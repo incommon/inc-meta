@@ -276,21 +276,17 @@
                     the UK federation. Originally, this was because of issues porting some rules
                     into the MDA 0.9 environment.
 
-                    For reference, here is an expanded list of the individual checking beans
-                    so that we can review and reintroduce those which seem appropriate.
+                    The following is an expanded list of such individual checking beans
+                    not currently included here. Discussion of these takes place in GitLab.
 
                         CHECK_std:
                             <ref bean="check_adfs"/>
                             <ref bean="check_algsupport"/>
                             <ref bean="check_bindings"/>
-                            (check_cr included)
-                            (check_entityid_prefix included)
                             <ref bean="check_hoksso"/>
                             <ref bean="check_idpdisc"/>
-                            (check_idp_tls included)
                             <ref bean="check_incmd"/>
                             <ref bean="check_init"/>
-                            (check_mdattr included)
                             <ref bean="check_mdiop"/>
                             <ref bean="check_mdrpi"/>
                             <ref bean="check_mdui"/>
@@ -302,10 +298,9 @@
                             <ref bean="check_saml2int"/>
                             <ref bean="check_saml2meta"/>
                             <ref bean="check_saml_strings"/>
-                            (check_shib_noregscope included)
                             <ref bean="check_shibboleth"/>
                             <ref bean="check_sirtfi"/>
-                            (check_sp_tls included)
+                            <ref bean="check_sp_tls"/>
                             <ref bean="check_uk_algorithms"/>
                             <ref bean="check_uk_trust"/>
                             <ref bean="check_uk_wayf"/>
