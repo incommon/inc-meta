@@ -173,6 +173,7 @@
                 <ref bean="check_idpdisc"/>
                 <ref bean="check_init"/>
                 <ref bean="check_mdiop"/>
+                <ref bean="check_mdrpi"/>
 
                 <!--
                     Technical Policy rule 3.
@@ -296,7 +297,6 @@
                         CHECK_std:
                             <ref bean="check_adfs"/>
                             <ref bean="check_incmd"/>
-                            <ref bean="check_mdrpi"/>
                             <ref bean="check_mdui"/>
                             <ref bean="check_misc"/>
                             <ref bean="check_rands"/>
