@@ -24,26 +24,11 @@
 
             https://spaces.internet2.edu/display/InCFederation/Interfederation+Technical+Policy
 
-        The numbers given here are up to date as of 2016-08-12.
+        The numbers given here are up to date as of 2017-02-16.
     -->
     <bean id="edugainPolicy" parent="CompositeStage">
         <property name="composedStages">
             <list>
-
-                <!--
-                    Check entities against the MDATTR specification.
-
-                    This is not called out in the technical policy, so would
-                    normally be placed at the end of the policy. We need to
-                    perform this check at the start so that any entity attribute
-                    filtering we perform below does not accidentally bring the
-                    entity into apparent compliance.
-
-                    See https://issues.shibboleth.net/jira/browse/MDA-168
-
-                    (EntityAttributeFilteringStage mishandles multiple containers)
-                -->
-                <ref bean="check_mdattr"/>
 
                 <!--
                     Technical Policy rule 1.
@@ -70,6 +55,113 @@
 
                 <!--
                     Technical Policy rule 2.
+
+                    "Remove and log the removal of all imported
+                    entities matching one or more of the following conditions:"
+
+                    This rule is performed by the error-detecting beans below
+                    in combination with the caller of this CompositeStage
+                    taking action on any resulting ErrorStatus objects in
+                    item metadata.
+                -->
+
+                <!--
+                    Technical Policy rule 2.a.
+
+                    Mark entities with an entityID that does not begin with one of the
+                    following prefixes: urn:mace:, http://, https://.
+                -->
+                <ref bean="check_entityid_prefix"/>
+
+                <!--
+                    Technical Policy rule 2.b.
+
+                    Mark entities with weak keys.
+                -->
+                <bean p:id="certificateValidation" parent="X509ValidationStage">
+                    <property name="validators">
+                        <list>
+                            <!-- Error on RSA key length less than 2048 bits. -->
+                            <bean parent="X509RSAKeyLengthValidator"
+                                p:warningBoundary="0" p:errorBoundary="2048"/>
+                            <!-- Error on small RSA public exponents. -->
+                            <bean parent="X509RSAExponentValidator"/>
+
+                            <!--
+                                Debian weak key blacklists.
+
+                                Don't need to check for keys below our minimum key size.
+                            -->
+                            <ref bean="debian.2048"/>
+                            <ref bean="debian.4096"/>
+
+                            <!--
+                                Compromised key blacklists.
+
+                                Again, don't need to check for keys below our minimum key size.
+                            -->
+                            <ref bean="compromised.2048"/>
+                        </list>
+                    </property>
+                </bean>
+
+                <!--
+                    Technical Policy rule 2.c.i.
+
+                    Require regexp attribute on shibmd:Scope.
+                -->
+                <ref bean="check_shib_noregscope"/>
+
+                <!--
+                    Technical Policy rule 2.c.ii.
+
+                    Disallow regexp="true".
+                -->
+                <ref bean="check_shib_regscope"/>
+
+                <!--
+                    Technical Policy rule 2.d.
+
+                    Mark IdP entities with an endpoint location that
+                    is not HTTPS-protected.
+                -->
+                <ref bean="check_idp_tls"/>
+
+                <!--
+                    Technical Policy rule 2.e.
+
+                    Mark IdP entities that do not have a SAML2 SingleSignOnService endpoint
+                    that supports the HTTP-Redirect binding.
+                -->
+                <bean id="check_idp_non_saml2" parent="XSLValidationStage"
+                    p:XSLResource="classpath:incommon/check_idp_no_saml2.xsl"/>
+
+                <!--
+                    Technical Policy rule 2.f.
+
+                    Mark SP entities that do not have at least one SAML2 AssertionConsumerService
+                    endpoint that supports the HTTP-POST binding.
+                -->
+                <bean id="check_sp_non_saml2" parent="XSLValidationStage"
+                    p:XSLResource="classpath:incommon/check_sp_no_saml2.xsl"/>
+
+                <!--
+                    Technical Policy rule 2.g.
+
+                    Mark entities containing literal CR characters.
+                -->
+                <ref bean="check_cr"/>
+
+                <!--
+                    Technical Policy rule 2.h.
+
+                    Mark entities containing misplaced or duplicated
+                    EntityAttributes elements.
+                -->
+                <ref bean="check_mdattr"/>
+
+                <!--
+                    Technical Policy rule 3.
 
                     "Silently remove all entity attributes not on the Entity Attribute
                     Whitelist."
@@ -116,137 +208,18 @@
                 </bean>
 
                 <!--
-                    Technical Policy rule 3.
+                    Technical Policy rule 4.
 
-                    "Remove and log the removal of all imported mdui:Logo elements
+                    "Remove (and log the removal of) all imported mdui:Logo elements
                     (not entities) with a URL that is not HTTPS-protected."
                 -->
                 <ref bean="stripMDUILogoHttp"/>
 
                 <!--
-                    Technical Policy rule 4.
-
-                    "Fiter out (remove and log the removal of) all imported
-                    entities matching one or more of the following conditions:"
-
-                    This rule is performed by the error-detecting beans below
-                    in combination with the caller of this CompositeStage
-                    taking action on any resulting ErrorStatus objects in
-                    item metadata.
-                -->
-
-                <!--
-                    Technical Policy rule 4.a.
-
-                    Mark entities with an entityID that does not begin with one of the
-                    following prefixes: urn:mace:, http://, https://.
-                -->
-                <ref bean="check_entityid_prefix"/>
-
-                <!--
-                    Technical Policy rule 4.b.
-
-                    Mark entities with weak keys.
-                -->
-                <bean p:id="certificateValidation" parent="X509ValidationStage">
-                    <property name="validators">
-                        <list>
-                            <!-- Error on RSA key length less than 2048 bits. -->
-                            <bean parent="X509RSAKeyLengthValidator"
-                                p:warningBoundary="0" p:errorBoundary="2048"/>
-                            <!-- Error on small RSA public exponents. -->
-                            <bean parent="X509RSAExponentValidator"/>
-
-                            <!--
-                                Debian weak key blacklists.
-
-                                Don't need to check for keys below our minimum key size.
-                            -->
-                            <ref bean="debian.2048"/>
-                            <ref bean="debian.4096"/>
-
-                            <!--
-                                Compromised key blacklists.
-
-                                Again, don't need to check for keys below our minimum key size.
-                            -->
-                            <ref bean="compromised.2048"/>
-                        </list>
-                    </property>
-                </bean>
-
-                <!--
-                    Technical Policy rule 4.c.i.
-
-                    Filter entities without regexp attributes.
-                -->
-                <ref bean="check_shib_noregscope"/>
-
-                <!--
-                    Technical Policy rule 4.c.ii.
-
-                    Disallow regexp="true".
-                -->
-                <ref bean="check_shib_regscope"/>
-
-                <!--
-                    Technical Policy rule 4.d.
-
-                    Mark IdP entities with an endpoint location that
-                    is not HTTPS-protected.
-                -->
-                <ref bean="check_idp_tls"/>
-
-                <!--
-                    Technical Policy rule 4.e.
-
-                    Mark IdP entities that do not have a SAML2 SingleSignOnService endpoint
-                    that supports the HTTP-Redirect binding.
-                -->
-                <bean id="check_idp_non_saml2" parent="XSLValidationStage"
-                    p:XSLResource="classpath:incommon/check_idp_no_saml2.xsl"/>
-
-                <!--
-                    Technical Policy rule 4.f.
-
-                    Mark SP entities that do not have at least one SAML2 AssertionConsumerService
-                    endpoint that supports the HTTP-POST binding.
-                -->
-                <bean id="check_sp_non_saml2" parent="XSLValidationStage"
-                    p:XSLResource="classpath:incommon/check_sp_no_saml2.xsl"/>
-
-                <!--
-                    Technical Policy rule 4.g.
-
-                    Mark entities containing literal CR characters.
-                -->
-                <ref bean="check_cr"/>
-
-                <!--
                     Technical Policy rule 5.
 
-                    "Silently remove all imported entities that have the same entityID as an existing
-                    entity in the InCommon aggregate."
-
-                    This policy rule is implemented by the merge strategy used when these
-                    entities are merged in with the ones from InCommon.
-                -->
-
-                <!--
-                    The following technical policy rules do not yet appear in the
-                    published wiki page.
-                -->
-
-                <!-- none -->
-
-                <!--
-                    Policy rules below this point are not called out explicitly in the
-                    published policy wiki page.
-                -->
-
-                <!--
-                    Strip all elements and attributes that are in namespaces
-                    other than the ones we accept from partners.
+                    Silently remove all extended XML elements and attributes
+                    defined in namespaces not on the XML Namespace Whitelist.
                 -->
                 <bean id="whitelistImportedNamespaces" parent="NamespacesStrippingStage"
                     p:whitelisting="true">
@@ -270,6 +243,28 @@
                         </set>
                     </property>
                 </bean>
+
+                <!--
+                    Technical Policy rule 6.
+
+                    "Silently remove all imported entities that have the same entityID as an existing
+                    entity in the InCommon aggregate."
+
+                    This policy rule is implemented by the merge strategy used when these
+                    entities are merged in with the ones from InCommon.
+                -->
+
+                <!--
+                    The following technical policy rules do not yet appear in the
+                    published wiki page.
+                -->
+
+                <!-- none -->
+
+                <!--
+                    Policy rules below this point are not called out explicitly in the
+                    published policy wiki page.
+                -->
 
                 <ref bean="cleanImport"/>
                 <ref bean="stripAAMDUI"/>
