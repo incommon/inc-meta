@@ -161,6 +161,15 @@
                 <ref bean="check_mdattr"/>
 
                 <!--
+                    Technical Policy rule 2.*.
+
+                    The following checks do not yet appear in the list on
+                    the Technical Policy page, but will appear in a future
+                    edition as part of rule 2.
+                -->
+                <ref bean="check_algsupport"/>
+
+                <!--
                     Technical Policy rule 3.
 
                     "Silently remove all entity attributes not on the Entity Attribute
@@ -281,7 +290,6 @@
 
                         CHECK_std:
                             <ref bean="check_adfs"/>
-                            <ref bean="check_algsupport"/>
                             <ref bean="check_bindings"/>
                             <ref bean="check_hoksso"/>
                             <ref bean="check_idpdisc"/>
