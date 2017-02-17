@@ -175,6 +175,7 @@
                 <ref bean="check_mdiop"/>
                 <ref bean="check_mdrpi"/>
                 <ref bean="check_rands"/>
+                <ref bean="check_sirtfi"/>
 
                 <!--
                     Technical Policy rule 3.
@@ -307,7 +308,6 @@
                             <ref bean="check_saml2meta"/>
                             <ref bean="check_saml_strings"/>
                             <ref bean="check_shibboleth"/>
-                            <ref bean="check_sirtfi"/>
                             <ref bean="check_sp_tls"/>
                             <ref bean="check_uk_algorithms"/>
                             <ref bean="check_uk_trust"/>
