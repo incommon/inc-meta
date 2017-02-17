@@ -58,7 +58,6 @@
 
                 <!-- Set ID, cacheDuration and validUntil attributes. -->
                 <bean parent="GenerateIdStage"/>
-                <bean parent="SetCacheDurationStage" p:cacheDuration="PT6H"/>
                 <bean parent="SetValidUntilStage" p:validityDuration="P14D"/>
 
                 <!-- Identity transform fixes signing issues. -->
