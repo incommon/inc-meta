@@ -18,6 +18,11 @@
     <import resource="classpath:common-beans.xml"/>
 
     <!--
+        Import inc-mda beans.
+    -->
+    <import resource="classpath:uk/org/iay/incommon/mda/beans.xml"/>
+
+    <!--
         Import channel-specific beans.
     -->
     <import resource="classpath:incommon/beans.xml"/>
@@ -40,7 +45,13 @@
         <property name="composedStages">
             <list>
                 <!-- Construct a new aggregate from the collection of entities. -->
-                <ref bean="assemble"/>
+                <bean id="inc.assemble" parent="stage_parent"
+                    class="net.shibboleth.metadata.dom.saml.EntitiesDescriptorAssemblerStage">
+                    <property name="itemOrderingStrategy">
+                        <bean parent="inc.InCommonEntityOrderingStrategy"
+                            c:_-ref="us_incommon_registrar"/>
+                    </property>
+                </bean>
 
                 <!-- Apply final tweaks to the aggregate. -->
                 <bean id="finalise" parent="incommon_finalise_parent">
