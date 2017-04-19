@@ -118,25 +118,23 @@
                 <!--
                     Sub-rule b.
 
-                    All entity attributes not on the Entity Attribute
-                    Whitelist.
+                    All entity attributes on the Entity Attribute Blacklist.
                 -->
-                <bean id="entityAttributes" parent="EntityAttributeFilteringStage">
+                <bean id="entityAttributes" parent="EntityAttributeFilteringStage"
+                    p:whitelisting="false">
                     <property name="rules">
                         <list>
-                            <!-- Permit REFEDS R&S category membership -->
+                            <!-- "registered by InCommon" entity category. -->
                             <bean parent="EntityCategoryMatcher"
-                                c:category="http://refeds.org/category/research-and-scholarship"/>
+                                c:category="http://id.incommon.org/category/registered-by-incommon"/>
 
-                            <!-- Permit REFEDS R&S category support -->
+                            <!-- InCommon Research and Scholarship category. -->
+                            <bean parent="EntityCategoryMatcher"
+                                c:category="http://id.incommon.org/category/research-and-scholarship"/>
                             <bean parent="EntityCategorySupportMatcher"
-                                c:category="http://refeds.org/category/research-and-scholarship"/>
+                                c:category="http://id.incommon.org/category/research-and-scholarship"/>
 
-                            <!-- Permit REFEDS Hide From Discovery category membership -->
-                            <bean parent="EntityCategoryMatcher"
-                                c:category="http://refeds.org/category/hide-from-discovery"/>
-
-                            <!-- Permit SIRTFI entity attribute -->
+                            <!-- InCommon Bronze assurance certification. -->
                             <bean parent="MultiPredicateMatcher">
                                 <property name="nameFormatPredicate">
                                     <bean class="com.google.common.base.Predicates"
@@ -153,11 +151,32 @@
                                 <property name="valuePredicate">
                                     <bean class="com.google.common.base.Predicates"
                                         factory-method="equalTo"
-                                        c:_="https://refeds.org/sirtfi"
+                                        c:_="http://id.incommon.org/assurance/bronze"
                                     />
                                 </property>
                             </bean>
 
+                            <!-- InCommon Silver assurance certification. -->
+                            <bean parent="MultiPredicateMatcher">
+                                <property name="nameFormatPredicate">
+                                    <bean class="com.google.common.base.Predicates"
+                                        factory-method="equalTo"
+                                        c:_="urn:oasis:names:tc:SAML:2.0:attrname-format:uri"
+                                    />
+                                </property>
+                                <property name="namePredicate">
+                                    <bean class="com.google.common.base.Predicates"
+                                        factory-method="equalTo"
+                                        c:_="urn:oasis:names:tc:SAML:attribute:assurance-certification"
+                                    />
+                                </property>
+                                <property name="valuePredicate">
+                                    <bean class="com.google.common.base.Predicates"
+                                        factory-method="equalTo"
+                                        c:_="http://id.incommon.org/assurance/silver"
+                                    />
+                                </property>
+                            </bean>
                         </list>
                     </property>
                 </bean>
