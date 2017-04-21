@@ -10,19 +10,20 @@
 	xmlns:alg="urn:oasis:names:tc:SAML:metadata:algsupport"
 	xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
 	xmlns:idpdisc="urn:oasis:names:tc:SAML:profiles:SSO:idp-discovery-protocol"
+	xmlns:icmd="http://id.incommon.org/metadata"
 	xmlns:init="urn:oasis:names:tc:SAML:profiles:SSO:request-init"
 	xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"
 	xmlns:mdattr="urn:oasis:names:tc:SAML:metadata:attribute"
 	xmlns:mdrpi="urn:oasis:names:tc:SAML:metadata:rpi"
 	xmlns:mdui="urn:oasis:names:tc:SAML:metadata:ui"
+	xmlns:remd="http://refeds.org/metadata"
 	xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"
 	xmlns:shibmd="urn:mace:shibboleth:metadata:1.0"
-	xmlns:ukfedlabel="http://ukfederation.org.uk/2006/11/label"
-	xmlns:wayf="http://sdss.ac.uk/2006/06/WAYF"
-
-	exclude-result-prefixes="md mdattr saml ukfedlabel wayf"
+	xmlns:xenc="http://www.w3.org/2001/04/xmlenc#"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+
+	exclude-result-prefixes="md"
 	xmlns="urn:oasis:names:tc:SAML:2.0:metadata">
 
 
