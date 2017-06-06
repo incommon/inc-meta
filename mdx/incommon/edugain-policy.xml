@@ -54,6 +54,14 @@
                 </bean>
 
                 <!--
+                    Technical Policy rule 4 (to be renumbered).
+
+                    "Remove (and log the removal of) all imported mdui:Logo elements
+                    (not entities) with a URL that is not HTTPS-protected."
+                -->
+                <ref bean="stripMDUILogoHttp"/>
+
+                <!--
                     Technical Policy rule 2.
 
                     "Remove and log the removal of all imported
@@ -224,14 +232,6 @@
                         </list>
                     </property>
                 </bean>
-
-                <!--
-                    Technical Policy rule 4.
-
-                    "Remove (and log the removal of) all imported mdui:Logo elements
-                    (not entities) with a URL that is not HTTPS-protected."
-                -->
-                <ref bean="stripMDUILogoHttp"/>
 
                 <!--
                     Technical Policy rule 5.
