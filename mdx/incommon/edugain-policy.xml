@@ -115,6 +115,12 @@
                 <ref bean="stripAAMDUI"/>
 
                 <!--
+                    The following minor mutations don't rise to the level where
+                    they are explicitly documented in the policy wiki page.
+                -->
+                <ref bean="trimImportElementWhitespace"/>
+
+                <!--
                     *************************************
                     ***                               ***
                     ***   P O L I C Y   R U L E   4   ***
@@ -344,7 +350,6 @@
                 -->
 
                 <ref bean="cleanImport"/>
-                <ref bean="trimImportElementWhitespace"/>
                 <ref bean="stripEmptyExtensions"/>
                 <ref bean="checkSchemas"/>
 
