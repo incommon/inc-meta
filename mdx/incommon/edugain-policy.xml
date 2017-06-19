@@ -108,6 +108,13 @@
                 -->
 
                 <!--
+                    Sub-rule a.
+
+                    Remove all MDUI metadata from attribute authority roles.
+                -->
+                <ref bean="stripAAMDUI"/>
+
+                <!--
                     *************************************
                     ***                               ***
                     ***   P O L I C Y   R U L E   4   ***
@@ -337,7 +344,6 @@
                 -->
 
                 <ref bean="cleanImport"/>
-                <ref bean="stripAAMDUI"/>
                 <ref bean="trimImportElementWhitespace"/>
                 <ref bean="stripEmptyExtensions"/>
                 <ref bean="checkSchemas"/>
