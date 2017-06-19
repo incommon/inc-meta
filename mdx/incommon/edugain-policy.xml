@@ -19,19 +19,33 @@
         Entities with errors are NOT removed here, so that this policy can be
         used in contexts where reporting is more appropriate than just removal.
 
-        Rule number references are to the published Interfederation Technical Policy
-        page:
+        Rule number references are to the Interfederation Technical Policy
+        pages on the Internet2 wiki. There are two versions:
 
-            https://spaces.internet2.edu/display/InCFederation/Interfederation+Technical+Policy
+        * Interfederation Technical Policy Development
+            * at https://spaces.internet2.edu/x/ugDABg
+            * documents the expected *next* deployment
+            * updated as changes are made in the master branch
+            * use this if you want to cross-reference numbers against
+              the development tooling
 
-        The numbers given here are up to date as of 2017-02-16.
+        * Interfederation Technical Policy
+            * at https://spaces.internet2.edu/x/TgCNBQ
+            * documents the *current* deployment
+            * to cross-reference against this page, check out the specific
+              release mentioned there
+
     -->
     <bean id="edugainPolicy" parent="CompositeStage">
         <property name="composedStages">
             <list>
 
                 <!--
-                    Technical Policy rule 1.
+                    *************************************
+                    ***                               ***
+                    ***   P O L I C Y   R U L E   1   ***
+                    ***                               ***
+                    *************************************
 
                     "Silently remove all imported entities with XML attribute
                     mdrpi:RegistrationInfo[@registrationAuthority='https://incommon.org']
@@ -42,6 +56,9 @@
                     by our federation.  We don't want those coming back in
                     from another registrar or metadata exchange as they may be
                     old versions of entities we have deregistered, or spoofed.
+
+                    This rule is executed first as a performance optimisation
+                    so as to reduce the amount of metadata being processed.
                 -->
                 <bean id="removeInCommonEntities" parent="EntityRegistrationAuthorityFilterStage">
                     <property name="designatedRegistrationAuthorities">
@@ -54,17 +71,50 @@
                 </bean>
 
                 <!--
-                    Technical Policy rule 4 (to be renumbered).
+                    *************************************
+                    ***                               ***
+                    ***   P O L I C Y   R U L E   2   ***
+                    ***                               ***
+                    *************************************
 
-                    "Remove (and log the removal of) all imported mdui:Logo elements
-                    (not entities) with a URL that is not HTTPS-protected."
+                    "Remove (and log the removal of) the following XML
+                    elements (not entities)"
+
+                    Removal of elements should in general be performed before
+                    checking, so that errors corrected by a removal are let
+                    through.
+                -->
+
+                <!--
+                    Sub-rule a.
+
+                    "mdui:Logo elements with a URL that is not HTTPS-protected"
                 -->
                 <ref bean="stripMDUILogoHttp"/>
 
                 <!--
-                    Technical Policy rule 2.
+                    *************************************
+                    ***                               ***
+                    ***   P O L I C Y   R U L E   3   ***
+                    ***                               ***
+                    *************************************
 
-                    "Remove and log the removal of all imported
+                    "Silently remove the following XML elements
+                    (not entities)"
+
+                    Removal of elements should in general be performed before
+                    checking, so that errors corrected by a removal are let
+                    through.
+                -->
+
+                <!--
+                    *************************************
+                    ***                               ***
+                    ***   P O L I C Y   R U L E   4   ***
+                    ***                               ***
+                    *************************************
+
+                    "Remove (and log the removal of) all imported
                     entities matching one or more of the following conditions:"
 
                     This rule is performed by the error-detecting beans below
@@ -74,7 +124,7 @@
                 -->
 
                 <!--
-                    Technical Policy rule 2.a.
+                    Sub-rule a.
 
                     Mark entities with an entityID that does not begin with one of the
                     following prefixes: urn:mace:, http://, https://.
@@ -82,7 +132,7 @@
                 <ref bean="check_entityid_prefix"/>
 
                 <!--
-                    Technical Policy rule 2.b.
+                    Sub-rule b.
 
                     Mark entities with weak keys.
                 -->
@@ -114,21 +164,21 @@
                 </bean>
 
                 <!--
-                    Technical Policy rule 2.c.i.
+                    Sub-rule c.i.
 
                     Require regexp attribute on shibmd:Scope.
                 -->
                 <ref bean="check_shib_noregscope"/>
 
                 <!--
-                    Technical Policy rule 2.c.ii.
+                    Sub-rule c.ii.
 
                     Disallow regexp="true".
                 -->
                 <ref bean="check_shib_regscope"/>
 
                 <!--
-                    Technical Policy rule 2.d.
+                    Sub-rule d.
 
                     Mark IdP entities with an endpoint location that
                     is not HTTPS-protected.
@@ -136,7 +186,7 @@
                 <ref bean="check_idp_tls"/>
 
                 <!--
-                    Technical Policy rule 2.e.
+                    Sub-rule e.
 
                     Mark IdP entities that do not have a SAML2 SingleSignOnService endpoint
                     that supports the HTTP-Redirect binding.
@@ -145,7 +195,7 @@
                     p:XSLResource="classpath:incommon/check_idp_no_saml2.xsl"/>
 
                 <!--
-                    Technical Policy rule 2.f.
+                    Sub-rule f.
 
                     Mark SP entities that do not have at least one SAML2 AssertionConsumerService
                     endpoint that supports the HTTP-POST binding.
@@ -154,14 +204,14 @@
                     p:XSLResource="classpath:incommon/check_sp_no_saml2.xsl"/>
 
                 <!--
-                    Technical Policy rule 2.g.
+                    Sub-rule g.
 
                     Mark entities containing literal CR characters.
                 -->
                 <ref bean="check_cr"/>
 
                 <!--
-                    Technical Policy rule 2.h.
+                    Sub-rule h.
 
                     Mark entities containing misplaced or duplicated
                     EntityAttributes elements.
@@ -169,11 +219,9 @@
                 <ref bean="check_mdattr"/>
 
                 <!--
-                    Technical Policy rule 2.*.
-
                     The following checks do not yet appear in the list on
                     the Technical Policy page, but will appear in a future
-                    edition as part of rule 2.
+                    edition as part of this rule.
                 -->
                 <ref bean="check_algsupport"/>
                 <ref bean="check_bindings"/>
@@ -187,7 +235,11 @@
                 <ref bean="check_sirtfi"/>
 
                 <!--
-                    Technical Policy rule 3.
+                    *************************************
+                    ***                               ***
+                    ***   P O L I C Y   R U L E   5   ***
+                    ***                               ***
+                    *************************************
 
                     "Silently remove all entity attributes not on the Entity Attribute
                     Whitelist."
@@ -234,7 +286,11 @@
                 </bean>
 
                 <!--
-                    Technical Policy rule 5.
+                    *************************************
+                    ***                               ***
+                    ***   P O L I C Y   R U L E   6   ***
+                    ***                               ***
+                    *************************************
 
                     Silently remove all extended XML elements and attributes
                     defined in namespaces not on the XML Namespace Whitelist.
@@ -262,7 +318,11 @@
                 </bean>
 
                 <!--
-                    Technical Policy rule 6.
+                    *************************************
+                    ***                               ***
+                    ***   P O L I C Y   R U L E   7   ***
+                    ***                               ***
+                    *************************************
 
                     "Silently remove all imported entities that have the same entityID as an existing
                     entity in the InCommon aggregate."
@@ -270,13 +330,6 @@
                     This policy rule is implemented by the merge strategy used when these
                     entities are merged in with the ones from InCommon.
                 -->
-
-                <!--
-                    The following technical policy rules do not yet appear in the
-                    published wiki page.
-                -->
-
-                <!-- none -->
 
                 <!--
                     Policy rules below this point are not called out explicitly in the
