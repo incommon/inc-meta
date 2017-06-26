@@ -110,15 +110,100 @@
                 <!--
                     Sub-rule a.
 
-                    Remove all MDUI metadata from attribute authority roles.
+                    All MDUI metadata (e.g., mdui:UIInfo elements) within
+                    AttributeAuthority roles.
                 -->
                 <ref bean="stripAAMDUI"/>
+
+                <!--
+                    Sub-rule b.
+
+                    All entity attributes not on the Entity Attribute
+                    Whitelist.
+                -->
+                <bean id="entityAttributes" parent="EntityAttributeFilteringStage">
+                    <property name="rules">
+                        <list>
+                            <!-- Permit REFEDS R&S category membership -->
+                            <bean parent="EntityCategoryMatcher"
+                                c:category="http://refeds.org/category/research-and-scholarship"/>
+
+                            <!-- Permit REFEDS R&S category support -->
+                            <bean parent="EntityCategorySupportMatcher"
+                                c:category="http://refeds.org/category/research-and-scholarship"/>
+
+                            <!-- Permit REFEDS Hide From Discovery category membership -->
+                            <bean parent="EntityCategoryMatcher"
+                                c:category="http://refeds.org/category/hide-from-discovery"/>
+
+                            <!-- Permit SIRTFI entity attribute -->
+                            <bean parent="MultiPredicateMatcher">
+                                <property name="nameFormatPredicate">
+                                    <bean class="com.google.common.base.Predicates"
+                                        factory-method="equalTo"
+                                        c:_="urn:oasis:names:tc:SAML:2.0:attrname-format:uri"
+                                    />
+                                </property>
+                                <property name="namePredicate">
+                                    <bean class="com.google.common.base.Predicates"
+                                        factory-method="equalTo"
+                                        c:_="urn:oasis:names:tc:SAML:attribute:assurance-certification"
+                                    />
+                                </property>
+                                <property name="valuePredicate">
+                                    <bean class="com.google.common.base.Predicates"
+                                        factory-method="equalTo"
+                                        c:_="https://refeds.org/sirtfi"
+                                    />
+                                </property>
+                            </bean>
+
+                        </list>
+                    </property>
+                </bean>
+
+                <!--
+                    Sub-rule c.
+
+                    All extended XML elements and attributes
+                    defined in namespaces not on the XML Namespace Whitelist.
+                -->
+                <bean id="whitelistImportedNamespaces" parent="NamespacesStrippingStage"
+                    p:whitelisting="true">
+                    <property name="namespaces">
+                        <set>
+                            <ref bean="alg_namespace"/>
+                            <ref bean="ds_namespace"/>
+                            <ref bean="hoksso_namespace"/>
+                            <ref bean="idpdisc_namespace"/>
+                            <ref bean="init_namespace"/>
+                            <ref bean="md_namespace"/>
+                            <ref bean="mdattr_namespace"/>
+                            <ref bean="mdrpi_namespace"/>
+                            <ref bean="mdui_namespace"/>
+                            <ref bean="remd_namespace"/>
+                            <ref bean="saml_namespace"/>
+                            <ref bean="shibmd_namespace"/>
+                            <ref bean="xenc_namespace"/>
+                            <ref bean="xml_namespace"/>
+                        </set>
+                    </property>
+                </bean>
 
                 <!--
                     The following minor mutations don't rise to the level where
                     they are explicitly documented in the policy wiki page.
                 -->
+                <ref bean="cleanImport"/>
                 <ref bean="trimImportElementWhitespace"/>
+
+                <!--
+                    Remove empty md:Extensions elements; these are most
+                    likely to have come about as a result of operations
+                    above. They need to be removed to avoid schema-invalid
+                    resulting XML.
+                -->
+                <ref bean="stripEmptyExtensions"/>
 
                 <!--
                     *************************************
@@ -232,103 +317,41 @@
                 <ref bean="check_mdattr"/>
 
                 <!--
-                    The following checks do not yet appear in the list on
-                    the Technical Policy page, but will appear in a future
-                    edition as part of this rule.
+                    Sub-rule i.
+
+                    Entities containing XML failing schema validation.
                 -->
+                <ref bean="checkSchemas"/>
+
+                <!-- Sub-rule j. -->
                 <ref bean="check_algsupport"/>
+
+                <!-- Sub-rule k. -->
                 <ref bean="check_bindings"/>
+
+                <!-- Sub-rule l. -->
                 <ref bean="check_hoksso"/>
+
+                <!-- Sub-rule m. -->
                 <ref bean="check_idpdisc"/>
+
+                <!-- Sub-rule n. -->
                 <ref bean="check_init"/>
+
+                <!-- Sub-rule o. -->
                 <ref bean="check_mdiop"/>
+
+                <!-- Sub-rule p. -->
                 <ref bean="check_mdrpi"/>
+
+                <!-- Sub-rule q. -->
                 <ref bean="check_mdui_xslt"/>
+
+                <!-- Sub-rule r. -->
                 <ref bean="check_rands"/>
+
+                <!-- Sub-rule s. -->
                 <ref bean="check_sirtfi"/>
-
-                <!--
-                    *************************************
-                    ***                               ***
-                    ***   P O L I C Y   R U L E   5   ***
-                    ***                               ***
-                    *************************************
-
-                    "Silently remove all entity attributes not on the Entity Attribute
-                    Whitelist."
-                -->
-                <bean id="entityAttributes" parent="EntityAttributeFilteringStage">
-                    <property name="rules">
-                        <list>
-                            <!-- Permit REFEDS R&S category membership -->
-                            <bean parent="EntityCategoryMatcher"
-                                c:category="http://refeds.org/category/research-and-scholarship"/>
-
-                            <!-- Permit REFEDS R&S category support -->
-                            <bean parent="EntityCategorySupportMatcher"
-                                c:category="http://refeds.org/category/research-and-scholarship"/>
-
-                            <!-- Permit REFEDS Hide From Discovery category membership -->
-                            <bean parent="EntityCategoryMatcher"
-                                c:category="http://refeds.org/category/hide-from-discovery"/>
-
-                            <!-- Permit SIRTFI entity attribute -->
-                            <bean parent="MultiPredicateMatcher">
-                                <property name="nameFormatPredicate">
-                                    <bean class="com.google.common.base.Predicates"
-                                        factory-method="equalTo"
-                                        c:_="urn:oasis:names:tc:SAML:2.0:attrname-format:uri"
-                                    />
-                                </property>
-                                <property name="namePredicate">
-                                    <bean class="com.google.common.base.Predicates"
-                                        factory-method="equalTo"
-                                        c:_="urn:oasis:names:tc:SAML:attribute:assurance-certification"
-                                    />
-                                </property>
-                                <property name="valuePredicate">
-                                    <bean class="com.google.common.base.Predicates"
-                                        factory-method="equalTo"
-                                        c:_="https://refeds.org/sirtfi"
-                                    />
-                                </property>
-                            </bean>
-
-                        </list>
-                    </property>
-                </bean>
-
-                <!--
-                    *************************************
-                    ***                               ***
-                    ***   P O L I C Y   R U L E   6   ***
-                    ***                               ***
-                    *************************************
-
-                    Silently remove all extended XML elements and attributes
-                    defined in namespaces not on the XML Namespace Whitelist.
-                -->
-                <bean id="whitelistImportedNamespaces" parent="NamespacesStrippingStage"
-                    p:whitelisting="true">
-                    <property name="namespaces">
-                        <set>
-                            <ref bean="alg_namespace"/>
-                            <ref bean="ds_namespace"/>
-                            <ref bean="hoksso_namespace"/>
-                            <ref bean="idpdisc_namespace"/>
-                            <ref bean="init_namespace"/>
-                            <ref bean="md_namespace"/>
-                            <ref bean="mdattr_namespace"/>
-                            <ref bean="mdrpi_namespace"/>
-                            <ref bean="mdui_namespace"/>
-                            <ref bean="remd_namespace"/>
-                            <ref bean="saml_namespace"/>
-                            <ref bean="shibmd_namespace"/>
-                            <ref bean="xenc_namespace"/>
-                            <ref bean="xml_namespace"/>
-                        </set>
-                    </property>
-                </bean>
 
                 <!--
                     *************************************
@@ -343,15 +366,6 @@
                     This policy rule is implemented by the merge strategy used when these
                     entities are merged in with the ones from InCommon.
                 -->
-
-                <!--
-                    Policy rules below this point are not called out explicitly in the
-                    published policy wiki page.
-                -->
-
-                <ref bean="cleanImport"/>
-                <ref bean="stripEmptyExtensions"/>
-                <ref bean="checkSchemas"/>
 
                 <!--
                     We do not currently apply the complete battery of checking rulesets used by
