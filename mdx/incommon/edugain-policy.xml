@@ -372,6 +372,9 @@
                 <!-- Sub-rule s. -->
                 <ref bean="check_sirtfi"/>
 
+                <!-- Sub-rule t. -->
+                <ref bean="check_saml2meta"/>
+
                 <!--
                     *************************************
                     ***                               ***
@@ -403,7 +406,6 @@
                             <ref bean="check_saml1"/>
                             <ref bean="check_saml2"/>
                             <ref bean="check_saml2int"/>
-                            <ref bean="check_saml2meta"/>
                             <ref bean="check_saml_strings"/>
                             <ref bean="check_shibboleth"/>
                             <ref bean="check_sp_tls"/>
