@@ -11,26 +11,41 @@
     xsi:schemaLocation="
         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
-    
+
     <!--
         Import commonly used beans.
     -->
     <import resource="classpath:common-beans.xml"/>
-    
+
     <!--
         Import channel-specific beans.
     -->
     <import resource="classpath:int_edugain/beans.xml"/>
-    
-    <bean id="serializeImported" parent="SerializationStage">
+
+    <bean id="serializeImported" parent="mda.SerializationStage">
+        <property name="serializer" ref="serializer"/>
         <property name="outputFile">
-            <bean class="java.io.File">
+            <bean parent="File">
                 <constructor-arg value="${mdx.dir}/int_edugain/imported.xml"/>
             </bean>
         </property>
     </bean>
-    
-    <bean id="importProduction" parent="SimplePipeline">
+
+    <!--
+        removeUKEntities
+
+        Filter out entities which declare themselves as registered
+        by the UK federation, as we don't need to verify those.
+    -->
+    <bean id="removeUKEntities" parent="mda.EntityRegistrationAuthorityFilterStage">
+        <property name="designatedRegistrationAuthorities">
+            <list>
+                <ref bean="uk_ukf_registrar"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="importProduction" parent="mda.SimplePipeline">
         <property name="stages">
             <list>
                 <ref bean="int_edugain_productionEntities"/>
@@ -41,7 +56,7 @@
         </property>
     </bean>
 
-    <bean id="importProductionRaw" parent="SimplePipeline">
+    <bean id="importProductionRaw" parent="mda.SimplePipeline">
         <property name="stages">
             <list>
                 <ref bean="int_edugain_productionAggregate"/>
@@ -49,8 +64,8 @@
             </list>
         </property>
     </bean>
-    
-    <bean id="importTest" parent="SimplePipeline">
+
+    <bean id="importTest" parent="mda.SimplePipeline">
         <property name="stages">
             <list>
                 <ref bean="int_edugain_testEntities"/>
@@ -60,20 +75,21 @@
             </list>
         </property>
     </bean>
-    
+
     <!--
         verify
-        
+
         Verifies that entities being imported from eduGAIN match our checks.
         Intended to be run from Jenkins once a week. Errors on the verification
         blacklist are ignored, so that we only need to deal with each entity
         entering an error state once.
     -->
-    <bean id="verify" parent="SimplePipeline">
+    <bean id="verify" parent="mda.SimplePipeline">
         <property name="stages">
             <list>
                 <ref bean="int_edugain_productionEntities"/>
-                <bean id="removeBlacklistedEntities" parent="EntityFilterStage"
+                <ref bean="removeUKEntities"/>
+                <bean id="removeBlacklistedEntities" parent="mda.EntityFilterStage"
                     p:whitelistingEntities="false"
                     p:designatedEntities-ref="int_edugain_verify_blacklist"/>
 
@@ -85,18 +101,18 @@
 
     <!--
         verify.new
-        
+
         Live verify, but adding "new" checks that we don't impose on the live import.
     -->
-    <bean id="verify.new" parent="SimplePipeline">
+    <bean id="verify.new" parent="mda.SimplePipeline">
         <property name="stages">
             <list>
                 <ref bean="int_edugain_productionEntities"/>
-                <bean id="removeBlacklistedEntities" parent="EntityFilterStage"
+                <ref bean="removeUKEntities"/>
+                <bean id="removeBlacklistedEntities" parent="mda.EntityFilterStage"
                     p:whitelistingEntities="false"
                     p:designatedEntities-ref="int_edugain_verify_blacklist"/>
-                
-                <ref bean="check_rands"/>
+
                 <ref bean="standardImportActions"/>
                 <ref bean="errorTerminatingFilter"/>
             </list>
@@ -105,54 +121,56 @@
 
     <!--
         verify.recovered
-        
+
         Looks for eduGAIN entities which *were* in an error state, as shown by
         their inclusion in our verification blacklist, but have now recovered.
     -->
-    <bean id="verify.recovered" parent="SimplePipeline">
+    <bean id="verify.recovered" parent="mda.SimplePipeline">
         <property name="stages">
             <list>
                 <ref bean="int_edugain_productionEntities"/>
-                
+                <ref bean="removeUKEntities"/>
+
                 <!-- remove all entities which still have errors -->
                 <ref bean="standardImportActions"/>
                 <ref bean="errorRemover"/>
-                
+
                 <!-- remove all entities *other* than the ones in the blacklist -->
-                <bean id="removeAllButBlacklistedEntities" parent="EntityFilterStage"
+                <bean id="removeAllButBlacklistedEntities" parent="mda.EntityFilterStage"
                     p:whitelistingEntities="true"
                     p:designatedEntities-ref="int_edugain_verify_blacklist"/>
-                
+
                 <!-- flag up any remaining entities -->
-                <bean id="check_recovered" parent="XSLValidationStage"
+                <bean id="check_recovered" parent="mda.XSLValidationStage"
                     p:XSLResource="classpath:int_edugain/check_recovered.xsl"/>
 
                 <ref bean="errorTerminatingFilter"/>
             </list>
         </property>
     </bean>
-    
+
     <!--
         verify.all
-        
+
         Same as verify, but not making use of the validation
         blacklist. Can be used to check up on blacklisted entities.
-        
+
         Output also includes any warnings attached to entities, although
         these do not result in an error termination.
     -->
-    <bean id="verify.all" parent="SimplePipeline">
+    <bean id="verify.all" parent="mda.SimplePipeline">
         <property name="stages">
             <list>
                 <ref bean="int_edugain_productionEntities"/>
-                
+                <ref bean="removeUKEntities"/>
+
                 <ref bean="standardImportActions"/>
                 <ref bean="warningAndErrorAnnouncer"/>
                 <ref bean="errorTerminator"/>
             </list>
         </property>
     </bean>
-    
+
     <alias alias="import"    name="importProduction"/>
     <alias alias="importRaw" name="importProductionRaw"/>
 </beans>

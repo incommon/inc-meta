@@ -11,26 +11,27 @@
     xsi:schemaLocation="
         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
-    
+
     <!--
         Import commonly used beans.
     -->
     <import resource="classpath:common-beans.xml"/>
-        
+
     <!--
         Import channel-specific beans.
     -->
     <import resource="classpath:test/beans.xml"/>
-    
-    <bean id="serializeImported" parent="SerializationStage">
+
+    <bean id="serializeImported" parent="mda.SerializationStage">
+        <property name="serializer" ref="serializer"/>
         <property name="outputFile">
-            <bean class="java.io.File">
+            <bean parent="File">
                 <constructor-arg value="${mdx.dir}/test/imported.xml"/>
             </bean>
         </property>
     </bean>
-    
-    <bean id="import" parent="SimplePipeline">
+
+    <bean id="import" parent="mda.SimplePipeline">
         <property name="stages">
             <list>
                 <ref bean="test_entities"/>
@@ -41,7 +42,7 @@
         </property>
     </bean>
 
-    <bean id="importRaw" parent="SimplePipeline">
+    <bean id="importRaw" parent="mda.SimplePipeline">
         <property name="stages">
             <list>
                 <ref bean="test_aggregate"/>
@@ -49,5 +50,5 @@
             </list>
         </property>
     </bean>
-    
+
 </beans>

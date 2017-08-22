@@ -11,26 +11,27 @@
     xsi:schemaLocation="
         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
-    
+
     <!--
         Import commonly used beans.
     -->
     <import resource="classpath:common-beans.xml"/>
-        
+
     <!--
         Import channel-specific beans.
     -->
     <import resource="classpath:at_aconet/beans.xml"/>
-    
-    <bean id="serializeImported" parent="SerializationStage">
+
+    <bean id="serializeImported" parent="mda.SerializationStage">
+        <property name="serializer" ref="serializer"/>
         <property name="outputFile">
-            <bean class="java.io.File">
+            <bean parent="File">
                 <constructor-arg value="${mdx.dir}/at_aconet/imported.xml"/>
             </bean>
         </property>
     </bean>
-    
-    <bean id="importProduction" parent="SimplePipeline">
+
+    <bean id="importProduction" parent="mda.SimplePipeline">
         <property name="stages">
             <list>
                 <ref bean="at_aconet_productionEntities"/>
@@ -41,7 +42,7 @@
         </property>
     </bean>
 
-    <bean id="importProductionRaw" parent="SimplePipeline">
+    <bean id="importProductionRaw" parent="mda.SimplePipeline">
         <property name="stages">
             <list>
                 <ref bean="at_aconet_productionAggregate"/>
@@ -49,8 +50,8 @@
             </list>
         </property>
     </bean>
-    
-    <bean id="importEdugain" parent="SimplePipeline">
+
+    <bean id="importEdugain" parent="mda.SimplePipeline">
         <property name="stages">
             <list>
                 <ref bean="at_aconet_edugainEntities"/>
@@ -60,8 +61,8 @@
             </list>
         </property>
     </bean>
-    
-    <bean id="importEdugainRaw" parent="SimplePipeline">
+
+    <bean id="importEdugainRaw" parent="mda.SimplePipeline">
         <property name="stages">
             <list>
                 <ref bean="at_aconet_edugainAggregate"/>
@@ -69,29 +70,28 @@
             </list>
         </property>
     </bean>
-    
-    <bean id="verifyEdugain" parent="SimplePipeline">
+
+    <bean id="verifyEdugain" parent="mda.SimplePipeline">
         <property name="stages">
             <list>
                 <ref bean="at_aconet_edugainEntities"/>
                 <ref bean="standardImportActions"/>
 
-                <bean id="checkCertificates" parent="X509ValidationStage">
+                <bean id="checkCertificates" parent="mda.X509ValidationStage">
                     <property name="validators">
                         <list>
                             <!-- Error on RSA key length less than 2048 bits. -->
-                            <bean parent="X509RSAKeyLengthValidator"
+                            <bean parent="mda.X509RSAKeyLengthValidator"
                                 p:warningBoundary="0" p:errorBoundary="2048"/>
                         </list>
                     </property>
                 </bean>
-                
+
                 <!--
                     Remove a specific entity we know has a problem that it will take
                     a while to resolve.
                 -->
-                <bean id="filterEntities" parent="stage_parent"
-                    class="net.shibboleth.metadata.dom.saml.EntityFilterStage"
+                <bean id="filterEntities" parent="mda.EntityFilterStage"
                     p:whitelistingEntities="false">
                     <property name="designatedEntities">
                         <set>
@@ -104,7 +104,7 @@
             </list>
         </property>
     </bean>
-    
+
     <alias alias="import"    name="importEdugain"/>
     <alias alias="importRaw" name="importEdugainRaw"/>
 </beans>

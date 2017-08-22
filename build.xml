@@ -145,9 +145,10 @@
         Metadata Distribution Service server properties.
     -->
     <property name="md.user" value="mdscp"/>
-    <property name="md.dist.host1.name" value="md1.infr.ukfederation.org.uk"/>
-    <property name="md.dist.host2.name" value="md2.infr.ukfederation.org.uk"/>
-    <property name="md.dist.host3.name" value="md3.infr.ukfederation.org.uk"/>
+    <property name="md.dist.host-ne-01.name" value="md-ne-01.infr.ukfederation.org.uk"/>
+    <property name="md.dist.host-ne-02.name" value="md-ne-02.infr.ukfederation.org.uk"/>
+    <property name="md.dist.host-we-01.name" value="md-we-01.infr.ukfederation.org.uk"/>
+    <property name="md.dist.host-we-02.name" value="md-we-02.infr.ukfederation.org.uk"/>
     <property name="mdq.dist.name" value="mdq.ukfederation.org.uk"/>
     <property name="md.dist.path.name" value="/"/>
 
@@ -171,7 +172,7 @@
         Web server properties.
     -->
     <property name="www.user" value="wwwscp"/>
-    <property name="www.hostname" value="web1.infr.ukfederation.org.uk"/>
+    <property name="www.hostname" value="www-ne-01.infr.ukfederation.org.uk"/>
     <property name="www.path.stats" value="/var/www/html/fed"/>
     <property name="www.path.members" value="/var/www/externals"/>
     <property name="www.url.stats" value="${www.user}@${www.hostname}:${www.path.stats}"/>
@@ -521,7 +522,7 @@
         fs.tar.mdqcache">
         <echo>Stage 4 Success: MDQ cache created; all files comitted to data repository.</echo>
     </target>
-    
+
     <!--
         Stage 4.2 of md process: Copy files from keymaster, push.
 
@@ -548,7 +549,7 @@
         Runs on: orchestrator
             * Git: Create New Tag
             * Git: Push to origin
-            * SCP: Copy mdq cache to repo 
+            * SCP: Copy mdq cache to repo
             * Jenkins: Trigger publish task
     -->
     <target name="process.bagandtag" depends="
@@ -873,7 +874,7 @@
       Checks out master branch of data repository
     -->
     <target name="git.data.masterbranch.checkout">
-        <echo>Switching to deferred branch in data repository.</echo>
+        <echo>Switching to master branch in data repository.</echo>
         <exec executable="${git.executable}" dir="${shared.ws.dir}/${git.repo.project.data}" failonerror="true">
             <arg value="checkout"/>
             <arg value="master"/>
@@ -1186,7 +1187,7 @@
             <delete file="${temp.xml}" quiet="true" verbose="false"/>
         </sequential>
     </macrodef>
-    
+
     <!--
         Verify a metadata file held on the master distribution site, using the ukfederation-mdq.pem key
     -->
@@ -1269,52 +1270,68 @@
         <checksum file="${aggregates.dir}/${mdaggr.export.preview.signed}"
             property="mdaggr.export.preview.signed.checksum"/>
 
-        <echo>Verifying metadata held at ${md.dist.host1.name}</echo>
-        <VFY.remote.and.checksum i="http://${md.dist.host1.name}${md.dist.path.name}${mdaggr.prod.signed}"
+        <echo>Verifying metadata held at ${md.dist.host-ne-01.name}</echo>
+        <VFY.remote.and.checksum i="http://${md.dist.host-ne-01.name}${md.dist.path.name}${mdaggr.prod.signed}"
             checksum="${mdaggr.prod.signed.checksum}"/>
-        <VFY.remote.and.checksum i="http://${md.dist.host1.name}${md.dist.path.name}${mdaggr.wayf.signed}"
+        <VFY.remote.and.checksum i="http://${md.dist.host-ne-01.name}${md.dist.path.name}${mdaggr.wayf.signed}"
             checksum="${mdaggr.wayf.signed.checksum}"/>
-        <VFY.remote.and.checksum i="http://${md.dist.host1.name}${md.dist.path.name}${mdaggr.cdsall.signed}"
+        <VFY.remote.and.checksum i="http://${md.dist.host-ne-01.name}${md.dist.path.name}${mdaggr.cdsall.signed}"
             checksum="${mdaggr.cdsall.signed.checksum}"/>
-        <VFY.remote.and.checksum i="http://${md.dist.host1.name}${md.dist.path.name}${mdaggr.test.signed}"
+        <VFY.remote.and.checksum i="http://${md.dist.host-ne-01.name}${md.dist.path.name}${mdaggr.test.signed}"
             checksum="${mdaggr.test.signed.checksum}"/>
-        <VFY.remote.and.checksum i="http://${md.dist.host1.name}${md.dist.path.name}${mdaggr.back.signed}"
+        <VFY.remote.and.checksum i="http://${md.dist.host-ne-01.name}${md.dist.path.name}${mdaggr.back.signed}"
             checksum="${mdaggr.back.signed.checksum}"/>
-        <VFY.remote.and.checksum i="http://${md.dist.host1.name}${md.dist.path.name}${mdaggr.export.signed}"
+        <VFY.remote.and.checksum i="http://${md.dist.host-ne-01.name}${md.dist.path.name}${mdaggr.export.signed}"
             checksum="${mdaggr.export.signed.checksum}"/>
-        <VFY.remote.and.checksum i="http://${md.dist.host1.name}${md.dist.path.name}${mdaggr.export.preview.signed}"
+        <VFY.remote.and.checksum i="http://${md.dist.host-ne-01.name}${md.dist.path.name}${mdaggr.export.preview.signed}"
             checksum="${mdaggr.export.preview.signed.checksum}"/>
 
-        <echo>Verifying metadata held at ${md.dist.host2.name}</echo>
-        <VFY.remote.and.checksum i="http://${md.dist.host2.name}${md.dist.path.name}${mdaggr.prod.signed}"
+        <echo>Verifying metadata held at ${md.dist.host-ne-02.name}</echo>
+        <VFY.remote.and.checksum i="http://${md.dist.host-ne-02.name}${md.dist.path.name}${mdaggr.prod.signed}"
             checksum="${mdaggr.prod.signed.checksum}"/>
-        <VFY.remote.and.checksum i="http://${md.dist.host2.name}${md.dist.path.name}${mdaggr.wayf.signed}"
+        <VFY.remote.and.checksum i="http://${md.dist.host-ne-02.name}${md.dist.path.name}${mdaggr.wayf.signed}"
             checksum="${mdaggr.wayf.signed.checksum}"/>
-        <VFY.remote.and.checksum i="http://${md.dist.host2.name}${md.dist.path.name}${mdaggr.cdsall.signed}"
+        <VFY.remote.and.checksum i="http://${md.dist.host-ne-02.name}${md.dist.path.name}${mdaggr.cdsall.signed}"
             checksum="${mdaggr.cdsall.signed.checksum}"/>
-        <VFY.remote.and.checksum i="http://${md.dist.host2.name}${md.dist.path.name}${mdaggr.test.signed}"
+        <VFY.remote.and.checksum i="http://${md.dist.host-ne-02.name}${md.dist.path.name}${mdaggr.test.signed}"
             checksum="${mdaggr.test.signed.checksum}"/>
-        <VFY.remote.and.checksum i="http://${md.dist.host2.name}${md.dist.path.name}${mdaggr.back.signed}"
+        <VFY.remote.and.checksum i="http://${md.dist.host-ne-02.name}${md.dist.path.name}${mdaggr.back.signed}"
             checksum="${mdaggr.back.signed.checksum}"/>
-        <VFY.remote.and.checksum i="http://${md.dist.host2.name}${md.dist.path.name}${mdaggr.export.signed}"
+        <VFY.remote.and.checksum i="http://${md.dist.host-ne-02.name}${md.dist.path.name}${mdaggr.export.signed}"
             checksum="${mdaggr.export.signed.checksum}"/>
-        <VFY.remote.and.checksum i="http://${md.dist.host2.name}${md.dist.path.name}${mdaggr.export.preview.signed}"
+        <VFY.remote.and.checksum i="http://${md.dist.host-ne-02.name}${md.dist.path.name}${mdaggr.export.preview.signed}"
             checksum="${mdaggr.export.preview.signed.checksum}"/>
 
-        <echo>Verifying metadata held at ${md.dist.host3.name}</echo>
-        <VFY.remote.and.checksum i="http://${md.dist.host3.name}${md.dist.path.name}${mdaggr.prod.signed}"
+        <echo>Verifying metadata held at ${md.dist.host-we-01.name}</echo>
+        <VFY.remote.and.checksum i="http://${md.dist.host-we-01.name}${md.dist.path.name}${mdaggr.prod.signed}"
             checksum="${mdaggr.prod.signed.checksum}"/>
-        <VFY.remote.and.checksum i="http://${md.dist.host3.name}${md.dist.path.name}${mdaggr.wayf.signed}"
+        <VFY.remote.and.checksum i="http://${md.dist.host-we-01.name}${md.dist.path.name}${mdaggr.wayf.signed}"
             checksum="${mdaggr.wayf.signed.checksum}"/>
-        <VFY.remote.and.checksum i="http://${md.dist.host3.name}${md.dist.path.name}${mdaggr.cdsall.signed}"
+        <VFY.remote.and.checksum i="http://${md.dist.host-we-01.name}${md.dist.path.name}${mdaggr.cdsall.signed}"
             checksum="${mdaggr.cdsall.signed.checksum}"/>
-        <VFY.remote.and.checksum i="http://${md.dist.host3.name}${md.dist.path.name}${mdaggr.test.signed}"
+        <VFY.remote.and.checksum i="http://${md.dist.host-we-01.name}${md.dist.path.name}${mdaggr.test.signed}"
             checksum="${mdaggr.test.signed.checksum}"/>
-        <VFY.remote.and.checksum i="http://${md.dist.host3.name}${md.dist.path.name}${mdaggr.back.signed}"
+        <VFY.remote.and.checksum i="http://${md.dist.host-we-01.name}${md.dist.path.name}${mdaggr.back.signed}"
             checksum="${mdaggr.back.signed.checksum}"/>
-        <VFY.remote.and.checksum i="http://${md.dist.host3.name}${md.dist.path.name}${mdaggr.export.signed}"
+        <VFY.remote.and.checksum i="http://${md.dist.host-we-01.name}${md.dist.path.name}${mdaggr.export.signed}"
             checksum="${mdaggr.export.signed.checksum}"/>
-        <VFY.remote.and.checksum i="http://${md.dist.host3.name}${md.dist.path.name}${mdaggr.export.preview.signed}"
+        <VFY.remote.and.checksum i="http://${md.dist.host-we-01.name}${md.dist.path.name}${mdaggr.export.preview.signed}"
+            checksum="${mdaggr.export.preview.signed.checksum}"/>
+
+        <echo>Verifying metadata held at ${md.dist.host-we-02.name}</echo>
+        <VFY.remote.and.checksum i="http://${md.dist.host-we-02.name}${md.dist.path.name}${mdaggr.prod.signed}"
+            checksum="${mdaggr.prod.signed.checksum}"/>
+        <VFY.remote.and.checksum i="http://${md.dist.host-we-02.name}${md.dist.path.name}${mdaggr.wayf.signed}"
+            checksum="${mdaggr.wayf.signed.checksum}"/>
+        <VFY.remote.and.checksum i="http://${md.dist.host-we-02.name}${md.dist.path.name}${mdaggr.cdsall.signed}"
+            checksum="${mdaggr.cdsall.signed.checksum}"/>
+        <VFY.remote.and.checksum i="http://${md.dist.host-we-02.name}${md.dist.path.name}${mdaggr.test.signed}"
+            checksum="${mdaggr.test.signed.checksum}"/>
+        <VFY.remote.and.checksum i="http://${md.dist.host-we-02.name}${md.dist.path.name}${mdaggr.back.signed}"
+            checksum="${mdaggr.back.signed.checksum}"/>
+        <VFY.remote.and.checksum i="http://${md.dist.host-we-02.name}${md.dist.path.name}${mdaggr.export.signed}"
+            checksum="${mdaggr.export.signed.checksum}"/>
+        <VFY.remote.and.checksum i="http://${md.dist.host-we-02.name}${md.dist.path.name}${mdaggr.export.preview.signed}"
             checksum="${mdaggr.export.preview.signed.checksum}"/>
 
         <echo>Verification completed.</echo>
@@ -1689,7 +1706,7 @@
             </XMLSECTOOL>
         </sequential>
     </macrodef>
-    
+
     <macrodef name="XMLSECTOOL.VFY.MDQ.uk">
         <attribute name="i"/><!-- input file -->
         <sequential>
@@ -2040,22 +2057,28 @@
             Push metadata files for the UK Federation to the MD dist servers
         -->
         <echo>Pushing UK Federation metadata files to MD dist.</echo>
-        <echo>-> MD1</echo>
+        <echo>-> MD-NE-01</echo>
         <exec executable="${git.executable}" dir="${shared.ws.dir}/${git.repo.project.products}" failonerror="true">
             <arg value="push"/>
-            <arg value="md1"/>
+            <arg value="md-ne-01"/>
             <arg value="master"/>
         </exec>
-        <echo>-> MD2</echo>
+        <echo>-> MD-NE-02</echo>
         <exec executable="${git.executable}" dir="${shared.ws.dir}/${git.repo.project.products}" failonerror="true">
             <arg value="push"/>
-            <arg value="md2"/>
+            <arg value="md-ne-02"/>
             <arg value="master"/>
         </exec>
-        <echo>-> MD3</echo>
+        <echo>-> MD-WE-01</echo>
         <exec executable="${git.executable}" dir="${shared.ws.dir}/${git.repo.project.products}" failonerror="true">
             <arg value="push"/>
-            <arg value="md3"/>
+            <arg value="md-we-01"/>
+            <arg value="master"/>
+        </exec>
+        <echo>-> MD-WE-01</echo>
+        <exec executable="${git.executable}" dir="${shared.ws.dir}/${git.repo.project.products}" failonerror="true">
+            <arg value="push"/>
+            <arg value="md-we-02"/>
             <arg value="master"/>
         </exec>
     </target>
@@ -2065,20 +2088,26 @@
             Push mdq cache tar to the MD dist servers
         -->
         <echo>Pushing UK Federation mdq cache to MD dist.</echo>
-        <echo>-> MD1</echo>
-        <scp failonerror="true" remoteTodir="${md.user}@${md.dist.host1.name}:/tmp" keyfile="~/.ssh/id_rsa" knownhosts="~/.ssh/known_hosts">
+        <echo>-> MD-NE-01</echo>
+        <scp failonerror="true" remoteTodir="${md.user}@${md.dist.host-ne-01.name}:/tmp" keyfile="~/.ssh/id_rsa" knownhosts="~/.ssh/known_hosts">
             <fileset dir="${output.dir}">
                 <include name="${mdq.cache}"/>
             </fileset>
         </scp>
-        <echo>-> MD2</echo>
-        <scp failonerror="true" remoteTodir="${md.user}@${md.dist.host2.name}:/tmp" keyfile="~/.ssh/id_rsa" knownhosts="~/.ssh/known_hosts">
+        <echo>-> MD-NE-02</echo>
+        <scp failonerror="true" remoteTodir="${md.user}@${md.dist.host-ne-02.name}:/tmp" keyfile="~/.ssh/id_rsa" knownhosts="~/.ssh/known_hosts">
             <fileset dir="${output.dir}">
                 <include name="${mdq.cache}"/>
             </fileset>
         </scp>
-        <echo>-> MD3</echo>
-        <scp failonerror="true" remoteTodir="${md.user}@${md.dist.host3.name}:/tmp" keyfile="~/.ssh/id_rsa" knownhosts="~/.ssh/known_hosts">
+        <echo>-> MD-WE-01</echo>
+        <scp failonerror="true" remoteTodir="${md.user}@${md.dist.host-we-01.name}:/tmp" keyfile="~/.ssh/id_rsa" knownhosts="~/.ssh/known_hosts">
+            <fileset dir="${output.dir}">
+                <include name="${mdq.cache}"/>
+            </fileset>
+        </scp>
+        <echo>-> MD-WE-02</echo>
+        <scp failonerror="true" remoteTodir="${md.user}@${md.dist.host-we-02.name}:/tmp" keyfile="~/.ssh/id_rsa" knownhosts="~/.ssh/known_hosts">
             <fileset dir="${output.dir}">
                 <include name="${mdq.cache}"/>
             </fileset>
@@ -2295,6 +2324,15 @@
     </target>
 
     <!--
+        This variant generates a much simpler file, intended for use when building the
+        monthly chart pack.
+    -->
+    <target name="stats.charting">
+        <CHANNEL.do channel="uk" verb="statistics.charting"/>
+        <fixcrlf file="${output.dir}/${mdaggr.stats}" eol="lf" encoding="UTF-8"/>
+    </target>
+
+    <!--
         Check mailing list against current metadata
     -->
     <target name="check.mailing.list" depends="flow.uk.collect">
@@ -2426,6 +2464,29 @@
     -->
     <target name="check.embedded" depends="extract.embedded">
         <echo>Checking embedded certificates</echo>
+        <exec executable="perl" dir="${utilities.dir}"
+            input="${temp.dir}/embedded.pem">
+            <arg value="${utilities.dir}/check_embedded.pl"/>
+            <arg value="${entities.dir}/expiry_whitelist.txt"/>
+        </exec>
+        <delete file="${temp.dir}/embedded.pem" quiet="true" verbose="false"/>
+    </target>
+
+    <!--
+        Check embedded certificates in our production aggregate.
+
+        You can ignore almost all of the output from this, other than
+        the summary information at the end and in particular the
+        number of distinct RSA moduli.
+    -->
+    <target name="check.embedded.all">
+        <echo>Extracting embedded certificates</echo>
+        <XALAN
+            i="${aggregates.dir}/${mdaggr.prod.signed}"
+            o="${temp.dir}/embedded.pem"
+            x="${build.dir}/extract_embedded.xsl"/>
+        <echo>Checking embedded certificates</echo>
+        <echo>Note: ignore expiry on eduGAIN entities</echo>
         <exec executable="perl" dir="${utilities.dir}"
             input="${temp.dir}/embedded.pem">
             <arg value="${utilities.dir}/check_embedded.pl"/>

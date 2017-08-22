@@ -11,18 +11,19 @@
     xsi:schemaLocation="
         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
-    
+
     <!--
         Location of various resources.
     -->
-    <bean id="int_cobweb_productionAggregate_url" class="java.lang.String">
+    <bean id="int_cobweb_productionAggregate_url" parent="String">
         <constructor-arg value="https://cobweb.edina.ac.uk/metadata/cobweb-metadata.xml"/>
     </bean>
-    
+
     <!--
         Fetch the production aggregate.
     -->
-    <bean id="int_cobweb_productionAggregate" parent="DOMResourceSourceStage">
+    <bean id="int_cobweb_productionAggregate" parent="mda.DOMResourceSourceStage">
+        <property name="parserPool" ref="parserPool"/>
         <property name="DOMResource">
             <bean parent="HTTPResource">
                 <constructor-arg name="client" ref="httpClient"/>
@@ -30,13 +31,13 @@
             </bean>
         </property>
     </bean>
-    
+
     <!--
         Signing certificate.
     -->
     <bean id="int_cobweb_signingCertificate" parent="X509CertificateFactoryBean"
         p:resource="classpath:int_cobweb/cobweb.pem"/>
-    
+
     <!--
         Check signing signature.
     -->
@@ -47,11 +48,11 @@
     <!--
         Fetch the production entities as a collection.
     -->
-    <bean id="int_cobweb_productionEntities" parent="CompositeStage">
+    <bean id="int_cobweb_productionEntities" parent="mda.CompositeStage">
         <property name="composedStages">
             <list>
                 <ref bean="int_cobweb_productionAggregate"/>
-                
+
                 <!--
                     Check for fatal errors at the aggregate level:
                         missing or expired validUntil attribute
@@ -59,12 +60,12 @@
                 -->
                 <ref bean="check_validUntil"/>
                 <ref bean="errorTerminatingFilter"/>
-                
+
                 <ref bean="disassemble"/>
             </list>
         </property>
     </bean>
-        
+
     <!--
         Select primary export aggregate.
     -->

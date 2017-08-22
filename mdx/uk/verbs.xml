@@ -16,12 +16,12 @@
         Import commonly used beans.
     -->
     <import resource="classpath:common-beans.xml"/>
-    
+
     <!--
         Import channel-specific beans.
     -->
     <import resource="classpath:uk/beans.xml"/>
-    
+
     <!--
         ***************************************
         ***                                 ***
@@ -29,13 +29,13 @@
         ***                                 ***
         ***************************************
     -->
-    
+
     <!--
         statistics
-        
+
         Stand-alone statistics generation.
     -->
-    <bean id="statistics" parent="SimplePipeline">
+    <bean id="statistics" parent="mda.SimplePipeline">
         <property name="stages">
             <list>
                 <ref bean="uk_registeredEntities"/>
@@ -47,21 +47,52 @@
     </bean>
 
     <!--
-        sp_mdui_test
-        
-        Generates a page of links to discovery services, for each SP that
-        has mdui:uiinfo metadata.
+        statistics.charting
+
+        Stand-along statistics generation for charting.
     -->
-    <bean id="sp_mdui_test" parent="SimplePipeline">
+    <bean id="statistics.charting" parent="mda.SimplePipeline">
         <property name="stages">
             <list>
                 <ref bean="uk_registeredEntities"/>
                 <ref bean="assemble"/>
-                <bean id="process" parent="XSLTransformationStage"
-                    p:XSLResource="classpath:uk/sp_mdui_test.xsl"/>
-                <bean id="serialize" parent="SerializationStage">
+                <bean parent="mda.XSLTransformationStage"
+                    p:XSLResource="classpath:uk/statistics-charting.xsl">
+                    <property name="transformParameters">
+                        <map>
+                            <entry key="memberDocument" value-ref="uk_membersDocument"/>
+                        </map>
+                    </property>
+                </bean>
+                <bean parent="mda.SerializationStage">
+                    <property name="serializer" ref="serializer"/>
                     <property name="outputFile">
-                        <bean class="java.io.File">
+                        <bean parent="File">
+                            <constructor-arg value="${output.dir}/statistics-charting.html"/>
+                        </bean>
+                    </property>
+                </bean>
+            </list>
+        </property>
+    </bean>
+
+    <!--
+        sp_mdui_test
+
+        Generates a page of links to discovery services, for each SP that
+        has mdui:uiinfo metadata.
+    -->
+    <bean id="sp_mdui_test" parent="mda.SimplePipeline">
+        <property name="stages">
+            <list>
+                <ref bean="uk_registeredEntities"/>
+                <ref bean="assemble"/>
+                <bean id="process" parent="mda.XSLTransformationStage"
+                    p:XSLResource="classpath:uk/sp_mdui_test.xsl"/>
+                <bean id="serialize" parent="mda.SerializationStage">
+                    <property name="serializer" ref="serializer"/>
+                    <property name="outputFile">
+                        <bean parent="File">
                             <constructor-arg value="${mdx.dir}/uk/temp.html"/>
                         </bean>
                     </property>
@@ -77,8 +108,8 @@
         ***                 ***
         ***********************
     -->
-    
-    <bean id="verify" parent="SimplePipeline">
+
+    <bean id="verify" parent="mda.SimplePipeline">
         <property name="stages">
             <list>
                 <!--
@@ -87,7 +118,7 @@
                     any of them fail.
                 -->
                 <ref bean="uk_registeredEntities"/>
-                
+
                 <!--
                     Now build an aggregate so that we can perform
                     checks across the whole aggregate, such as
@@ -100,7 +131,7 @@
             </list>
         </property>
     </bean>
-    
+
     <!--
         *********************************
         ***                           ***
@@ -108,12 +139,12 @@
         ***                           ***
         *********************************
     -->
-    
-    <bean id="checkPorts" parent="SimplePipeline">
+
+    <bean id="checkPorts" parent="mda.SimplePipeline">
         <property name="stages">
             <list>
                 <ref bean="uk_registeredEntities"/>
-                
+
                 <!--
                     The next four stages ensure that any errors are reported
                     in entity ID order, even on systems where the native order
@@ -126,13 +157,13 @@
                 <ref bean="populateItemIds"/>
                 <ref bean="uk_populateIds"/>
                 <ref bean="populateRegistrationAuthorities"/>
-                
+
                 <ref bean="check_vhosts"/>
                 <ref bean="errorAnnouncingFilter"/>
             </list>
         </property>
     </bean>
-    
+
     <!--
         ***********************************
         ***                             ***
@@ -140,8 +171,8 @@
         ***                             ***
         ***********************************
     -->
-    
-    <bean id="checkFuture" parent="SimplePipeline">
+
+    <bean id="checkFuture" parent="mda.SimplePipeline">
         <property name="stages">
             <list>
                 <ref bean="uk_registeredEntities"/>
@@ -158,25 +189,25 @@
                 <ref bean="populateItemIds"/>
                 <ref bean="uk_populateIds"/>
                 <ref bean="populateRegistrationAuthorities"/>
-                
+
                 <!--
                     Additional X.509 certificate checks, over and above those
                     performed in uk_registeredEntities.
                 -->
-                <bean id="checkCertificates" parent="X509ValidationStage">
+                <bean id="checkCertificates" parent="mda.X509ValidationStage">
                     <property name="validators">
                         <list>
                             <!-- none at present -->
                         </list>
                     </property>
                 </bean>
-                
+
                 <ref bean="check_future"/>
                 <ref bean="errorAnnouncingFilter"/>
             </list>
         </property>
     </bean>
-    
+
     <!--
         *****************************************
         ***                                   ***
@@ -184,29 +215,31 @@
         ***                                   ***
         *****************************************
     -->
-    
+
     <!--
         fetchImportMetadata
-        
+
         Fetches the contents of the file used to hold metadata to be imported
         into a UK federation fragment file.
     -->
-    <bean id="fetchImportMetadata" parent="DOMFilesystemSourceStage">
+    <bean id="fetchImportMetadata" parent="mda.DOMFilesystemSourceStage">
+        <property name="parserPool" ref="parserPool"/>
         <property name="source">
-            <bean class="java.io.File">
+            <bean parent="File">
                 <constructor-arg value="${entities.dir}/import.xml"/>
             </bean>
         </property>
     </bean>
-    
+
     <!--
         serializeImportedMetadata
-        
+
         Serialise the fragment file just imported.
     -->
-    <bean id="serializeImportedMetadata" parent="SerializationStage">
+    <bean id="serializeImportedMetadata" parent="mda.SerializationStage">
+        <property name="serializer" ref="serializer"/>
         <property name="outputFile">
-            <bean class="java.io.File">
+            <bean parent="File">
                 <constructor-arg value="${entities.dir}/imported.xml"/>
             </bean>
         </property>
@@ -214,39 +247,39 @@
 
     <!--
         import
-        
+
         Pipeline to import a metadata fragment file.
-        
+
         For now, just the head of that pipeline.
     -->
-    <bean id="import.metadata" parent="SimplePipeline">
+    <bean id="import.metadata" parent="mda.SimplePipeline">
         <property name="stages">
             <list>
                 <!-- fetch the input file -->
                 <ref bean="fetchImportMetadata"/>
                 <ref bean="populateItemIds"/>
-                
+
                 <!-- perform schema validation and stop immediately if this fails -->
                 <ref bean="checkSchemas"/>
                 <ref bean="errorTerminatingFilter"/>
-                
+
                 <!-- fix mailto: in contacts -->
                 <ref bean="uk_fix_mailto"/>
-                
+
                 <!-- transform into a fragment using our local conventions -->
-                <bean id="importTransform" parent="XSLTransformationStage"
+                <bean id="importTransform" parent="mda.XSLTransformationStage"
                     p:XSLResource="classpath:uk/import.xsl"/>
-                
+
                 <!-- normalise namespaces in a specific way -->
-                <bean id="normalizeFragment" parent="XSLTransformationStage"
+                <bean id="normalizeFragment" parent="mda.XSLTransformationStage"
                     p:XSLResource="classpath:uk/ns_norm_fragment.xsl"/>
-                
+
                 <!-- check the transformed input -->
                 <ref bean="checkSchemas"/>
-                
+
                 <!--
                     Standard checks (i.e., CHECK_std), with some exclusions.
-                    
+
                     check_saml2meta is excluded so that the "FILL IN" boilerplate on
                     OrganizationURL is not flagged.
                 -->
@@ -272,43 +305,43 @@
                 <ref bean="check_shibboleth"/>
                 <ref bean="check_sp_tls"/>
                 <ref bean="check_uk_trust"/>
-                
-                <bean id="checkCertificates" parent="X509ValidationStage">
+
+                <bean id="checkCertificates" parent="mda.X509ValidationStage">
                     <property name="validators">
                         <list>
                             <!-- Error on RSA key length less than 2048 bits. -->
-                            <bean parent="X509RSAKeyLengthValidator"
+                            <bean parent="mda.X509RSAKeyLengthValidator"
                                 p:warningBoundary="0" p:errorBoundary="2048"/>
                             <!-- Error on small RSA public exponents. -->
-                            <bean parent="X509RSAExponentValidator"/>
+                            <bean parent="mda.X509RSAExponentValidator"/>
                             <!-- Error on inconsistent subjectAltNames. -->
-                            <bean parent="X509ConsistentNameValidator"/>
+                            <bean parent="ukf.X509ConsistentNameValidator"/>
 
                             <!--
                                 Debian weak key blacklists.
-                                
+
                                 Don't need to check for keys below our minimum key size.
                             -->
                             <ref bean="debian.2048"/>
                             <ref bean="debian.4096"/>
-                            
+
                             <!--
                                 Compromised key blacklists.
-                                
+
                                 Again, don't need to check for keys below our minimum key size.
                             -->
                             <ref bean="compromised.2048"/>
                         </list>
                     </property>
                 </bean>
-                
+
                 <ref bean="check_uk_mdrps"/>
                 <ref bean="check_uk_urlenc"/>
                 <ref bean="check_future"/>
                 <ref bean="check_imported"/>
                 <ref bean="check_vhosts"/>
                 <ref bean="errorTerminatingFilter"/>
-                
+
                 <!-- write output file -->
                 <ref bean="serializeImportedMetadata"/>
             </list>
@@ -322,16 +355,17 @@
         ###                                           ###
         #################################################
     -->
-    
-    <bean id="serializeImported" parent="SerializationStage">
+
+    <bean id="serializeImported" parent="mda.SerializationStage">
+        <property name="serializer" ref="serializer"/>
         <property name="outputFile">
-            <bean class="java.io.File">
+            <bean parent="File">
                 <constructor-arg value="${mdx.dir}/uk/imported.xml"/>
             </bean>
         </property>
     </bean>
-    
-    <bean id="importExported" parent="SimplePipeline">
+
+    <bean id="importExported" parent="mda.SimplePipeline">
         <property name="stages">
             <list>
                 <ref bean="uk_exportedEntities"/>
@@ -341,8 +375,8 @@
             </list>
         </property>
     </bean>
-    
-    <bean id="importExportedRaw" parent="SimplePipeline">
+
+    <bean id="importExportedRaw" parent="mda.SimplePipeline">
         <property name="stages">
             <list>
                 <ref bean="uk_exportAggregate"/>
@@ -350,7 +384,7 @@
             </list>
         </property>
     </bean>
-    
+
     <alias alias="import"    name="importExported"/>
-    <alias alias="importRaw" name="importExportedRaw"/>    
+    <alias alias="importRaw" name="importExportedRaw"/>
 </beans>

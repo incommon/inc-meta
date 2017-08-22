@@ -16,21 +16,22 @@
         Import commonly used beans.
     -->
     <import resource="classpath:common-beans.xml"/>
-    
+
     <!--
         Import channel-specific beans.
     -->
     <import resource="classpath:uk/beans.xml"/>
 
-    <bean id="serializeCollected" parent="SerializationStage">
+    <bean id="serializeCollected" parent="mda.SerializationStage">
+        <property name="serializer" ref="serializer"/>
         <property name="outputFile">
-            <bean class="java.io.File">
+            <bean parent="File">
                 <constructor-arg value="${mdx.dir}/uk/collected.xml"/>
             </bean>
         </property>
     </bean>
 
-    <bean id="collect" parent="SimplePipeline">
+    <bean id="collect" parent="mda.SimplePipeline">
         <property name="stages">
             <list>
                 <ref bean="uk_registeredEntities"/>

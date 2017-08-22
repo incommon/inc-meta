@@ -28,9 +28,9 @@ before being included in the `export` version consumed by interfederation partne
 
 ### Export Preview Aggregate vs. Export Aggregate
 
-Status (2017-01-27):
+Status (2017-02-14):
 
-* these two aggregates are currently identical.
+* These aggregates are currently identical.
 
 ## Production Maturity Pipeline
 
@@ -43,6 +43,12 @@ The production maturity pipeline consists of:
 In this arrangement, features are first introduced to the `test` variant of the aggregate for a period
 before being included in the `metadata` variant consumed by federation members.
 
+The following additional aggregates are normally kept in sync (where appropriate) with the production `metadata`
+aggregate:
+
+* `ukfederation-cdsall-unsigned.xml`
+* `ukfederation-wayf-unsigned.xml`
+
 Once a feature has been "in production" (present in the `metadata` variant) for a period, normally one month but
 subject to extension at Federation discretion, it will be introduced to the `back` variant. This provides a
 temporary "fallback" mechanism for entity owners whose entities have difficulty with a newly introduced
@@ -53,21 +59,13 @@ when it appeared in the fallback aggregate, which would be too late to take corr
 
 ### Test Aggregate vs. Production Aggregate
 
-Status (2017-01-27):
+Status (2017-03-02):
 
-* the test aggregate implements a _blacklisting_ approach to entity attributes imported from eduGAIN,
-while the production aggregate implements the traditional entity attribute _whitelist_.
-* the test aggregate no longer implements the "key use" fixup required for pre-1.3.1 Shibboleth SPs.
-This adds the `use="signing"` XML attribute to `<KeyDescriptor>` elements present in IdP metadata
-without a `use` attribute. It is not needed for later releases of the Shibboleth SP.
-* The test aggregate defines the `saml` namespace prefix (used by entity attributes) on the document element
-instead of in each SAML `<Attribute>`.
-* The test aggregate defines the `mdattr` namespace prefix (used by entity attributes) on the document element
-instead of in each `<EntityAttributes>` element.
-* The test aggregate normalises the `xenc` namespace to not use a prefix, as it is not very commonly used.
+* These aggregates are currently identical.
 
 ### Fallback Aggregate vs. Production Aggregate
 
-Status (2017-01-27):
+Status (2017-03-14):
 
-* these two aggregates are currently identical
+* the production aggregate implements a _blacklisting_ approach to entity attributes imported from eduGAIN,
+while the production aggregate implements the traditional entity attribute _whitelist_. (2017-03-02)
