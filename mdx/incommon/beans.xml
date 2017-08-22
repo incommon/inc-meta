@@ -23,7 +23,7 @@
         Template for a stage used in each output pipeline which performs
         final tweaks on the document.
     -->
-    <bean id="incommon_finalise_parent" abstract="true" parent="XSLTransformationStage"
+    <bean id="incommon_finalise_parent" abstract="true" parent="mda.XSLTransformationStage"
         p:XSLResource="classpath:incommon/final_tweak.xsl">
         <property name="transformParameters">
             <map>

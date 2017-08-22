@@ -23,9 +23,10 @@
     <import resource="classpath:incommon/beans.xml"/>
     <import resource="classpath:incommon/export-whitelist.xml"/>
 
-    <bean id="serializeExported" parent="SerializationStage">
+    <bean id="serializeExported" parent="mda.SerializationStage">
+        <property name="serializer" ref="serializer"/>
         <property name="outputFile">
-            <bean class="java.io.File">
+            <bean parent="File">
                 <constructor-arg value="${inc.exported.xml}"/>
             </bean>
         </property>
@@ -34,7 +35,7 @@
     <!--
         Construct InCommon eduGAIN export aggregate.
     -->
-    <bean id="export" parent="SimplePipeline">
+    <bean id="export" parent="mda.SimplePipeline">
         <property name="stages">
             <list>
                 <!--
@@ -43,7 +44,8 @@
                     In a production environment, this will be the *unsigned* aggregate,
                     so we perform minimal checking on its contents.
                 -->
-                <bean id="production_aggregate" parent="DOMResourceSourceStage">
+                <bean id="production_aggregate" parent="mda.DOMResourceSourceStage">
+                    <property name="parserPool" ref="parserPool"/>
                     <property name="DOMResource">
                         <bean parent="FileSystemResource" c:_0="${inc.production.xml}"/>
                     </property>
@@ -53,7 +55,7 @@
                 <ref bean="disassemble"/>
 
                 <!-- Remove all but the entities we want to export. -->
-                <bean id="applyEntityWhitelist" parent="EntityFilterStage"
+                <bean id="applyEntityWhitelist" parent="mda.EntityFilterStage"
                     p:whitelistingEntities="true"
                     p:designatedEntities-ref="incommon_edugain_export_whitelist"/>
 
@@ -66,19 +68,19 @@
                     Note: this is temporary, until the REFEDS R&S category is present in
                     InCommon production metadata
                 -->
-                <bean id="rands_to_refeds" parent="XSLTransformationStage"
+                <bean id="rands_to_refeds" parent="mda.XSLTransformationStage"
                     p:XSLResource="classpath:incommon/rands_to_refeds.xsl"/>
 
                 <!-- Filter the entity attributes released to eduGAIN. -->
-                <bean id="entityAttributes" parent="EntityAttributeFilteringStage">
+                <bean id="entityAttributes" parent="mda.EntityAttributeFilteringStage">
                    <property name="rules">
                        <list>
                            <!-- Permit REFEDS R&S category membership -->
-                           <bean parent="EntityCategoryMatcher"
+                           <bean parent="mda.EntityCategoryMatcher"
                                 c:category="http://refeds.org/category/research-and-scholarship"/>
 
                            <!-- Permit REFEDS R&S category support -->
-                           <bean parent="EntityCategorySupportMatcher"
+                           <bean parent="mda.EntityCategorySupportMatcher"
                                c:category="http://refeds.org/category/research-and-scholarship"/>
 
                        </list>
@@ -99,7 +101,7 @@
                 </bean>
 
                 <!-- Normalise the use of namespace prefixes in the resulting XML document. -->
-                <bean id="normalise" parent="XSLTransformationStage"
+                <bean id="normalise" parent="mda.XSLTransformationStage"
                     p:XSLResource="classpath:incommon/ns_norm_export.xsl"/>
 
                 <!-- Write the resulting aggregate out to a file. -->

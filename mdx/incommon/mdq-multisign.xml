@@ -38,13 +38,14 @@
     <!--
         Generate per-entity metadata.
     -->
-    <bean id="mdq-multisign" parent="SimplePipeline">
+    <bean id="mdq-multisign" parent="mda.SimplePipeline">
         <property name="stages">
             <list>
                 <!--
                     Start with the unsigned production aggregate.
                 -->
-                <bean id="production_aggregate" parent="DOMResourceSourceStage">
+                <bean id="production_aggregate" parent="mda.DOMResourceSourceStage">
+                    <property name="parserPool" ref="parserPool"/>
                     <property name="DOMResource">
                         <bean parent="FileSystemResource" c:_0="${mdq.input}"/>
                     </property>
@@ -57,15 +58,15 @@
                 <ref bean="populateItemIds"/>
 
                 <!-- Set ID, cacheDuration and validUntil attributes. -->
-                <bean parent="GenerateIdStage"/>
-                <bean parent="SetValidUntilStage" p:validityDuration="P14D"/>
+                <bean parent="mda.GenerateIdStage"/>
+                <bean parent="mda.SetValidUntilStage" p:validityDuration="P14D"/>
 
                 <!-- Identity transform fixes signing issues. -->
-                <bean parent="XSLTransformationStage"
+                <bean parent="mda.XSLTransformationStage"
                     p:XSLResource="classpath:identity.xsl"/>
 
                 <!-- Sign each item. -->
-                <bean id="perform.signature" parent="XMLSignatureSigningStage">
+                <bean id="perform.signature" parent="mda.XMLSignatureSigningStage">
                     <property name="privateKey">
                         <bean parent="PrivateKeyFactoryBean"
                             p:resource="${sign.keyResource}"
@@ -75,14 +76,15 @@
                 </bean>
 
                 <!-- Write individual entity documents to files. -->
-                <bean id="write.perentity" parent="MultiOutputSerializationStage">
+                <bean id="write.perentity" parent="mda.MultiOutputSerializationStage">
+                    <property name="serializer" ref="serializer"/>
                     <property name="outputStrategy">
-                        <bean parent="FilesInDirectoryMultiOutputStrategy" p:nameSuffix=".xml">
+                        <bean parent="mda.FilesInDirectoryMultiOutputStrategy" p:nameSuffix=".xml">
                             <property name="directory">
-                                <bean class="java.io.File" c:_="${mdq.output}"/>
+                                <bean parent="File" c:_="${mdq.output}"/>
                             </property>
                             <property name="nameTransformer">
-                                <bean parent="SHA1StringTransformer"/>
+                                <bean parent="mda.SHA1StringTransformer"/>
                             </property>
                         </bean>
                     </property>

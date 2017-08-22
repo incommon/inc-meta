@@ -36,7 +36,7 @@
               release mentioned there
 
     -->
-    <bean id="edugainPolicy" parent="CompositeStage">
+    <bean id="edugainPolicy" parent="mda.CompositeStage">
         <property name="composedStages">
             <list>
 
@@ -60,7 +60,7 @@
                     This rule is executed first as a performance optimisation
                     so as to reduce the amount of metadata being processed.
                 -->
-                <bean id="removeInCommonEntities" parent="EntityRegistrationAuthorityFilterStage">
+                <bean id="removeInCommonEntities" parent="mda.EntityRegistrationAuthorityFilterStage">
                     <property name="designatedRegistrationAuthorities">
                         <list>
                             <ref bean="us_incommon_registrar"/>
@@ -120,22 +120,22 @@
 
                     All entity attributes on the Entity Attribute Blacklist.
                 -->
-                <bean id="entityAttributes" parent="EntityAttributeFilteringStage"
+                <bean id="entityAttributes" parent="mda.EntityAttributeFilteringStage"
                     p:whitelisting="false">
                     <property name="rules">
                         <list>
                             <!-- "registered by InCommon" entity category. -->
-                            <bean parent="EntityCategoryMatcher"
+                            <bean parent="mda.EntityCategoryMatcher"
                                 c:category="http://id.incommon.org/category/registered-by-incommon"/>
 
                             <!-- InCommon Research and Scholarship category. -->
-                            <bean parent="EntityCategoryMatcher"
+                            <bean parent="mda.EntityCategoryMatcher"
                                 c:category="http://id.incommon.org/category/research-and-scholarship"/>
-                            <bean parent="EntityCategorySupportMatcher"
+                            <bean parent="mda.EntityCategorySupportMatcher"
                                 c:category="http://id.incommon.org/category/research-and-scholarship"/>
 
                             <!-- InCommon Bronze assurance certification. -->
-                            <bean parent="MultiPredicateMatcher">
+                            <bean parent="mda.MultiPredicateMatcher">
                                 <property name="nameFormatPredicate">
                                     <bean class="com.google.common.base.Predicates"
                                         factory-method="equalTo"
@@ -157,7 +157,7 @@
                             </bean>
 
                             <!-- InCommon Silver assurance certification. -->
-                            <bean parent="MultiPredicateMatcher">
+                            <bean parent="mda.MultiPredicateMatcher">
                                 <property name="nameFormatPredicate">
                                     <bean class="com.google.common.base.Predicates"
                                         factory-method="equalTo"
@@ -187,7 +187,7 @@
                     All extended XML elements and attributes
                     defined in namespaces not on the XML Namespace Whitelist.
                 -->
-                <bean id="whitelistImportedNamespaces" parent="NamespacesStrippingStage"
+                <bean id="whitelistImportedNamespaces" parent="mda.NamespacesStrippingStage"
                     p:whitelisting="true">
                     <property name="namespaces">
                         <set>
@@ -253,14 +253,14 @@
 
                     Mark entities with weak keys.
                 -->
-                <bean p:id="certificateValidation" parent="X509ValidationStage">
+                <bean p:id="certificateValidation" parent="mda.X509ValidationStage">
                     <property name="validators">
                         <list>
                             <!-- Error on RSA key length less than 2048 bits. -->
-                            <bean parent="X509RSAKeyLengthValidator"
+                            <bean parent="mda.X509RSAKeyLengthValidator"
                                 p:warningBoundary="0" p:errorBoundary="2048"/>
                             <!-- Error on small RSA public exponents. -->
-                            <bean parent="X509RSAExponentValidator"/>
+                            <bean parent="mda.X509RSAExponentValidator"/>
 
                             <!--
                                 Debian weak key blacklists.
@@ -308,7 +308,7 @@
                     Mark IdP entities that do not have a SAML2 SingleSignOnService endpoint
                     that supports the HTTP-Redirect binding.
                 -->
-                <bean id="check_idp_non_saml2" parent="XSLValidationStage"
+                <bean id="check_idp_non_saml2" parent="mda.XSLValidationStage"
                     p:XSLResource="classpath:incommon/check_idp_no_saml2.xsl"/>
 
                 <!--
@@ -317,7 +317,7 @@
                     Mark SP entities that do not have at least one SAML2 AssertionConsumerService
                     endpoint that supports the HTTP-POST binding.
                 -->
-                <bean id="check_sp_non_saml2" parent="XSLValidationStage"
+                <bean id="check_sp_non_saml2" parent="mda.XSLValidationStage"
                     p:XSLResource="classpath:incommon/check_sp_no_saml2.xsl"/>
 
                 <!--

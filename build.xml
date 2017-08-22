@@ -1478,6 +1478,9 @@
                     <fileset dir="${tools.mda}/lib">
                         <include name="*.jar"/>
                     </fileset>
+                    <fileset dir="${tools.dir}/ukf-mda">
+                        <include name="*.jar"/>
+                    </fileset>
                     <fileset dir="${tools.dir}/xalan/lib">
                         <include name="sdss-xalan-md-*.jar"/>
                     </fileset>

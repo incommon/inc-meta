@@ -41,12 +41,11 @@
         ***********************************************************
     -->
 
-    <bean id="common.output" parent="CompositeStage">
+    <bean id="common.output" parent="mda.CompositeStage">
         <property name="composedStages">
             <list>
                 <!-- Construct a new aggregate from the collection of entities. -->
-                <bean id="inc.assemble" parent="stage_parent"
-                    class="net.shibboleth.metadata.dom.saml.EntitiesDescriptorAssemblerStage">
+                <bean id="inc.assemble" parent="mda.EntitiesDescriptorAssemblerStage">
                     <property name="itemOrderingStrategy">
                         <bean parent="inc.InCommonEntityOrderingStrategy"
                             c:_-ref="us_incommon_registrar"/>
@@ -64,7 +63,7 @@
                 </bean>
 
                 <!-- Normalise the use of namespace prefixes in the resulting XML document. -->
-                <bean id="normalise" parent="XSLTransformationStage"
+                <bean id="normalise" parent="mda.XSLTransformationStage"
                     p:XSLResource="classpath:incommon/ns_norm_import.xsl"/>
             </list>
         </property>
@@ -84,9 +83,10 @@
 
         Writes the IdP-only aggregate out to a file.
     -->
-    <bean id="idp.serialize" parent="SerializationStage">
+    <bean id="idp.serialize" parent="mda.SerializationStage">
+        <property name="serializer" ref="serializer"/>
         <property name="outputFile">
-            <bean class="java.io.File">
+            <bean parent="File">
                 <constructor-arg value="${inc.imported-idp.xml}"/>
             </bean>
         </property>
@@ -97,7 +97,7 @@
 
         Entities in the IdP-only aggregate are restricted to identity providers.
     -->
-    <bean id="idp.selector" parent="XPathItemSelectionStrategy">
+    <bean id="idp.selector" parent="mda.XPathItemSelectionStrategy">
         <constructor-arg value="/md:EntityDescriptor[md:IDPSSODescriptor]"/>
         <constructor-arg ref="commonNamespaces"/>
     </bean>
@@ -108,7 +108,7 @@
         Generates the IdP-only aggregate. The selector has already taken care
         of removing non-IdP entities.
     -->
-    <bean id="idp.pipeline" parent="SimplePipeline">
+    <bean id="idp.pipeline" parent="mda.SimplePipeline">
         <property name="stages">
             <list>
                 <!-- Perform common steps in constructing an output aggregate. -->
@@ -134,9 +134,10 @@
 
         Writes the import aggregate out to a file.
     -->
-    <bean id="serializeImported" parent="SerializationStage">
+    <bean id="serializeImported" parent="mda.SerializationStage">
+        <property name="serializer" ref="serializer"/>
         <property name="outputFile">
-            <bean class="java.io.File">
+            <bean parent="File">
                 <constructor-arg value="${inc.imported.xml}"/>
             </bean>
         </property>
@@ -151,13 +152,14 @@
         *************************************
     -->
 
-    <bean id="incommon_edugain_importPipeline" parent="SimplePipeline">
+    <bean id="incommon_edugain_importPipeline" parent="mda.SimplePipeline">
         <property name="stages">
             <list>
                 <!--
                     Load the saved eduGAIN aggregate from a file.
                 -->
-                <bean id="edugain_aggregate" parent="DOMResourceSourceStage">
+                <bean id="edugain_aggregate" parent="mda.DOMResourceSourceStage">
+                    <property name="parserPool" ref="parserPool"/>
                     <property name="DOMResource">
                         <bean parent="FileSystemResource" c:_0="${inc.edugain.xml}"/>
                     </property>
@@ -211,7 +213,7 @@
         The main "import" pipeline is responsible for generating the
         all-entities output aggregate.
     -->
-    <bean id="import" parent="SimplePipeline">
+    <bean id="import" parent="mda.SimplePipeline">
         <property name="stages">
             <list>
                 <!--
@@ -220,7 +222,8 @@
                     In a production environment, this will be the *unsigned* aggregate,
                     so we perform minimal checking on its contents.
                 -->
-                <bean id="production_aggregate" parent="DOMResourceSourceStage">
+                <bean id="production_aggregate" parent="mda.DOMResourceSourceStage">
+                    <property name="parserPool" ref="parserPool"/>
                     <property name="DOMResource">
                         <bean parent="FileSystemResource" c:_0="${inc.production.xml}"/>
                     </property>
@@ -235,7 +238,7 @@
                     before proceeding to avoid them overwriting the
                     new imported version.
                 -->
-                <bean id="keepInCommonEntities" parent="EntityRegistrationAuthorityFilterStage">
+                <bean id="keepInCommonEntities" parent="mda.EntityRegistrationAuthorityFilterStage">
                     <property name="designatedRegistrationAuthorities">
                         <list>
                             <ref bean="us_incommon_registrar"/>
@@ -253,7 +256,8 @@
                 <ref bean="populateRegistrationAuthorities"/>
 
                 <!-- Merge in selected entities from eduGAIN. -->
-                <bean id="mergeProductionMDXEntities" parent="PipelineMergeStage.deduplicate">
+                <bean id="mergeProductionMDXEntities" parent="mda.PipelineMergeStage"
+                    p:collectionMergeStrategy-ref="deduplicateMergeStrategy">
                     <property name="mergedPipelines">
                         <list>
                             <ref bean="incommon_edugain_importPipeline"/>
@@ -262,7 +266,7 @@
                 </bean>
 
                 <!-- Fork new pipelines to generate special aggregates. -->
-                <bean id="demux" parent="PipelineDemultiplexerStage">
+                <bean id="demux" parent="mda.PipelineDemultiplexerStage">
                     <property name="pipelineAndSelectionStrategies">
                         <list>
                             <!-- IdP-only aggregate. -->

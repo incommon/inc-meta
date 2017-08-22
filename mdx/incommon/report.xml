@@ -28,7 +28,7 @@
     -->
     <import resource="classpath:int_edugain/beans.xml"/>
 
-    <bean id="incommon_edugain_importPipeline" parent="SimplePipeline">
+    <bean id="incommon_edugain_importPipeline" parent="mda.SimplePipeline">
         <property name="stages">
             <list>
             </list>
@@ -38,13 +38,14 @@
     <!--
         Report on errors detected in eduGAIN metadata.
     -->
-    <bean id="report" parent="SimplePipeline">
+    <bean id="report" parent="mda.SimplePipeline">
         <property name="stages">
             <list>
                 <!--
                     Load the saved eduGAIN aggregate from a file.
                 -->
-                <bean id="edugain_aggregate" parent="DOMResourceSourceStage">
+                <bean id="edugain_aggregate" parent="mda.DOMResourceSourceStage">
+                    <property name="parserPool" ref="parserPool"/>
                     <property name="DOMResource">
                         <bean parent="FileSystemResource" c:_0="${inc.edugain.xml}"/>
                     </property>
