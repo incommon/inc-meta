@@ -27,9 +27,10 @@
     -->
     <import resource="classpath:int_edugain/beans.xml"/>
 
-    <bean id="serializeImported" parent="SerializationStage">
+    <bean id="serializeImported" parent="mda.SerializationStage">
+        <property name="serializer" ref="serializer"/>
         <property name="outputFile">
-            <bean class="java.io.File">
+            <bean parent="File">
                 <constructor-arg value="${inc.edugain.xml}"/>
             </bean>
         </property>
@@ -38,7 +39,7 @@
     <!--
         Download eduGAIN aggregate.
     -->
-    <bean id="download-edugain" parent="SimplePipeline">
+    <bean id="download-edugain" parent="mda.SimplePipeline">
         <property name="stages">
             <list>
                 <ref bean="int_edugain_productionAggregate"/>
