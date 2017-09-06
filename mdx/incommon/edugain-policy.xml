@@ -376,6 +376,14 @@
                 <ref bean="check_saml2meta"/>
 
                 <!--
+                    Sub-rule u.
+
+                    Mark SP entities with an endpoint location that
+                    is not HTTPS-protected.
+                -->
+                <ref bean="check_sp_tls"/>
+
+                <!--
                     *************************************
                     ***                               ***
                     ***   P O L I C Y   R U L E   7   ***
@@ -408,7 +416,6 @@
                             <ref bean="check_saml2int"/>
                             <ref bean="check_saml_strings"/>
                             <ref bean="check_shibboleth"/>
-                            <ref bean="check_sp_tls"/>
                             <ref bean="check_uk_algorithms"/>
                             <ref bean="check_uk_trust"/>
                             <ref bean="check_uk_wayf"/>
