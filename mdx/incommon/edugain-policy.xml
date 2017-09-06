@@ -374,6 +374,7 @@
 
                 <!-- Sub-rule t. -->
                 <ref bean="check_saml2meta"/>
+                <ref bean="check_misc"/>
 
                 <!--
                     Sub-rule u.
@@ -409,7 +410,6 @@
                             <ref bean="check_adfs"/>
                             <ref bean="check_incmd"/>
                             <ref bean="check_mdui_iphint"/> (part of check_mdui)
-                            <ref bean="check_misc"/>
                             <ref bean="check_reqattr"/>
                             <ref bean="check_saml1"/>
                             <ref bean="check_saml2"/>
