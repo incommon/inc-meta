@@ -18,6 +18,11 @@
     <import resource="classpath:common-beans.xml"/>
 
     <!--
+        Import inc-mda beans.
+    -->
+    <import resource="classpath:uk/org/iay/incommon/mda/beans.xml"/>
+
+    <!--
         Import channel-specific beans.
     -->
     <import resource="classpath:incommon/beans.xml"/>
