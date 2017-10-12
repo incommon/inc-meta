@@ -417,10 +417,8 @@
                     not currently included here. Discussion of these takes place in GitLab.
 
                         CHECK_std:
-                            <ref bean="check_adfs"/>
                             <ref bean="check_incmd"/>
                             <ref bean="check_mdui_iphint"/> (part of check_mdui)
-                            <ref bean="check_saml1"/>
                             <ref bean="check_saml2"/>
                             <ref bean="check_saml2int"/>
                             <ref bean="check_shibboleth"/>
