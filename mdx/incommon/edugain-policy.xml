@@ -385,6 +385,9 @@
                 -->
                 <ref bean="check_sp_tls"/>
 
+                <!-- Sub-rule v. -->
+                <ref bean="check_adfs"/>
+
                 <!--
                     *************************************
                     ***                               ***
