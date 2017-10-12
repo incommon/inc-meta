@@ -391,6 +391,9 @@
                 <!-- Sub-rule w. -->
                 <ref bean="check_saml1"/>
 
+                <!-- Sub-rule x. -->
+                <ref bean="check_reqattr"/>
+
                 <!--
                     *************************************
                     ***                               ***
@@ -417,7 +420,6 @@
                             <ref bean="check_adfs"/>
                             <ref bean="check_incmd"/>
                             <ref bean="check_mdui_iphint"/> (part of check_mdui)
-                            <ref bean="check_reqattr"/>
                             <ref bean="check_saml1"/>
                             <ref bean="check_saml2"/>
                             <ref bean="check_saml2int"/>
