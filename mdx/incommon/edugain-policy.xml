@@ -388,6 +388,9 @@
                 <!-- Sub-rule v. -->
                 <ref bean="check_adfs"/>
 
+                <!-- Sub-rule w. -->
+                <ref bean="check_saml1"/>
+
                 <!--
                     *************************************
                     ***                               ***
