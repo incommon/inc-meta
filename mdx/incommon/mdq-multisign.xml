@@ -84,7 +84,7 @@
                                 <bean parent="File" c:_="${mdq.output}"/>
                             </property>
                             <property name="nameTransformer">
-                                <bean parent="mda.SHA1StringTransformer"/>
+                                <bean parent="mda.PathSegmentStringTransformer"/>
                             </property>
                         </bean>
                     </property>
