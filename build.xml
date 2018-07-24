@@ -2653,6 +2653,12 @@
 
         Generate per-entity metadata for the InCommon federation
         using the localkey configuration.
+
+        Properties:
+
+        Set sign.uk.keyPassword (note the slightly anomalous "uk" in that
+        identifier) to set the password to access the key resource. If not set,
+        this will be prompted for.
     -->
     <target name="inc.mdq.generate.localkey" depends="get.sign.uk.keyPassword">
         <property name="mda.mdq.input" value="${mda.inc.imported.xml}"/>
@@ -2672,6 +2678,34 @@
     -->
     <target name="inc.generate.mdq" depends="inc.mdq.generate.localkey">
         <!-- temporary alias for inc.mdq.generate.localkey -->
+    </target>
+
+    <!--
+        inc.mdq.generate.cloudhsm
+
+        Generate per-entity metadata for the InCommon federation
+        using AWS CloudHSM.
+
+        Properties:
+
+        Set sign.keyHandle to indicate the key to be used for signing.
+
+        Set sign.keyUser and sign.keyPassword with credentials for the HSM user
+        accessing the key.
+    -->
+    <target name="inc.mdq.generate.cloudhsm">
+        <property name="mda.mdq.input" value="${mda.inc.imported.xml}"/>
+        <property name="mda.sign.keyHandle" value="${sign.keyHandle}"/>
+        <property name="mda.sign.keyUser" value="${sign.keyUser}"/>
+        <property name="mda.sign.keyPassword" value="${sign.keyPassword}"/>
+        <property name="mda.classpath.extra" value="inc-mda-cloudhsm"/>
+        <property name="mda.jni.path" value="/opt/cloudhsm/lib"/>
+        <echo>Generating per-entity metadata in ${mda.mdq.output}</echo>
+        <echo>    from unsigned aggregate in ${mda.mdq.input}</echo>
+        <delete dir="${mdq.output.dir}" quiet="true"/>
+        <mkdir dir="${mdq.output.dir}"/>
+        <CHANNEL.do channel="incommon" verb="mdq-multisign-cloudhsm"/>
+        <echo>Generation complete.</echo>
     </target>
 
     <!--
