@@ -1470,6 +1470,8 @@
         <sequential>
             <java classname="net.shibboleth.metadata.cli.SimpleCommandLine"
                 fork="true" failonerror="true" maxmemory="${java.max.memory}">
+                <sysproperty key="java.library.path" path="${mda.jni.path}"
+                    if:set="mda.jni.path"/>
                 <classpath>
                     <!-- Spring "classpath:" imports can be under the MDX directory -->
                     <pathelement path="${mdx.dir}"/>
@@ -1486,6 +1488,12 @@
                     </fileset>
                     <fileset dir="${tools.dir}/inc-mda">
                         <include name="*.jar"/>
+                    </fileset>
+
+                    <!-- Include a per-target directory if set. -->
+                    <fileset dir="${tools.dir}">
+                        <include name="${mda.classpath.extra}/*.jar"
+                            if="mda.classpath.extra"/>
                     </fileset>
                 </classpath>
                 <syspropertyset>
