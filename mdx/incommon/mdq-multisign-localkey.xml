@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    Generate and sign per-entity metadata.
+    Generate and sign per-entity metadata using a local private key resource.
 -->
 <beans xmlns="http://www.springframework.org/schema/beans"
     default-lazy-init="true"
@@ -38,7 +38,7 @@
     <!--
         Generate per-entity metadata.
     -->
-    <bean id="mdq-multisign" parent="mda.SimplePipeline">
+    <bean id="mdq-multisign-localkey" parent="mda.SimplePipeline">
         <property name="stages">
             <list>
                 <!--

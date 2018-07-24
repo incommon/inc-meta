@@ -2641,19 +2641,29 @@
     </target>
 
     <!--
-        inc.generate.mdq
+        inc.mdq.generate.localkey
 
-        Generate per-entity metadata for the InCommon federation.
+        Generate per-entity metadata for the InCommon federation
+        using the localkey configuration.
     -->
-    <target name="inc.generate.mdq" depends="get.sign.uk.keyPassword">
+    <target name="inc.mdq.generate.localkey" depends="get.sign.uk.keyPassword">
         <property name="mda.mdq.input" value="${mda.inc.imported.xml}"/>
         <property name="mda.sign.keyPassword" value="${sign.uk.keyPassword}"/>
         <echo>Generating per-entity metadata in ${mda.mdq.output}</echo>
         <echo>    from unsigned aggregate in ${mda.mdq.input}</echo>
         <delete dir="${mdq.output.dir}" quiet="true"/>
         <mkdir dir="${mdq.output.dir}"/>
-        <CHANNEL.do channel="incommon" verb="mdq-multisign"/>
+        <CHANNEL.do channel="incommon" verb="mdq-multisign-localkey"/>
         <echo>Generation complete.</echo>
+    </target>
+
+    <!--
+        inc.generate.mdq
+
+        Generate per-entity metadata for the InCommon federation.
+    -->
+    <target name="inc.generate.mdq" depends="inc.mdq.generate.localkey">
+        <!-- temporary alias for inc.mdq.generate.localkey -->
     </target>
 
     <!--
