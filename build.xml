@@ -2597,6 +2597,13 @@
     <property name="mda.inc.edugain.xml" value="${mda.incdir}/edugain.xml"/>
 
     <!--
+        Default local file location from which to acquire the InCommon
+        entity blacklist.
+    -->
+    <property name="mda.inc.entity.blacklist"
+        value="classpath:incommon/incommon-blacklist.xml"/>
+
+    <!--
         inc.fetch.production
 
         This target is for use in a development environment. It reads the

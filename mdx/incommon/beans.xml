@@ -18,6 +18,14 @@
     <import resource="classpath:us_incommon/beans.xml"/>
 
     <!--
+        Acquire the InCommon entity blacklist. This defaults to a
+        file contained within the repository, but can be overridden by
+        the mda.inc.entity.blacklist property (which shows up here
+        as inc.entity.blacklist).
+    -->
+    <import resource="${inc.entity.blacklist}"/>
+
+    <!--
         finalise_parent
 
         Template for a stage used in each output pipeline which performs
@@ -31,5 +39,15 @@
             </map>
         </property>
     </bean>
+
+    <!--
+        remove_blacklisted_incommon_entities
+
+        Discard entities included in the InCommon entity blacklist.
+    -->
+    <bean id="remove_blacklisted_incommon_entities"
+        parent="mda.EntityFilterStage"
+        p:whitelistingEntities="false"
+        p:designatedEntities-ref="incommon_entity_blacklist"/>
 
 </beans>

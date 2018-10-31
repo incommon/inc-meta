@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    default-lazy-init="true"
+    xmlns:c="http://www.springframework.org/schema/c"
+    xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:util="http://www.springframework.org/schema/util"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <!--
+        *************************************************************
+        ***                                                       ***
+        ***   I N C O M M O N   E N T I T Y   B L A C K L I S T   ***
+        ***                                                       ***
+        *************************************************************
+    -->
+
+    <!--
+        The entities named in this set will be discarded from the
+        collection sourced from the InCommon Federation Manager.
+
+        The location of this file is defaulted to the version within
+        the repository, but may be overridden by setting the
+        mda.inc.entity.blacklist property.
+    -->
+    <util:set id="incommon_entity_blacklist">
+
+        <!-- Nothing in this example file. -->
+        <!--
+        <value>https://example.edu/entity</value>
+        -->
+
+    </util:set>
+
+</beans>

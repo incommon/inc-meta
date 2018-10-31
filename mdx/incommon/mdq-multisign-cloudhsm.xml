@@ -57,6 +57,9 @@
                 <!-- Populate ItemId with the entityID. -->
                 <ref bean="populateItemIds"/>
 
+                <!-- Discard entities in the InCommon entity blacklist. -->
+                <ref bean="remove_blacklisted_incommon_entities"/>
+
                 <!-- Set ID, cacheDuration and validUntil attributes. -->
                 <bean parent="mda.GenerateIdStage"/>
                 <bean parent="mda.SetValidUntilStage" p:validityDuration="P14D"/>

@@ -265,6 +265,14 @@
                     </property>
                 </bean>
 
+                <!--
+                    Discard entities in the InCommon entity blacklist.
+
+                    Because this is done _after_ the eduGAIN merge, the
+                    named entities will be removed whatever their source.
+                -->
+                <ref bean="remove_blacklisted_incommon_entities"/>
+
                 <!-- Fork new pipelines to generate special aggregates. -->
                 <bean id="demux" parent="mda.PipelineDemultiplexerStage">
                     <property name="pipelineAndSelectionStrategies">
