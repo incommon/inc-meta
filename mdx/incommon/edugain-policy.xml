@@ -300,8 +300,6 @@
                                 p:regex="" p:message="scope element must not be empty"/>
                             <bean p:id="whiteSpace" parent="inc.RejectStringRegexValidator"
                                 p:regex=".*\s.*" p:message="scope '%s' includes white space"/>
-                            <bean p:id="upperCase" parent="inc.RejectStringRegexValidator"
-                                p:regex=".*\p{Upper}.*" p:message="scope '%s' includes upper-case characters"/>
                             <bean p:id="domainName" parent="inc.AsDomainNameStringValidator"
                                 p:message="scope is not a valid domain name: %s">
                                 <property name="validators">
@@ -329,8 +327,6 @@
                                 <property name="validators">
                                     <!-- validators to apply to the literal tail -->
                                     <list>
-                                        <bean p:id="upperCase" parent="inc.RejectStringRegexValidator"
-                                            p:regex=".*\p{Upper}.*" p:message="literal tail '%s' includes upper-case characters"/>
                                         <bean p:id="domainName" parent="inc.AsDomainNameStringValidator"
                                             p:message="literal tail is not a valid domain name: %s">
                                             <property name="validators">
