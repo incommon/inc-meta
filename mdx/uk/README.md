@@ -28,7 +28,7 @@ before being included in the `export` version consumed by interfederation partne
 
 ### Export Preview Aggregate vs. Export Aggregate
 
-Status (2017-02-14):
+Status (2017-12-05):
 
 * These aggregates are currently identical.
 
@@ -59,13 +59,23 @@ when it appeared in the fallback aggregate, which would be too late to take corr
 
 ### Test Aggregate vs. Production Aggregate
 
-Status (2017-03-02):
+Status (2017-12-05):
 
-* These aggregates are currently identical.
+* The `test` aggregate does not include the `<UKFederationMember>` label (`ukf-meta#34`).
+
+* The `test` aggregate does not include the entity-level copy of the scopes for an
+  identity provider (`ukf-meta#49`) 
+
+### `cds-all` Aggregate vs. Production Aggregate
+
+Status (2017-12-05):
+
+* The `cdsall` aggregate omits many elements not necessary for the generation of a discovery feed.
+
+* Otherwise, these aggregates are currently identical.
 
 ### Fallback Aggregate vs. Production Aggregate
 
-Status (2017-03-14):
+Status (2018-01-08):
 
-* the production aggregate implements a _blacklisting_ approach to entity attributes imported from eduGAIN,
-while the production aggregate implements the traditional entity attribute _whitelist_. (2017-03-02)
+* These aggregates are currently identical.

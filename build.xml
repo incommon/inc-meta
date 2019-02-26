@@ -101,6 +101,27 @@
     <property file="default.properties"/>
 
     <!--
+        *******************************************************
+        ***                                                 ***
+        ***   S A M L   O U T P U T   P R O P E R T I E S   ***
+        ***                                                 ***
+        *******************************************************
+    -->
+
+    <!-- Default validUntil duration for all generated metadata, in days. -->
+    <property name="validUntil.default.days" value="14"/>
+
+    <!-- Specific validUntil duration for aggregates, in days. -->
+    <property name="validUntil.aggregate.days" value="${validUntil.default.days}"/>
+    <!-- Same value, as an ISO 8601 duration. -->
+    <property name="validUntil.aggregate.duration" value="P${validUntil.aggregate.days}D"/>
+
+    <!-- Specific validUntil duration for per-entity metadata, in days. -->
+    <property name="validUntil.perEntity.days" value="${validUntil.default.days}"/>
+    <!-- Same value, as an ISO 8601 duration. -->
+    <property name="validUntil.perEntity.duration" value="P${validUntil.perEntity.days}D"/>
+
+    <!--
         ***************************************************************
         ***                                                         ***
         ***   G I T   I N T E G R A T I O N   P R O P E R T I E S   ***
@@ -152,6 +173,13 @@
     <property name="mdq.dist.name" value="mdq.ukfederation.org.uk"/>
     <property name="md.dist.path.name" value="/"/>
 
+    <property name="cdi-master.user" value="rsync"/>
+    <property name="cdi-master.name" value="cdi-master.ci.ti.ja.net"/>
+    <property name="cdi-master.ssh.port" value="8822"/>
+    <property name="cdi-master.temploc.name" value="/tmp/legacy-ukf"/>
+    <property name="cdi-master.md.path.name" value="/legacy-ukf-md/"/>
+    <property name="cdi-master.mdq.path.name" value="/legacy-ukf-mdq/"/>
+
     <!--
         Middlebox server properties.
     -->
@@ -173,7 +201,7 @@
     -->
     <property name="www.user" value="wwwscp"/>
     <property name="www.hostname" value="www-ne-01.infr.ukfederation.org.uk"/>
-    <property name="www.path.stats" value="/var/www/html/fed"/>
+    <property name="www.path.stats" value="/var/www/www-prod/html/fed"/>
     <property name="www.path.members" value="/var/www/externals"/>
     <property name="www.url.stats" value="${www.user}@${www.hostname}:${www.path.stats}"/>
     <property name="www.url.members" value="${www.user}@${www.hostname}:${www.path.members}"/>
@@ -243,7 +271,6 @@
     <property name="tools.mdnorm" value="${tools.dir}/mdnorm"/>
     <property name="tools.slacktee" value="${tools.dir}/slacktee"/>
     <property name="tools.xmlsectool" value="${tools.dir}/xmlsectool-2.0.0"/>
-    <property name="tools.xalan" value="${tools.dir}/xalan"/>
 
     <!--
         Full path to a commonly used temporary file.
@@ -313,7 +340,7 @@
         be more than some invocations require, but there's no harm in having a higher
         limit for all of them.
     -->
-    <property name="java.max.memory" value="1024m"/>
+    <property name="java.max.memory" value="1280m"/>
 
 
     <!--
@@ -556,7 +583,6 @@
         git.products.masterbranch.pushtoorigin,
         git.products.createtagandpushtoorigin,
         fs.scp.mdqcache.to.repo,
-        fs.clear.outputdir,
         jenkins.triggerjob.publish">
         <echo>Stage 5 Success: Master branch pushed to origin, new tag created and pushed, mdq cache sent to repo, message sent to start publication.</echo>
     </target>
@@ -1132,7 +1158,7 @@
             <arg value="${utilities.dir}/stats-generate.sh"/>
             <arg value="day"/>
         </exec>
-        <SLACK.send conf="${tools.slacktee}/conf/repo-jenkins.conf" colour="good" channel="stats"
+        <SLACK.send conf="${tools.slacktee}/conf/repo-jenkins.conf" colour="good" channel="ukf-stats"
             message="${stats.daily.output}"/>
     </target>
 
@@ -1270,6 +1296,22 @@
         <checksum file="${aggregates.dir}/${mdaggr.export.preview.signed}"
             property="mdaggr.export.preview.signed.checksum"/>
 
+        <echo>Verifying metadata held at ${cdi-master.name}</echo>
+        <VFY.remote.and.checksum i="http://${cdi-master.name}${cdi-master.md.path.name}${mdaggr.prod.signed}"
+            checksum="${mdaggr.prod.signed.checksum}"/>
+        <VFY.remote.and.checksum i="http://${cdi-master.name}${cdi-master.md.path.name}${mdaggr.wayf.signed}"
+            checksum="${mdaggr.wayf.signed.checksum}"/>
+        <VFY.remote.and.checksum i="http://${cdi-master.name}${cdi-master.md.path.name}${mdaggr.cdsall.signed}"
+            checksum="${mdaggr.cdsall.signed.checksum}"/>
+        <VFY.remote.and.checksum i="http://${cdi-master.name}${cdi-master.md.path.name}${mdaggr.test.signed}"
+            checksum="${mdaggr.test.signed.checksum}"/>
+        <VFY.remote.and.checksum i="http://${cdi-master.name}${cdi-master.md.path.name}${mdaggr.back.signed}"
+            checksum="${mdaggr.back.signed.checksum}"/>
+        <VFY.remote.and.checksum i="http://${cdi-master.name}${cdi-master.md.path.name}${mdaggr.export.signed}"
+            checksum="${mdaggr.export.signed.checksum}"/>
+        <VFY.remote.and.checksum i="http://${cdi-master.name}${cdi-master.md.path.name}${mdaggr.export.preview.signed}"
+            checksum="${mdaggr.export.preview.signed.checksum}"/>
+
         <echo>Verifying metadata held at ${md.dist.host-ne-01.name}</echo>
         <VFY.remote.and.checksum i="http://${md.dist.host-ne-01.name}${md.dist.path.name}${mdaggr.prod.signed}"
             checksum="${mdaggr.prod.signed.checksum}"/>
@@ -1341,10 +1383,14 @@
         Verify a few select mdq files held on the master distribution site.
     -->
     <target name="samlmd.mdq.verify.remote">
-        <echo>Verifying MDQ held at ${mdq.dist.name}</echo>
-        <VFY.MDQ.remote i="http://${mdq.dist.name}/entities"/>
-        <VFY.MDQ.remote i="http://${mdq.dist.name}/entities/https%3A%2F%2Ftest-idp.ukfederation.org.uk%2Fidp%2Fshibboleth"/>
-        <VFY.MDQ.remote i="http://${mdq.dist.name}/entities/https%3A%2F%2Ftest.ukfederation.org.uk%2Fentity"/>
+      <echo>Verifying MDQ held at ${cdi-master.name}${cdi-master.mdq.path.name}</echo>
+      <VFY.MDQ.remote i="http://${cdi-master.name}${cdi-master.mdq.path.name}entities/all"/>
+      <VFY.MDQ.remote i="http://${cdi-master.name}${cdi-master.mdq.path.name}entities/https%3A%2F%2Ftest-idp.ukfederation.org.uk%2Fidp%2Fshibboleth"/>
+      <VFY.MDQ.remote i="http://${cdi-master.name}${cdi-master.mdq.path.name}entities/https%3A%2F%2Ftest.ukfederation.org.uk%2Fentity"/>
+      <echo>Verifying MDQ held at ${mdq.dist.name}</echo>
+      <VFY.MDQ.remote i="http://${mdq.dist.name}/entities"/>
+      <VFY.MDQ.remote i="http://${mdq.dist.name}/entities/https%3A%2F%2Ftest-idp.ukfederation.org.uk%2Fidp%2Fshibboleth"/>
+      <VFY.MDQ.remote i="http://${mdq.dist.name}/entities/https%3A%2F%2Ftest.ukfederation.org.uk%2Fentity"/>
     </target>
 
 
@@ -1449,6 +1495,9 @@
     <property name="mda.sign.keyAlias" value="${sign.uk.keyAlias}"/>
     <property name="mda.sign.pkcs11Config" value="${sign.uk.pkcs11Config}"/>
     <property name="mda.mdq.output" value="${mdq.output.dir}"/>
+    <property name="mda.validUntil.aggregate.days" value="${validUntil.aggregate.days}"/>
+    <property name="mda.validUntil.aggregate.duration" value="${validUntil.aggregate.duration}"/>
+    <property name="mda.validUntil.perEntity.duration" value="${validUntil.perEntity.duration}"/>
 
     <!--
         Build a property set of all the properties to be passed through, with
@@ -1602,7 +1651,7 @@
                     <arg value="${git.repo.project.data}"/>
                     <arg value="${git.repo.project.products}"/>
                 </exec>
-                <SLACK.send conf="${tools.slacktee}/conf/aggr-ant.conf" colour="good" channel="events-publications"
+                <SLACK.send conf="${tools.slacktee}/conf/aggr-ant.conf" colour="good" channel="ukf-events-publish"
                     message="${diff.between.publications}"/>
             </then>
         </if>
@@ -1731,64 +1780,6 @@
                     -->
                 </args>
             </XMLSECTOOL>
-        </sequential>
-    </macrodef>
-
-    <!--
-        *******************************
-        ***                         ***
-        ***   X A L A N   T O O L   ***
-        ***                         ***
-        *******************************
-    -->
-
-    <!--
-        Macro to run the Xalan XSLT engine, taking files from arbitrary
-        locations.
-    -->
-    <macrodef name="XALAN">
-        <attribute name="i"/>
-        <attribute name="o"/>
-        <attribute name="x"/>
-        <sequential>
-            <java fork="true" maxmemory="${java.max.memory}" failonerror="true" classname="org.apache.xalan.xslt.Process">
-                <classpath>
-                    <fileset dir="${tools.xalan}/lib">
-                        <include name="*.jar"/>
-                    </fileset>
-                </classpath>
-                <jvmarg value="-Djava.endorsed.dirs=${tools.xalan}/endorsed"/>
-                <arg value="-IN"/>
-                <arg value="@{i}"/>
-                <arg value="-OUT"/>
-                <arg value="@{o}"/>
-                <arg value="-XSL"/>
-                <arg value="@{x}"/>
-            </java>
-        </sequential>
-    </macrodef>
-
-    <!--
-        Macro to run the Xalan XSLT engine, taking files from arbitrary
-        locations.  No output specified, so the result of the transform
-        will be sent to standard output.
-    -->
-    <macrodef name="XALAN.noout">
-        <attribute name="i"/>
-        <attribute name="x"/>
-        <sequential>
-            <java fork="true" maxmemory="${java.max.memory}" failonerror="true" classname="org.apache.xalan.xslt.Process">
-                <classpath>
-                    <fileset dir="${tools.xalan}/lib">
-                        <include name="*.jar"/>
-                    </fileset>
-                </classpath>
-                <jvmarg value="-Djava.endorsed.dirs=${tools.xalan}/endorsed"/>
-                <arg value="-IN"/>
-                <arg value="@{i}"/>
-                <arg value="-XSL"/>
-                <arg value="@{x}"/>
-            </java>
         </sequential>
     </macrodef>
 
@@ -2068,6 +2059,12 @@
             Push metadata files for the UK Federation to the MD dist servers
         -->
         <echo>Pushing UK Federation metadata files to MD dist.</echo>
+        <echo>-> CDI-master</echo>
+        <exec executable="${git.executable}" dir="${shared.ws.dir}/${git.repo.project.products}" failonerror="true">
+            <arg value="push"/>
+            <arg value="cdi-master"/>
+            <arg value="master"/>
+        </exec>
         <echo>-> MD-NE-01</echo>
         <exec executable="${git.executable}" dir="${shared.ws.dir}/${git.repo.project.products}" failonerror="true">
             <arg value="push"/>
@@ -2099,6 +2096,12 @@
             Push mdq cache tar to the MD dist servers
         -->
         <echo>Pushing UK Federation mdq cache to MD dist.</echo>
+        <echo>-> CDI-master</echo>
+        <scp failonerror="true" remoteTodir="${cdi-master.user}@${cdi-master.name}:${cdi-master.temploc.name}" port="${cdi-master.ssh.port}" keyfile="~/.ssh/id_rsa" knownhosts="~/.ssh/known_hosts">
+            <fileset dir="${output.dir}">
+                <include name="${mdq.cache}"/>
+            </fileset>
+        </scp>
         <echo>-> MD-NE-01</echo>
         <scp failonerror="true" remoteTodir="${md.user}@${md.dist.host-ne-01.name}:/tmp" keyfile="~/.ssh/id_rsa" knownhosts="~/.ssh/known_hosts">
             <fileset dir="${output.dir}">
@@ -2307,8 +2310,10 @@
 
     <target name="uiinfo.list">
         <CHANNEL.do channel="uk" verb="collect"/>
-        <XALAN.noout i="${mdx.dir}/uk/collected.xml"
-               x="${build.dir}/list_uiinfo.xsl"/>
+        <exec executable="xsltproc" failonerror="true">
+            <arg value="${build.dir}/list_uiinfo.xsl"/>
+            <arg value="${mdx.dir}/uk/collected.xml"/>
+        </exec>
     </target>
 
     <!--
@@ -2464,10 +2469,12 @@
     -->
     <target name="extract.embedded" depends="flow.uk.collect">
         <echo>Extracting embedded certificates</echo>
-        <XALAN
-            i="${uk.collected}"
-            o="${temp.dir}/embedded.pem"
-            x="${build.dir}/extract_embedded.xsl"/>
+        <exec executable="xsltproc" failonerror="true">
+            <arg value="--output"/>
+            <arg value="${temp.dir}/embedded.pem"/>
+            <arg value="${build.dir}/extract_embedded.xsl"/>
+            <arg value="${uk.collected}"/>
+        </exec>
     </target>
 
     <!--
@@ -2492,10 +2499,12 @@
     -->
     <target name="check.embedded.all">
         <echo>Extracting embedded certificates</echo>
-        <XALAN
-            i="${aggregates.dir}/${mdaggr.prod.signed}"
-            o="${temp.dir}/embedded.pem"
-            x="${build.dir}/extract_embedded.xsl"/>
+        <exec executable="xsltproc" failonerror="true">
+            <arg value="--output"/>
+            <arg value="${temp.dir}/embedded.pem"/>
+            <arg value="${build.dir}/extract_embedded.xsl"/>
+            <arg value="${aggregates.dir}/${mdaggr.prod.signed}"/>
+        </exec>
         <echo>Checking embedded certificates</echo>
         <echo>Note: ignore expiry on eduGAIN entities</echo>
         <exec executable="perl" dir="${utilities.dir}"

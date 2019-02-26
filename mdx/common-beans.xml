@@ -260,6 +260,14 @@
         p:namespace-ref="ukfedlabel_namespace"/>
 
     <!--
+        stripXsiNamespace
+
+        Strip the XML Schema Instance namespace.
+    -->
+    <bean id="stripXsiNamespace" parent="mda.NamespaceStrippingStage"
+        p:namespace-ref="xsi_namespace"/>
+
+    <!--
         normaliseNamespaces
 
         A pipeline stage that can be used before serialisation to normalise the namespaces
@@ -284,17 +292,20 @@
     <!--
         Federation registrationAuthority URIs.
     -->
-    <bean id="ar_mate_registrar"         parent="String" c:_="http://www.federacionmate.gob.ar"/>
     <bean id="am_afire_registrar"        parent="String" c:_="https://aai.asnet.am"/>
+    <bean id="ar_mate_registrar"         parent="String" c:_="http://www.federacionmate.gob.ar"/>
     <bean id="at_aconet_registrar"       parent="String" c:_="http://eduid.at"/>
     <bean id="au_aaf_registrar"          parent="String" c:_="https://aaf.edu.au"/>
     <bean id="be_belnet_registrar"       parent="String" c:_="http://federation.belnet.be/"/>
+    <bean id="bg_bif_registrar"          parent="String" c:_="http://bif.bren.bg"/>
     <bean id="br_cafe_registrar"         parent="String" c:_="http://cafe.rnp.br"/>
-    <bean id="by_febas_registrar"        parent="String" c:_="http://febas.basnet.by/"/>
+    <bean id="by_febas_registrar"        parent="String" c:_="https://febas.basnet.by"/>
     <bean id="ca_caf_registrar"          parent="String" c:_="http://www.canarie.ca"/>
     <bean id="ch_switchaai_registrar"    parent="String" c:_="http://rr.aai.switch.ch/"/>
     <bean id="cl_cofre_registrar"        parent="String" c:_="http://cofre.reuna.cl"/>
+    <bean id="cn_carsi_registrar"        parent="String" c:_="http://carsi.edu.cn"/>
     <bean id="co_colfire_registrar"      parent="String" c:_="http://colfire.co"/>
+    <bean id="cy_cynet_registrar"        parent="String" c:_="http://cynet.ac.cy"/>
     <bean id="cz_eduid_registrar"        parent="String" c:_="http://www.eduid.cz/"/>
     <bean id="de_dfnaai_registrar"       parent="String" c:_="https://www.aai.dfn.de"/>
     <bean id="dk_wayf_registrar"         parent="String" c:_="https://www.wayf.dk"/>
@@ -306,26 +317,39 @@
     <bean id="fr_renater_registrar"      parent="String" c:_="https://federation.renater.fr/"/>
     <bean id="ge_gif_registrar"          parent="String" c:_="https://mtd.gif.grena.ge"/>
     <bean id="gr_grnet_registrar"        parent="String" c:_="http://aai.grnet.gr/"/>
+    <bean id="hk_hkaf_registrar"         parent="String" c:_="https://hkaf.edu.hk"/>
     <bean id="hr_eduhr_registrar"        parent="String" c:_="http://www.srce.hr"/>
     <bean id="hu_eduid_registrar"        parent="String" c:_="http://eduid.hu"/>
     <bean id="ie_edugate_registrar"      parent="String" c:_="http://www.heanet.ie"/>
     <bean id="il_iif_registrar"          parent="String" c:_="http://iif.iucc.ac.il"/>
     <bean id="in_infed_registrar"        parent="String" c:_="http://inflibnet.ac.in"/>
+    <bean id="ir_irfed_registrar"        parent="String" c:_="https://irfed.ir/"/>
     <bean id="it_gridp_registrar"        parent="String" c:_="http://gridp.garr.it"/>
     <bean id="it_idem_registrar"         parent="String" c:_="http://www.idem.garr.it/"/>
     <bean id="jp_gakunin_registrar"      parent="String" c:_="https://www.gakunin.jp"/>
     <bean id="kr_kafe_registrar"         parent="String" c:_="http://kafe.kreonet.net"/>
+    <bean id="lb_life_registrar"         parent="String" c:_="http://life.aub.edu.lb"/><!-- A guess -->
     <bean id="lt_litnet_registrar"       parent="String" c:_="https://fedi.litnet.lt"/>
     <bean id="lu_eduid_registrar"        parent="String" c:_="http://eduid.lu"/>
     <bean id="lv_laife_registrar"        parent="String" c:_="http://laife.lanet.lv/"/>
-    <bean id="mk_aaiedumk_registrar"     parent="String" c:_="https://rr.aaiedu.mk"/>
     <bean id="md_leaf_registrar"         parent="String" c:_="http://federations.renam.md/"/>
+    <bean id="me_eduid_registrar"        parent="String" c:_="http://mren.ac.me"/><!-- A guess -->
+    <bean id="mk_aaiedumk_registrar"     parent="String" c:_="https://rr.aaiedu.mk"/>
+    <bean id="mw_maren_registrar"        parent="String" c:_="https://maren.ac.mw"/><!-- A guess -->
+    <bean id="mz_cafmoz_registrar"       parent="String" c:_="http://cafmoz.morenet.ac.mz"/><!-- A guess -->
     <bean id="nl_surfconext_registrar"   parent="String" c:_="http://www.surfconext.nl/"/>
     <bean id="no_feide_registrar"        parent="String" c:_="http://feide.no/"/>
+    <bean id="nz_tuakiri_registrar"      parent="String" c:_="http://tuakiri.ac.nz/"/><!-- A guess -->
+    <bean id="om_omankid_registrar"      parent="String" c:_="https://home.trc.gov.om"/>
     <bean id="pl_pionier_registrar"      parent="String" c:_="https://aai.pionier.net.pl"/>
     <bean id="pt_rctsaai_registrar"      parent="String" c:_="https://www.fccn.pt"/>
+    <bean id="rs_amres_registrar"        parent="String" c:_="http://amres.ac.rs/"/><!-- A guess -->
+    <bean id="ru_fedurus_registrar"      parent="String" c:_="http://www.fedurus.ru/"/><!-- A guess -->
     <bean id="se_swamid_registrar"       parent="String" c:_="http://www.swamid.se/"/>
+    <bean id="sg_sgaf_registrar"         parent="String" c:_="https://www.singaren.net.sg"/>
     <bean id="si_arnes_registrar"        parent="String" c:_="http://aai.arnes.si"/>
+    <bean id="sk_safeid_registrar"       parent="String" c:_="http://safeid.sk"/>
+    <bean id="tr_yetkim_registrar"       parent="String" c:_="http://aai.ulak.net.tr/"/><!-- A guess -->
     <bean id="ua_peano_registrar"        parent="String" c:_="https://peano.uran.ua"/>
     <bean id="ug_rif_registrar"          parent="String" c:_="https://www.renu.ac.ug"/>
     <bean id="uk_ukf_registrar"          parent="String" c:_="http://ukfederation.org.uk"/>
@@ -354,9 +378,12 @@
 
                     http://www.edugain.org/technical/status.php
                 -->
+                <entry key-ref="dz_arnaai_registrar"          value="DZ"/>
+                <entry key-ref="ar_mate_registrar"            value="AR"/>
                 <entry key-ref="am_afire_registrar"           value="AM"/>
                 <entry key-ref="au_aaf_registrar"             value="AU"/>
                 <entry key-ref="at_aconet_registrar"          value="AT"/>
+                <entry key-ref="by_febas_registrar"           value="BY"/>
                 <entry key-ref="be_belnet_registrar"          value="BE"/>
                 <entry key-ref="br_cafe_registrar"            value="BR"/>
                 <entry key-ref="ca_caf_registrar"             value="CA"/>
@@ -374,6 +401,7 @@
                 <entry key-ref="gr_grnet_registrar"           value="GR"/>
                 <entry key-ref="hu_eduid_registrar"           value="HU"/>
                 <entry key-ref="in_infed_registrar"           value="IN"/>
+                <entry key-ref="ir_irfed_registrar"           value="IR"/>
                 <entry key-ref="ie_edugate_registrar"         value="IE"/>
                 <entry key-ref="il_iif_registrar"             value="IL"/>
                 <entry key-ref="it_idem_registrar"            value="IT"/>
@@ -385,8 +413,10 @@
                 <entry key-ref="mk_aaiedumk_registrar"        value="MK"/>
                 <entry key-ref="md_leaf_registrar"            value="MD"/>
                 <entry key-ref="no_feide_registrar"           value="NO"/>
+                <entry key-ref="om_omankid_registrar"         value="OM"/>
                 <entry key-ref="pl_pionier_registrar"         value="PL"/>
                 <entry key-ref="pt_rctsaai_registrar"         value="PT"/>
+                <entry key-ref="sg_sgaf_registrar"            value="SG"/>
                 <entry key-ref="si_arnes_registrar"           value="SI"/>
                 <entry key-ref="za_safire_registrar"          value="ZA"/>
                 <entry key-ref="es_sir_registrar"             value="ES"/>
@@ -394,17 +424,27 @@
                 <entry key-ref="ch_switchaai_registrar"       value="CH"/>
                 <entry key-ref="nl_surfconext_registrar"      value="NL"/>
                 <entry key-ref="us_incommon_registrar"        value="US"/>
+                <entry key-ref="ug_rif_registrar"             value="UG"/>
                 <entry key-ref="ua_peano_registrar"           value="UA"/>
                 <entry key-ref="uk_ukf_registrar"             value="UK"/>
 
                 <!-- eduGAIN voting-only members -->
-                <entry key-ref="ar_mate_registrar"            value="AR"/>
-                <entry key-ref="by_febas_registrar"           value="BY"/>
+                <entry key-ref="bg_bif_registrar"             value="BG"/>
+                <entry key-ref="cy_cynet_registrar"           value="CY"/>
+                <entry key-ref="hk_hkaf_registrar"            value="HK"/>
                 <entry key-ref="it_gridp_registrar"           value="IT-GRIDP"/>
+                <entry key-ref="nz_tuakiri_registrar"         value="NZ"/>
+                <entry key-ref="tr_yetkim_registrar"          value="TR"/>
 
                 <!-- eduGAIN candidates -->
-                <entry key-ref="dz_arnaai_registrar"          value="DZ"/>
-                <entry key-ref="ug_rif_registrar"             value="UG"/>
+                <entry key-ref="cn_carsi_registrar"           value="CN"/>
+                <entry key-ref="lb_life_registrar"            value="LB"/>
+                <entry key-ref="mw_maren_registrar"           value="MW"/>
+                <entry key-ref="me_eduid_registrar"           value="ME"/>
+                <entry key-ref="mz_cafmoz_registrar"          value="MZ"/>
+                <entry key-ref="ru_fedurus_registrar"         value="RU"/>
+                <entry key-ref="rs_amres_registrar"           value="RS"/>
+                <entry key-ref="sk_safeid_registrar"          value="SK"/>
             </map>
         </property>
     </bean>
@@ -420,6 +460,21 @@
         <property name="selectionRequirements">
             <list>
                 <value>#{T(net.shibboleth.metadata.ErrorStatus)}</value>
+            </list>
+        </property>
+    </bean>
+
+    <!--
+        warningAnnouncer
+
+        A pipeline stage that logs any warnings present,
+        but takes no action on them.
+    -->
+    <bean id="warningAnnouncer" parent="mda.StatusMetadataLoggingStage">
+        <property name="identificationStrategy" ref="identificationStrategy"/>
+        <property name="selectionRequirements">
+            <list>
+                <value>#{T(net.shibboleth.metadata.WarningStatus)}</value>
             </list>
         </property>
     </bean>
@@ -1018,11 +1073,16 @@
                 <bean id="checkCertificates" parent="mda.X509ValidationStage">
                     <property name="validators">
                         <list>
+                            <!-- Error on DSA keys. -->
+                            <bean p:id="DSA" parent="ukf.X509DSADetector"/>
+
                             <!-- Error on RSA key length less than 2048 bits. -->
-                            <bean parent="mda.X509RSAKeyLengthValidator"
+                            <bean p:id="RSAKeyLength" parent="mda.X509RSAKeyLengthValidator"
                                 p:warningBoundary="0" p:errorBoundary="2048"/>
                             <!-- Error on small RSA public exponents. -->
-                            <bean parent="mda.X509RSAExponentValidator"/>
+                            <bean p:id="RSAExponent" parent="mda.X509RSAExponentValidator"/>
+                            <!-- Error on keys vulnerable to ROCA. -->
+                            <bean p:id="ROCA" parent="ukf.X509ROCAValidator"/>
 
                             <!--
                                 Debian weak key blacklists.

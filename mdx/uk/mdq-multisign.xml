@@ -54,6 +54,15 @@
                 <!-- Remove UKFederationLabel elements. -->
                 <ref bean="uk_strip_UKFederationMember"/>
 
+                <!--
+                    Remove xsi elements and attributes.
+
+                    In practice, this just cleans up the results we get in
+                    a development environment, as the normal UKf aggregate
+                    already excludes this namespace.
+                -->
+                <ref bean="stripXsiNamespace"/>
+
                 <!-- Break down into individual entities. -->
                 <ref bean="disassemble"/>
 
@@ -67,7 +76,7 @@
                     </constructor-arg>
                 </bean>
                 <bean parent="mda.SetCacheDurationStage" p:cacheDuration="PT6H"/>
-                <bean parent="mda.SetValidUntilStage" p:validityDuration="P14D"/>
+                <bean parent="mda.SetValidUntilStage" p:validityDuration="${validUntil.perEntity.duration}"/>
 
                 <!-- Identity transform fixes signing issues. -->
                 <bean parent="mda.XSLTransformationStage"

@@ -259,6 +259,32 @@
                 <ref bean="fetchImportMetadata"/>
                 <ref bean="populateItemIds"/>
 
+                <!--
+                    Strip all elements and attributes that are in namespaces
+                    we don't accept from registrants.
+                -->
+                <bean id="whitelistImportedNamespaces" parent="mda.NamespacesStrippingStage"
+                    p:whitelisting="true">
+                    <property name="namespaces">
+                        <set>
+                            <ref bean="alg_namespace"/>
+                            <ref bean="ds_namespace"/>
+                            <ref bean="hoksso_namespace"/>
+                            <ref bean="idpdisc_namespace"/>
+                            <ref bean="init_namespace"/>
+                            <ref bean="md_namespace"/>
+                            <ref bean="mdattr_namespace"/>
+                            <ref bean="mdrpi_namespace"/>
+                            <ref bean="mdui_namespace"/>
+                            <ref bean="remd_namespace"/>
+                            <ref bean="saml_namespace"/>
+                            <ref bean="shibmd_namespace"/>
+                            <ref bean="xenc_namespace"/>
+                            <ref bean="xml_namespace"/>
+                        </set>
+                    </property>
+                </bean>
+
                 <!-- perform schema validation and stop immediately if this fails -->
                 <ref bean="checkSchemas"/>
                 <ref bean="errorTerminatingFilter"/>
@@ -309,13 +335,16 @@
                 <bean id="checkCertificates" parent="mda.X509ValidationStage">
                     <property name="validators">
                         <list>
+                            <!-- Error on DSA keys. -->
+                            <bean p:id="DSA" parent="ukf.X509DSADetector"/>
+
                             <!-- Error on RSA key length less than 2048 bits. -->
-                            <bean parent="mda.X509RSAKeyLengthValidator"
+                            <bean p:id="RSAKeyLength" parent="mda.X509RSAKeyLengthValidator"
                                 p:warningBoundary="0" p:errorBoundary="2048"/>
                             <!-- Error on small RSA public exponents. -->
-                            <bean parent="mda.X509RSAExponentValidator"/>
-                            <!-- Error on inconsistent subjectAltNames. -->
-                            <bean parent="ukf.X509ConsistentNameValidator"/>
+                            <bean p:id="RSAExponent" parent="mda.X509RSAExponentValidator"/>
+                            <!-- Error on keys vulnerable to ROCA. -->
+                            <bean p:id="ROCA" parent="ukf.X509ROCAValidator"/>
 
                             <!--
                                 Debian weak key blacklists.
@@ -341,6 +370,9 @@
                 <ref bean="check_imported"/>
                 <ref bean="check_vhosts"/>
                 <ref bean="errorTerminatingFilter"/>
+
+                <!-- If there are no errors, log any warnings. -->
+                <ref bean="warningAnnouncer"/>
 
                 <!-- write output file -->
                 <ref bean="serializeImportedMetadata"/>

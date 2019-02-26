@@ -37,6 +37,19 @@
         *****************************
     -->
 
+    <!-- This bean MUST be called "conversionService" to work properly. -->
+    <bean id="conversionService" class="org.springframework.context.support.ConversionServiceFactoryBean">
+        <property name="converters">
+            <set>
+                <bean class="net.shibboleth.ext.spring.config.DurationToLongConverter" />
+                <bean class="net.shibboleth.ext.spring.config.StringToIPRangeConverter" />
+                <bean class="net.shibboleth.ext.spring.config.BooleanToPredicateConverter" />
+                <bean class="net.shibboleth.ext.spring.config.StringBooleanToPredicateConverter" />
+                <bean class="net.shibboleth.ext.spring.config.StringToResourceConverter" />
+            </set>
+        </property>
+    </bean>
+
     <!--
         stripEntityScopes
 
@@ -53,11 +66,29 @@
         final tweaks on the document.
     -->
     <bean id="finalise_parent" abstract="true" parent="mda.XSLTransformationStage"
-        p:XSLResource="classpath:uk/final_tweak.xsl">
-        <property name="transformParameters">
-            <map>
-                <entry key="publisher" value-ref="uk_federation_uri"/>
-            </map>
+        p:XSLResource="classpath:uk/final_tweak.xsl"/>
+
+    <!--
+        assembleAggregate
+
+        Assemble a UK-style aggregate with an appropriate validUntil and ID.
+    -->
+    <bean id="assembleAggregate" parent="mda.CompositeStage">
+        <property name="composedStages">
+            <list>
+                <ref bean="uk_assemble"/>
+                <bean parent="mda.SetValidUntilStage" p:validityDuration="${validUntil.aggregate.duration}"/>
+                <!--
+                    setStaticID
+
+                    Set the item's ID attribute to the static string "_".
+                -->
+                <bean id="setStaticID" parent="mda.GenerateIdStage">
+                    <constructor-arg>
+                        <bean parent="ukf.FixedStringIdentifierGenerationStrategy" c:_="_"/>
+                    </constructor-arg>
+                </bean>
+            </list>
         </property>
     </bean>
 
@@ -78,17 +109,6 @@
                 <ref bean="check_namespaces"/>
             </list>
         </property>
-    </bean>
-
-    <!--
-        setStaticID
-
-        Set the item's ID attribute to the static string "_".
-    -->
-    <bean id="setStaticID" parent="mda.GenerateIdStage">
-        <constructor-arg>
-            <bean parent="ukf.FixedStringIdentifierGenerationStrategy" c:_="_"/>
-        </constructor-arg>
     </bean>
 
 
@@ -257,6 +277,7 @@
         <property name="transformParameters">
             <map>
                 <entry key="publisher" value-ref="uk_federation_uri"/>
+                <entry key="validityDays" value="${validUntil.aggregate.days}"/>
             </map>
         </property>
     </bean>
@@ -279,9 +300,8 @@
                 <ref bean="check_dup_display"/>
                 <ref bean="errorTerminatingFilter"/>
 
-                <ref bean="uk_assemble"/>
+                <ref bean="assembleAggregate"/>
                 <ref bean="uk_finaliseProduction"/>
-                <ref bean="setStaticID"/>
                 <ref bean="uk_normaliseNamespaces"/>
 
                 <!-- production aggregate MUST pass publishability test -->
@@ -340,7 +360,7 @@
                 <ref bean="check_dup_display"/>
                 <ref bean="errorTerminatingFilter"/>
 
-                <ref bean="uk_assemble"/>
+                <ref bean="assembleAggregate"/>
 
                 <!--
                     Remove embedded images used in mdui:Logo elements.
@@ -351,7 +371,6 @@
 
                 <ref bean="stripMdattrNamespace"/>
                 <ref bean="uk_finaliseProduction"/>
-                <ref bean="setStaticID"/>
                 <ref bean="uk_normaliseNamespaces"/>
 
                 <!-- WAYF aggregate MUST pass publishability test -->
@@ -412,6 +431,7 @@
                 <entry key="extraText"
                     value="Central Discovery Service metadata; not for end entity use"/>
                 <entry key="publisher" value-ref="uk_federation_uri"/>
+                <entry key="validityDays" value="${validUntil.aggregate.days}"/>
             </map>
         </property>
     </bean>
@@ -456,7 +476,7 @@
                 <ref bean="errorTerminatingFilter"/>
 
                 <!-- make an aggregate first so that we're only traversing one item -->
-                <ref bean="uk_assemble"/>
+                <ref bean="assembleAggregate"/>
 
                 <!-- remove many things that the CDS doesn't look at -->
                 <ref bean="CDSStripUnwanted"/>
@@ -469,7 +489,6 @@
                 <ref bean="stripEmptyExtensions"/>
 
                 <ref bean="CDSFinalise"/>
-                <ref bean="setStaticID"/>
                 <ref bean="CDSNormaliseNamespaces"/>
 
                 <!-- schema validity check MUST pass -->
@@ -494,6 +513,7 @@
             <map>
                 <entry key="extraText" value="Feature fallback metadata; not for production use"/>
                 <entry key="publisher" value-ref="uk_federation_uri"/>
+                <entry key="validityDays" value="${validUntil.aggregate.days}"/>
             </map>
         </property>
     </bean>
@@ -519,10 +539,9 @@
                 <ref bean="check_dup_display"/>
                 <ref bean="errorTerminatingFilter"/>
 
-                <ref bean="uk_assemble"/>
+                <ref bean="assembleAggregate"/>
                 <ref bean="stripEmptyExtensions"/>
                 <ref bean="uk_finaliseFallback"/>
-                <ref bean="setStaticID"/>
                 <ref bean="uk_normaliseFallback"/>
 
                 <!-- fallback aggregate MUST pass publishability test -->
@@ -547,6 +566,7 @@
             <map>
                 <entry key="extraText" value="Feature test metadata; not for production use"/>
                 <entry key="publisher" value-ref="uk_federation_uri"/>
+                <entry key="validityDays" value="${validUntil.aggregate.days}"/>
             </map>
         </property>
     </bean>
@@ -573,10 +593,9 @@
                 <ref bean="errorTerminatingFilter"/>
 
                 <ref bean="uk_strip_UKFederationMember"/>
-                <ref bean="uk_assemble"/>
+                <ref bean="assembleAggregate"/>
                 <ref bean="stripEntityScopes"/>
                 <ref bean="uk_finaliseTest"/>
-                <ref bean="setStaticID"/>
                 <ref bean="uk_normaliseTest"/>
 
                 <!-- test aggregate MUST pass publishability test -->
@@ -601,6 +620,7 @@
             <map>
                 <entry key="extraText" value="Export metadata for use by partner federations"/>
                 <entry key="publisher" value-ref="uk_federation_uri"/>
+                <entry key="validityDays" value="${validUntil.aggregate.days}"/>
             </map>
         </property>
     </bean>
@@ -697,11 +717,10 @@
                 <ref bean="errorTerminatingFilter"/>
 
                 <ref bean="stripUkfedlabelNamespace"/>
-                <ref bean="uk_assemble"/>
+                <ref bean="assembleAggregate"/>
                 <ref bean="stripEntityScopes"/>
                 <ref bean="stripEmptyExtensions"/>
                 <ref bean="uk_finaliseExport"/>
-                <ref bean="setStaticID"/>
 
                 <bean id="uk_normaliseExport" parent="mda.XSLTransformationStage"
                     p:XSLResource="classpath:uk/ns_norm_export.xsl"/>
@@ -813,11 +832,10 @@
                 <ref bean="errorTerminatingFilter"/>
 
                 <ref bean="stripUkfedlabelNamespace"/>
-                <ref bean="uk_assemble"/>
+                <ref bean="assembleAggregate"/>
                 <ref bean="stripEntityScopes"/>
                 <ref bean="stripEmptyExtensions"/>
                 <ref bean="uk_finaliseExport"/>
-                <ref bean="setStaticID"/>
 
                 <bean id="uk_normaliseExportPreview" parent="mda.XSLTransformationStage"
                     p:XSLResource="classpath:uk/ns_norm_export_preview.xsl"/>
@@ -897,6 +915,15 @@
                 -->
                 <ref bean="uk_stripAdminContacts"/>
                 <ref bean="stripEmptyExtensions"/>
+
+                <!--
+                    odn_to_mdui
+
+                    Ensure that beyond this point, all UKf-registered identity providers
+                    have mdui:DisplayName and mdui:Description elements.
+                -->
+                <bean id="odn_to_mdui" parent="mda.XSLTransformationStage"
+                    p:XSLResource="classpath:uk/odn_to_mdui.xsl"/>
 
                 <!--
                     ***********************************************
