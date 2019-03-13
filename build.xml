@@ -2688,6 +2688,30 @@
     </target>
 
     <!--
+        inc.mdq.generate.all.localkey
+
+        Generate all metadata required for the InCommon federation MDQ service
+        using the local key configuration.
+
+        Properties:
+
+        Set sign.uk.keyPassword (note the slightly anomalous "uk" in that
+        identifier) to set the password to access the key resource. If not set,
+        this will be prompted for.
+    -->
+    <target name="inc.mdq.generate.all.localkey" depends="get.sign.uk.keyPassword">
+        <property name="mda.mdq.input" value="${mda.inc.imported.xml}"/>
+        <property name="mda.sign.keyPassword" value="${sign.keyPassword}"/>
+        <echo>Generating MDQ metadata in ${mda.mdq.output}</echo>
+        <echo>    from unsigned aggregate in ${mda.mdq.input}</echo>
+        <delete dir="${mdq.output.dir}" quiet="true"/>
+        <mkdir dir="${mdq.output.dir}"/>
+        <mkdir dir="${mdq.output.dir}/idps"/>
+        <CHANNEL.do channel="incommon" verb="mdq-all-localkey"/>
+        <echo>Generation complete.</echo>
+    </target>
+
+    <!--
         inc.generate.mdq
 
         Generate per-entity metadata for the InCommon federation.
@@ -2721,6 +2745,33 @@
         <delete dir="${mdq.output.dir}" quiet="true"/>
         <mkdir dir="${mdq.output.dir}"/>
         <CHANNEL.do channel="incommon" verb="mdq-multisign-cloudhsm"/>
+        <echo>Generation complete.</echo>
+    </target>
+
+    <!--
+        inc.mdq.generate.all.cloudhsm
+
+        Generate all metadata required for the InCommon federation MDQ service
+        using the AWS CloudHSM configuration.
+
+        Properties:
+
+        Set sign.keyUser and sign.keyPassword with credentials for the HSM user
+        accessing the key.
+    -->
+    <target name="inc.mdq.generate.all.cloudhsm">
+        <property name="mda.classpath.extra" value="inc-mda-cloudhsm"/>
+        <property name="mda.jni.path" value="/opt/cloudhsm/lib"/>
+        <property name="mda.mdq.input" value="${mda.inc.imported.xml}"/>
+        <property name="mda.sign.keyHandle" value="${sign.keyHandle}"/>
+        <property name="mda.sign.keyPassword" value="${sign.keyPassword}"/>
+        <property name="mda.sign.keyUser" value="${sign.keyUser}"/>
+        <echo>Generating MDQ metadata in ${mda.mdq.output}</echo>
+        <echo>    from unsigned aggregate in ${mda.mdq.input}</echo>
+        <delete dir="${mdq.output.dir}" quiet="true"/>
+        <mkdir dir="${mdq.output.dir}"/>
+        <mkdir dir="${mdq.output.dir}/idps"/>
+        <CHANNEL.do channel="incommon" verb="mdq-all-cloudhsm"/>
         <echo>Generation complete.</echo>
     </target>
 

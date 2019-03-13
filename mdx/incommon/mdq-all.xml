@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" default-lazy-init="true"
+    xmlns:c="http://www.springframework.org/schema/c" xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:if="ant:if" xmlns:unless="ant:unless" xmlns:util="http://www.springframework.org/schema/util"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <!-- Import commonly used beans -->
+    <import resource="classpath:common-beans.xml" />
+
+    <!-- Import inc-mda beans (from import.xml) -->
+    <import resource="classpath:uk/org/iay/incommon/mda/beans.xml" />
+
+    <!-- Import channel-specific beans -->
+    <import resource="classpath:incommon/beans.xml" />
+
+    <!-- This bean MUST be called "conversionService" to work properly -->
+    <bean id="conversionService" class="org.springframework.context.support.ConversionServiceFactoryBean">
+        <property name="converters">
+            <set>
+                <bean class="net.shibboleth.ext.spring.config.DurationToLongConverter" />
+                <bean class="net.shibboleth.ext.spring.config.StringToIPRangeConverter" />
+                <bean class="net.shibboleth.ext.spring.config.BooleanToPredicateConverter" />
+                <bean class="net.shibboleth.ext.spring.config.StringBooleanToPredicateConverter" />
+                <bean class="net.shibboleth.ext.spring.config.StringToResourceConverter" />
+            </set>
+        </property>
+    </bean>
+
+    <!-- Predicate for matching everything -->
+    <bean id="matchEverything" class="com.google.common.base.Predicates" factory-method="alwaysTrue" />
+
+    <!-- Generate all required metadata for the InCommon MDQ service -->
+    <bean id="generateAll" parent="mda.CompositeStage">
+        <property name="composedStages">
+            <list>
+
+                <!-- Begin with the published aggregate -->
+                <ref bean="commonSourceStage" />
+
+                <!-- Fork pipelines for creating signed aggregates -->
+                <bean id="demux" parent="mda.PipelineDemultiplexerStage">
+
+                    <property name="pipelineAndSelectionStrategies">
+                        <list>
+
+                            <!-- Create the signed aggregate -->
+                            <bean class="net.shibboleth.utilities.java.support.collection.Pair">
+                                <constructor-arg ref="aggregatePipeline" />
+                                <constructor-arg ref="matchEverything" />
+                            </bean>
+
+                            <!-- Create the signed IdP-only aggregate -->
+                            <bean class="net.shibboleth.utilities.java.support.collection.Pair">
+                                <constructor-arg ref="idpPipeline" />
+                                <constructor-arg ref="idpSelectionStrategy" />
+                            </bean>
+
+                        </list>
+                    </property>
+
+                    <property name="waitingForPipelines" value="true" />
+
+                </bean>
+
+                <!-- Create per-entity metadata -->
+                <ref bean="perEntityStage" />
+
+            </list>
+        </property>
+    </bean>
+
+    <!-- Pipeline that produces the signed aggregate from a collection of entities -->
+    <bean id="aggregatePipeline" parent="mda.SimplePipeline">
+        <property name="stages">
+            <list>
+                <ref bean="aggregateStage" />
+            </list>
+        </property>
+    </bean>
+
+    <!-- Stage that produces the signed aggregate from a collection of entities -->
+    <bean id="aggregateStage" parent="mda.CompositeStage">
+        <property name="composedStages">
+            <list>
+
+                <!-- Perform common steps in constructing an output aggregate -->
+                <ref bean="commonOutputStage" />
+
+                <!-- Write the resulting aggregate to a file -->
+                <ref bean="aggregateSerializationStage" />
+
+            </list>
+        </property>
+    </bean>
+
+    <!-- Stage that writes the aggregate to a file -->
+    <bean id="aggregateSerializationStage" parent="mda.SerializationStage">
+        <property name="serializer" ref="serializer" />
+        <property name="outputFile">
+            <bean parent="File">
+                <constructor-arg value="${mdq.output}/all.xml" />
+            </bean>
+        </property>
+    </bean>
+
+    <!-- Output stage used by all MDQ aggregate pipelines -->
+    <bean id="commonOutputStage" parent="mda.CompositeStage">
+        <property name="composedStages">
+            <list>
+                <!-- Construct a new aggregate from the collection of entities -->
+                <bean id="inc.assemble" parent="mda.EntitiesDescriptorAssemblerStage">
+                    <property name="itemOrderingStrategy">
+                        <bean parent="inc.InCommonEntityOrderingStrategy" c:_-ref="us_incommon_registrar" />
+                    </property>
+                </bean>
+
+                <!-- Apply final tweaks to the aggregate -->
+                <bean id="finalise" parent="incommon_finalise_parent">
+                    <property name="transformParameters">
+                        <map>
+                            <entry key="extraText" value="Contains InCommon and eduGAIN metadata" />
+                            <entry key="publisher" value-ref="us_incommon_registrar" />
+                        </map>
+                    </property>
+                </bean>
+
+                <!-- Normalise the use of namespace prefixes in the resulting XML document. -->
+                <bean id="normalise" parent="mda.XSLTransformationStage"
+                    p:XSLResource="classpath:incommon/ns_norm_import.xsl" />
+
+                <!-- Sign the aggregate -->
+                <ref bean="signItems" />
+
+            </list>
+        </property>
+    </bean>
+
+    <!-- Source stage used by all MDQ pipelines -->
+    <bean id="commonSourceStage" parent="mda.CompositeStage">
+        <property name="composedStages">
+            <list>
+
+                <!-- Start with the signed production aggregate -->
+                <bean id="production_aggregate" parent="mda.DOMResourceSourceStage">
+                    <property name="parserPool" ref="parserPool" />
+                    <property name="DOMResource">
+                        <bean parent="FileSystemResource" c:_0="${mdq.input}" />
+                    </property>
+                </bean>
+
+                <!-- TODO: Check signature on source aggregate -->
+
+                <!-- Break down into individual entities. -->
+                <ref bean="disassemble" />
+
+                <!-- Include a default registrationAuthority for each entity. -->
+                <ref bean="us_incommon_default_regauth" />
+
+                <!-- Populate identifiers for future actions. -->
+                <ref bean="populateItemIds" />
+                <ref bean="populateRegistrationAuthorities" />
+
+                <!-- Discard entities in the InCommon entity blacklist. -->
+                <ref bean="remove_blacklisted_incommon_entities" />
+
+            </list>
+        </property>
+    </bean>
+
+    <!-- Pipeline that produces the IdP-only aggregate from a collection of IdP entities -->
+    <bean id="idpPipeline" parent="mda.SimplePipeline">
+        <property name="stages">
+            <list>
+
+                <!-- Perform common steps in constructing an output aggregate. -->
+                <ref bean="commonOutputStage" />
+
+                <!-- Write the resulting aggregate out to a file. -->
+                <ref bean="idpSerializationStage" />
+            </list>
+        </property>
+    </bean>
+
+    <!-- Selection strategy that selects IdP entities for the IdP-only aggregate -->
+    <bean id="idpSelectionStrategy" parent="mda.XPathItemSelectionStrategy">
+        <constructor-arg value="/md:EntityDescriptor[md:IDPSSODescriptor]" />
+        <constructor-arg ref="commonNamespaces" />
+    </bean>
+
+    <!-- Serialization stage that writes the IdP-only aggregate to a file -->
+    <bean id="idpSerializationStage" parent="mda.SerializationStage">
+        <property name="serializer" ref="serializer" />
+        <property name="outputFile">
+            <bean parent="File">
+                <constructor-arg value="${mdq.output}/idps/all.xml" />
+            </bean>
+        </property>
+    </bean>
+
+    <!-- Stage to produce signed per-entity metadata -->
+    <bean id="perEntityStage" parent="mda.CompositeStage">
+        <property name="composedStages">
+            <list>
+
+                <!-- Set ID, cacheDuration and validUntil attributes. -->
+                <bean parent="mda.GenerateIdStage" />
+                <bean parent="mda.SetValidUntilStage" p:validityDuration="P14D" />
+
+                <!-- Identity transform fixes signing issues. -->
+                <bean parent="mda.XSLTransformationStage" p:XSLResource="classpath:identity.xsl" />
+
+                <!-- Sign each item. -->
+                <ref bean="signItems" />
+
+                <!-- Write individual entity documents to files. -->
+                <bean id="write.perentity" parent="mda.MultiOutputSerializationStage">
+                    <property name="serializer" ref="serializer" />
+                    <property name="outputStrategy">
+                        <bean parent="mda.FilesInDirectoryMultiOutputStrategy" p:nameSuffix=".xml">
+                            <property name="directory">
+                                <bean parent="File" c:_="${mdq.output}" />
+                            </property>
+                            <property name="nameTransformer">
+                                <bean parent="mda.PathSegmentStringTransformer" />
+                            </property>
+                        </bean>
+                    </property>
+                </bean>
+
+            </list>
+        </property>
+    </bean>
+
+    <!-- Signs items using a privateKeyFactory defined elsewhere -->
+    <bean id="signItems" parent="mda.XMLSignatureSigningStage">
+        <property name="privateKey">
+            <ref bean="privateKeyFactory" />
+        </property>
+    </bean>
+
+</beans>
