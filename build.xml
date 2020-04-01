@@ -2665,6 +2665,46 @@
     </target>
 
     <!--
+	inc.generate.import_sign
+
+	Generate the InCommon import aggregate signed using AWS CloudHSM
+    -->
+    <target name="inc.generate.import_sign">
+        <property name="mda.sign.keyHandle" value="${sign.keyHandle}"/>
+        <property name="mda.sign.keyPassword" value="${sign.keyPassword}"/>
+        <property name="mda.sign.keyUser" value="${sign.keyUser}"/>
+        <property name="mda.classpath.extra" value="inc-mda-cloudhsm"/>
+        <property name="mda.jni.path" value="/opt/cloudhsm/lib"/>
+
+        <echo>Generating InCommon signed import aggregate in ${mda.inc.imported.xml}</echo>
+        <echo>    (IdP-only aggregate in ${mda.inc.imported-idp.xml})</echo>
+        <echo>    from production aggregate in ${mda.inc.production.xml}</echo>
+        <echo>    and selected eduGAIN entities from ${mda.inc.edugain.xml}</echo>
+        <echo>    signed using AWS CloudHSM</echo>
+        <CHANNEL.do channel="incommon" verb="import_sign"/>
+        <echo>Generation complete.</echo>
+    </target>
+
+    <!--
+        inc.generate.sign
+
+        Sign an aggregate using CloudHSM
+    -->
+    <target name="inc.generate.sign">
+        <property name="mda.sign.keyHandle" value="${sign.keyHandle}"/>
+        <property name="mda.sign.keyPassword" value="${sign.keyPassword}"/>
+        <property name="mda.sign.keyUser" value="${sign.keyUser}"/>
+        <property name="mda.classpath.extra" value="inc-mda-cloudhsm"/>
+        <property name="mda.jni.path" value="/opt/cloudhsm/lib"/>
+
+        <echo>Generating signed aggregate in ${mda.inc.imported.xml}</echo>
+        <echo>    from aggregate in ${mda.inc.production.xml}</echo>
+        <echo>    signed using AWS CloudHSM</echo>
+        <CHANNEL.do channel="incommon" verb="sign"/>
+        <echo>Generation complete.</echo>
+    </target>
+
+    <!--
         inc.mdq.generate.localkey
 
         Generate per-entity metadata for the InCommon federation

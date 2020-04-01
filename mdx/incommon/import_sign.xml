@@ -1,0 +1,327 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Construct InCommon eduGAIN import aggregate.
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+    default-lazy-init="true"
+    xmlns:c="http://www.springframework.org/schema/c"
+    xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:util="http://www.springframework.org/schema/util"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <!--
+        Import commonly used beans.
+    -->
+    <import resource="classpath:common-beans.xml"/>
+
+    <!--
+        Import inc-mda beans.
+    -->
+    <import resource="classpath:uk/org/iay/incommon/mda/beans.xml"/>
+
+    <!--
+        Import channel-specific beans.
+    -->
+    <import resource="classpath:incommon/beans.xml"/>
+    <import resource="classpath:incommon/edugain-policy.xml"/>
+
+    <!--
+        Import eduGAIN channel beans.
+    -->
+    <import resource="classpath:int_edugain/beans.xml"/>
+
+    <!--
+        ***********************************************************
+        ***                                                     ***
+        ***   C O M M O N   O U T P U T   P R O C E S S I N G   ***
+        ***                                                     ***
+        ***********************************************************
+    -->
+
+    <bean id="common.output" parent="mda.CompositeStage">
+        <property name="composedStages">
+            <list>
+                <!-- Construct a new aggregate from the collection of entities. -->
+                <bean id="inc.assemble" parent="mda.EntitiesDescriptorAssemblerStage">
+                    <property name="itemOrderingStrategy">
+                        <bean parent="inc.InCommonEntityOrderingStrategy"
+                            c:_-ref="us_incommon_registrar"/>
+                    </property>
+                </bean>
+
+                <!-- Apply final tweaks to the aggregate. -->
+                <bean id="finalise" parent="incommon_finalise_parent">
+                    <property name="transformParameters">
+                        <map>
+                            <entry key="extraText" value="Contains InCommon and eduGAIN metadata"/>
+                            <entry key="publisher" value-ref="us_incommon_registrar"/>
+                        </map>
+                    </property>
+                </bean>
+
+                <!-- Normalise the use of namespace prefixes in the resulting XML document. -->
+                <bean id="normalise" parent="mda.XSLTransformationStage"
+                    p:XSLResource="classpath:incommon/ns_norm_import.xsl"/>
+            </list>
+        </property>
+    </bean>
+
+
+    <!--
+        *****************************************
+        ***                                   ***
+        ***   I D P - O N L Y   O U T P U T   ***
+        ***                                   ***
+        *****************************************
+    -->
+
+    <!--
+        idp.serialize
+
+        Writes the IdP-only aggregate out to a file.
+    -->
+    <bean id="idp.serialize" parent="mda.SerializationStage">
+        <property name="serializer" ref="serializer"/>
+        <property name="outputFile">
+            <bean parent="File">
+                <constructor-arg value="${inc.imported-idp.xml}"/>
+            </bean>
+        </property>
+    </bean>
+
+    <!--
+        idp.selector
+
+        Entities in the IdP-only aggregate are restricted to identity providers.
+    -->
+    <bean id="idp.selector" parent="mda.XPathItemSelectionStrategy">
+        <constructor-arg value="/md:EntityDescriptor[md:IDPSSODescriptor]"/>
+        <constructor-arg ref="commonNamespaces"/>
+    </bean>
+
+    <!--
+        idp.pipeline
+
+        Generates the IdP-only aggregate. The selector has already taken care
+        of removing non-IdP entities.
+    -->
+    <bean id="idp.pipeline" parent="mda.SimplePipeline">
+        <property name="stages">
+            <list>
+                <!-- Perform common steps in constructing an output aggregate. -->
+                <ref bean="common.output"/>
+
+                <!-- Sign the aggregate -->
+                <ref bean="signItems" />
+
+                <!-- Write the resulting aggregate out to a file. -->
+                <ref bean="idp.serialize"/>
+            </list>
+        </property>
+    </bean>
+
+
+    <!--
+        *************************************************
+        ***                                           ***
+        ***   A L L   E N T I T I E S   O U T P U T   ***
+        ***                                           ***
+        *************************************************
+    -->
+
+    <!--
+        serializeImported
+
+        Writes the import aggregate out to a file.
+    -->
+    <bean id="serializeImported" parent="mda.SerializationStage">
+        <property name="serializer" ref="serializer"/>
+        <property name="outputFile">
+            <bean parent="File">
+                <constructor-arg value="${inc.imported.xml}"/>
+            </bean>
+        </property>
+    </bean>
+
+
+    <!--
+        *************************************
+        ***                               ***
+        ***   E D U G A I N   I N P U T   ***
+        ***                               ***
+        *************************************
+    -->
+
+    <bean id="incommon_edugain_importPipeline" parent="mda.SimplePipeline">
+        <property name="stages">
+            <list>
+                <!--
+                    Load the saved eduGAIN aggregate from a file.
+                -->
+                <bean id="edugain_aggregate" parent="mda.DOMResourceSourceStage">
+                    <property name="parserPool" ref="parserPool"/>
+                    <property name="DOMResource">
+                        <bean parent="FileSystemResource" c:_0="${inc.edugain.xml}"/>
+                    </property>
+                </bean>
+
+                <!--
+                    Check for fatal errors at the aggregate level:
+                        missing or expired validUntil attribute
+                        invalid signature
+                -->
+                <ref bean="check_validUntil"/>
+                <ref bean="int_edugain_checkSignature"/>
+                <ref bean="errorTerminatingFilter"/>
+
+                <ref bean="disassemble"/>
+
+                <ref bean="int_edugain_removeBlacklistedEntities"/>
+
+                <!--
+                    All eduGAIN entities should have mdrpi:RegistrationInfo elements, but
+                    we can't check the actual values.
+                -->
+                <ref bean="check_hasreginfo"/>
+
+                <!-- Populate identifiers for future actions. -->
+                <ref bean="populateItemIds"/>
+                <ref bean="populateRegistrationAuthorities"/>
+
+                <!-- Apply policy. -->
+                <ref bean="edugainPolicy"/>
+
+                <!--
+                    Silently remove entities which are marked as
+                    having errors.
+                -->
+                <ref bean="errorRemover"/>
+            </list>
+        </property>
+    </bean>
+
+
+
+    <!-- MD SIGNING MOVE TO AWS (TIO-118) -->
+
+    <!-- Define a private key factory (based on AWS CloudHSM) -->
+    <bean id="hsmPrivateKeyFactory" class="uk.org.iay.incommon.mda.cloudhsm.CaviumPrivateKeyFactoryBean"
+       p:username="${sign.keyUser}" p:password="${sign.keyPassword}" p:keyHandle="${sign.keyHandle}" />
+
+    <!-- Signs items using a provided privateKeyFactory -->
+    <bean id="signItems" parent="mda.XMLSignatureSigningStage">
+        <property name="privateKey">
+            <ref bean="hsmPrivateKeyFactory" />
+        </property>
+        <property name="certificates">
+            <list>
+                <bean id="us_incommon_signingCertificate" parent="X509CertificateFactoryBean"
+                    p:resource="classpath:us_incommon/inc-md-cert.pem"/>
+            </list>
+        </property>
+    </bean>
+
+
+
+    <!--
+        *************************************
+        ***                               ***
+        ***   M A I N   P I P E L I N E   ***
+        ***                               ***
+        *************************************
+    -->
+
+    <!--
+        The main "import_sign" pipeline is responsible for generating the
+        all-entities signed output aggregate.
+    -->
+    <bean id="import_sign" parent="mda.SimplePipeline">
+        <property name="stages">
+            <list>
+                <!--
+                    Start with the InCommon production aggregate.
+
+                    In a production environment, this will be the *unsigned* aggregate,
+                    so we perform minimal checking on its contents.
+                -->
+                <bean id="production_aggregate" parent="mda.DOMResourceSourceStage">
+                    <property name="parserPool" ref="parserPool"/>
+                    <property name="DOMResource">
+                        <bean parent="FileSystemResource" c:_0="${inc.production.xml}"/>
+                    </property>
+                </bean>
+
+                <!-- Break down into individual entities. -->
+                <ref bean="disassemble"/>
+
+                <!--
+                    In case we are testing with InCommon production metadata
+                    that already includes imported entities, remove those
+                    before proceeding to avoid them overwriting the
+                    new imported version.
+                -->
+                <bean id="keepInCommonEntities" parent="mda.EntityRegistrationAuthorityFilterStage">
+                    <property name="designatedRegistrationAuthorities">
+                        <list>
+                            <ref bean="us_incommon_registrar"/>
+                        </list>
+                    </property>
+                    <property name="requiringRegistrationInformation" value="true"/>
+                    <property name="whitelistingRegistrationAuthorities" value="true"/>
+                </bean>
+
+                <!-- Include a default registrationAuthority for each entity. -->
+                <ref bean="us_incommon_default_regauth"/>
+
+                <!-- Populate identifiers for future actions. -->
+                <ref bean="populateItemIds"/>
+                <ref bean="populateRegistrationAuthorities"/>
+
+                <!-- Merge in selected entities from eduGAIN. -->
+                <bean id="mergeProductionMDXEntities" parent="mda.PipelineMergeStage"
+                    p:collectionMergeStrategy-ref="deduplicateMergeStrategy">
+                    <property name="mergedPipelines">
+                        <list>
+                            <ref bean="incommon_edugain_importPipeline"/>
+                        </list>
+                    </property>
+                </bean>
+
+                <!--
+                    Discard entities in the InCommon entity blacklist.
+
+                    Because this is done _after_ the eduGAIN merge, the
+                    named entities will be removed whatever their source.
+                -->
+                <ref bean="remove_blacklisted_incommon_entities"/>
+
+                <!-- Fork new pipelines to generate special aggregates. -->
+                <bean id="demux" parent="mda.PipelineDemultiplexerStage">
+                    <property name="pipelineAndSelectionStrategies">
+                        <list>
+                            <!-- IdP-only aggregate. -->
+                            <bean class="net.shibboleth.utilities.java.support.collection.Pair">
+                                <constructor-arg ref="idp.pipeline"/>
+                                <constructor-arg ref="idp.selector"/>
+                            </bean>
+                        </list>
+                    </property>
+                    <property name="waitingForPipelines" value="true"/>
+                </bean>
+
+                <!-- Perform common steps in constructing an output aggregate. -->
+                <ref bean="common.output"/>
+
+                <!-- Sign the aggregate -->
+                <ref bean="signItems" />
+
+                <!-- Write the resulting aggregate out to a file. -->
+                <ref bean="serializeImported"/>
+            </list>
+        </property>
+    </bean>
+
+</beans>
