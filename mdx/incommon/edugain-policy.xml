@@ -214,6 +214,7 @@
                     they are explicitly documented in the policy wiki page.
                 -->
                 <ref bean="cleanImport"/>
+                <ref bean="wrapX509Certificates"/>
                 <ref bean="trimImportElementWhitespace"/>
 
                 <!--
