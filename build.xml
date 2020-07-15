@@ -112,7 +112,7 @@
     <property name="validUntil.default.days" value="14"/>
 
     <!-- Specific validUntil duration for aggregates, in days. -->
-    <property name="validUntil.aggregate.days" value="${validUntil.default.days}"/>
+    <property name="validUntil.aggregate.days" value="21"/>
     <!-- Same value, as an ISO 8601 duration. -->
     <property name="validUntil.aggregate.duration" value="P${validUntil.aggregate.days}D"/>
 
@@ -146,6 +146,7 @@
     <property name="git.repo.project.data" value="ukf-data"/>
     <property name="git.repo.project.products" value="ukf-products"/>
     <property name="git.repo.project.tooling" value="ukf-meta"/>
+    <property name="git.repo.project.tooling.config" value="ukf-meta-config"/>
 
     <!--
         Build access URLs for each repository.
@@ -153,6 +154,7 @@
     <property name="git.repo.data.url" value="${git.repo.user}@${git.repo.host}:${git.repo.group}/${git.repo.project.data}"/>
     <property name="git.repo.products.url" value="${git.repo.user}@${git.repo.host}:${git.repo.group}/${git.repo.project.products}"/>
     <property name="git.repo.tooling.url" value="${git.repo.user}@${git.repo.host}:${git.repo.group}/${git.repo.project.tooling}"/>
+    <property name="git.repo.tooling.config.url" value="${git.repo.user}@${git.repo.host}:${git.repo.group}/${git.repo.project.tooling.config}"/>
 
     <!--
         *********************************************
@@ -247,6 +249,8 @@
         External specialised directories.
     -->
     <property name="aggregates.dir" value="${shared.ws.dir}/${git.repo.project.products}/aggregates"/>
+    <property name="blocklists.dir" value="${shared.ws.dir}/${git.repo.project.data}/blocklists"/>
+    <property name="edugain.dir" value="${shared.ws.dir}/${git.repo.project.data}/edugain"/>
     <property name="entities.dir" value="${shared.ws.dir}/${git.repo.project.data}/entities"/>
     <property name="members.dir" value="${shared.ws.dir}/${git.repo.project.data}/members"/>
     <property name="output.dir" value="${shared.ws.dir}/build"/>
@@ -271,6 +275,12 @@
     <property name="tools.mdnorm" value="${tools.dir}/mdnorm"/>
     <property name="tools.slacktee" value="${tools.dir}/slacktee"/>
     <property name="tools.xmlsectool" value="${tools.dir}/xmlsectool-2.0.0"/>
+
+    <!--
+        Location of configuration for externally supplied tool bundles.
+    -->
+    <property name="tools.config.dir" value="${shared.ws.dir}/${git.repo.project.tooling.config}/tools"/>
+    <property name="tools.slacktee.config" value="${tools.config.dir}/slacktee"/>
 
     <!--
         Full path to a commonly used temporary file.
@@ -339,8 +349,16 @@
         This is used as the max heap setting for all Java invocations.  This amount will
         be more than some invocations require, but there's no harm in having a higher
         limit for all of them.
+
+        Note that this value is often overridden in production contexts (see, for example,
+        prod.properties) to give the production environment extra headroom. The value is
+        kept lower here so that we'll get warnings in development before the production
+        environment is affected.
+
+		The overrides for production environments should be updated in step with the
+		value here whenever this is necessary.
     -->
-    <property name="java.max.memory" value="1280m"/>
+    <property name="java.max.memory" value="1536m"/>
 
 
     <!--
@@ -693,66 +711,129 @@
         *********************************
      -->
 
+     <!--
+         Full hard reset of all repositories
+     -->
+     <target name="git.hardreset.all">
+         <exec executable="${git.executable}" dir="${shared.ws.dir}/${git.repo.project.data}" failonerror="true">
+             <arg value="checkout"/>
+             <arg value="master"/>
+         </exec>
+         <exec executable="${git.executable}" dir="${shared.ws.dir}/${git.repo.project.data}" failonerror="true">
+             <arg value="fetch"/>
+             <arg value="origin"/>
+         </exec>
+         <exec executable="${git.executable}" dir="${shared.ws.dir}/${git.repo.project.data}" failonerror="true">
+             <arg value="reset"/>
+             <arg value="--hard"/>
+             <arg value="origin/master"/>
+         </exec>
+         <exec executable="${git.executable}" dir="${shared.ws.dir}/${git.repo.project.data}" failonerror="true">
+             <arg value="checkout"/>
+             <arg value="immediate"/>
+         </exec>
+         <exec executable="${git.executable}" dir="${shared.ws.dir}/${git.repo.project.data}" failonerror="true">
+             <arg value="fetch"/>
+             <arg value="origin"/>
+         </exec>
+         <exec executable="${git.executable}" dir="${shared.ws.dir}/${git.repo.project.data}" failonerror="true">
+             <arg value="reset"/>
+             <arg value="--hard"/>
+             <arg value="origin/immediate"/>
+         </exec>
+         <exec executable="${git.executable}" dir="${shared.ws.dir}/${git.repo.project.data}" failonerror="true">
+             <arg value="checkout"/>
+             <arg value="deferred"/>
+         </exec>
+         <exec executable="${git.executable}" dir="${shared.ws.dir}/${git.repo.project.data}" failonerror="true">
+             <arg value="fetch"/>
+             <arg value="origin"/>
+         </exec>
+         <exec executable="${git.executable}" dir="${shared.ws.dir}/${git.repo.project.data}" failonerror="true">
+             <arg value="reset"/>
+             <arg value="--hard"/>
+             <arg value="deferred"/>
+         </exec>
+         <exec executable="${git.executable}" dir="${shared.ws.dir}/${git.repo.project.products}" failonerror="true">
+             <arg value="fetch"/>
+             <arg value="origin"/>
+         </exec>
+         <exec executable="${git.executable}" dir="${shared.ws.dir}/${git.repo.project.products}" failonerror="true">
+             <arg value="reset"/>
+             <arg value="--hard"/>
+         </exec>
+         <exec executable="${git.executable}" dir="${shared.ws.dir}/${git.repo.project.tooling}" failonerror="true">
+             <arg value="fetch"/>
+             <arg value="origin"/>
+         </exec>
+         <exec executable="${git.executable}" dir="${shared.ws.dir}/${git.repo.project.tooling}" failonerror="true">
+             <arg value="reset"/>
+             <arg value="--hard"/>
+         </exec>
+         <exec executable="${git.executable}" dir="${shared.ws.dir}/${git.repo.project.tooling.config}" failonerror="true">
+             <arg value="fetch"/>
+             <arg value="origin"/>
+         </exec>
+         <exec executable="${git.executable}" dir="${shared.ws.dir}/${git.repo.project.tooling.config}" failonerror="true">
+             <arg value="reset"/>
+             <arg value="--hard"/>
+         </exec>
+         <echo>All branches on all repositories, reset HARD.</echo>
+     </target>
+
     <!--
-        Full hard reset of all repositories
+        Full clean of all repositories
     -->
-    <target name="git.hardreset.all">
+    <target name="git.clean.all">
         <exec executable="${git.executable}" dir="${shared.ws.dir}/${git.repo.project.data}" failonerror="true">
             <arg value="checkout"/>
             <arg value="master"/>
         </exec>
         <exec executable="${git.executable}" dir="${shared.ws.dir}/${git.repo.project.data}" failonerror="true">
-            <arg value="fetch"/>
-            <arg value="origin"/>
-        </exec>
-        <exec executable="${git.executable}" dir="${shared.ws.dir}/${git.repo.project.data}" failonerror="true">
-            <arg value="reset"/>
-            <arg value="--hard"/>
-            <arg value="origin/master"/>
+            <arg value="clean"/>
+            <arg value="-xdf"/>
         </exec>
         <exec executable="${git.executable}" dir="${shared.ws.dir}/${git.repo.project.data}" failonerror="true">
             <arg value="checkout"/>
             <arg value="immediate"/>
         </exec>
         <exec executable="${git.executable}" dir="${shared.ws.dir}/${git.repo.project.data}" failonerror="true">
-            <arg value="fetch"/>
-            <arg value="origin"/>
-        </exec>
-        <exec executable="${git.executable}" dir="${shared.ws.dir}/${git.repo.project.data}" failonerror="true">
-            <arg value="reset"/>
-            <arg value="--hard"/>
-            <arg value="origin/immediate"/>
+            <arg value="clean"/>
+            <arg value="-xdf"/>
         </exec>
         <exec executable="${git.executable}" dir="${shared.ws.dir}/${git.repo.project.data}" failonerror="true">
             <arg value="checkout"/>
             <arg value="deferred"/>
         </exec>
         <exec executable="${git.executable}" dir="${shared.ws.dir}/${git.repo.project.data}" failonerror="true">
-            <arg value="fetch"/>
-            <arg value="origin"/>
-        </exec>
-        <exec executable="${git.executable}" dir="${shared.ws.dir}/${git.repo.project.data}" failonerror="true">
-            <arg value="reset"/>
-            <arg value="--hard"/>
-            <arg value="deferred"/>
+            <arg value="clean"/>
+            <arg value="-xdf"/>
         </exec>
         <exec executable="${git.executable}" dir="${shared.ws.dir}/${git.repo.project.products}" failonerror="true">
             <arg value="fetch"/>
             <arg value="origin"/>
         </exec>
         <exec executable="${git.executable}" dir="${shared.ws.dir}/${git.repo.project.products}" failonerror="true">
-            <arg value="reset"/>
-            <arg value="--hard"/>
+            <arg value="clean"/>
+            <arg value="-xdf"/>
         </exec>
         <exec executable="${git.executable}" dir="${shared.ws.dir}/${git.repo.project.tooling}" failonerror="true">
             <arg value="fetch"/>
             <arg value="origin"/>
         </exec>
         <exec executable="${git.executable}" dir="${shared.ws.dir}/${git.repo.project.tooling}" failonerror="true">
-            <arg value="reset"/>
-            <arg value="--hard"/>
+            <arg value="clean"/>
+            <arg value="-xdf"/>
         </exec>
-        <echo>All branches on all repositories, reset HARD.</echo>
+        <exec executable="${git.executable}" dir="${shared.ws.dir}/${git.repo.project.tooling.config}" failonerror="true">
+            <arg value="clean"/>
+            <arg value="-xdf"/>
+        </exec>
+        <exec executable="${git.executable}" dir="${shared.ws.dir}/${git.repo.project.tooling.config}" failonerror="true">
+            <arg value="clean"/>
+            <arg value="-xdf"/>
+        </exec>
+        <echo>All branches on all repositories, cleaned.</echo>
     </target>
 
     <!--
@@ -785,6 +866,9 @@
             <arg value="pull"/>
         </exec>
         <exec executable="${git.executable}" dir="${shared.ws.dir}/${git.repo.project.tooling}" failonerror="true">
+            <arg value="pull"/>
+        </exec>
+        <exec executable="${git.executable}" dir="${shared.ws.dir}/${git.repo.project.tooling.config}" failonerror="true">
             <arg value="pull"/>
         </exec>
     </target>
@@ -1158,7 +1242,7 @@
             <arg value="${utilities.dir}/stats-generate.sh"/>
             <arg value="day"/>
         </exec>
-        <SLACK.send conf="${tools.slacktee}/conf/repo-jenkins.conf" colour="good" channel="ukf-stats"
+        <SLACK.send conf="${tools.slacktee.config}/repo-jenkins.conf" colour="good" channel="ukf-stats"
             message="${stats.daily.output}"/>
     </target>
 
@@ -1452,6 +1536,11 @@
         <CHANNEL.do channel="uk" verb="generate"/>
 
         <!--
+            Generate discovery feeds.
+        -->
+        <CHANNEL.do channel="uk" verb="discofeeds"/>
+
+        <!--
             Post-process mda-generated output files.
         -->
         <MDNORM i="${output.dir}/${mdaggr.prod.unsigned}"/>
@@ -1487,6 +1576,7 @@
         by properties defined in the external properties files, e.g., build.properties.
     -->
     <property name="mda.java.endorsed.dirs" value="${tools.dir}/endorsed"/>
+    <property name="mda.blocklists.dir" value="${blocklists.dir}"/>
     <property name="mda.edugain.dir" value="${edugain.dir}"/>
     <property name="mda.entities.dir" value="${entities.dir}"/>
     <property name="mda.mdx.dir" value="${mdx.dir}"/>
@@ -1651,7 +1741,7 @@
                     <arg value="${git.repo.project.data}"/>
                     <arg value="${git.repo.project.products}"/>
                 </exec>
-                <SLACK.send conf="${tools.slacktee}/conf/aggr-ant.conf" colour="good" channel="ukf-events-publish"
+                <SLACK.send conf="${tools.slacktee.config}/aggr-ant.conf" colour="good" channel="ukf-events-publish"
                     message="${diff.between.publications}"/>
             </then>
         </if>
@@ -2252,10 +2342,6 @@
         <CHANNEL.import channel="${channel}"/>
     </target>
 
-    <target name="flow.int_edugain.testImport">
-        <CHANNEL.do channel="int_edugain" verb="importTest"/>
-    </target>
-
     <!--
         flow.verify.cobweb
 
@@ -2301,22 +2387,6 @@
     </target>
 
     <!--
-        *********************************
-        ***                           ***
-        ***   U I I N F O   L I S T   ***
-        ***                           ***
-        *********************************
-    -->
-
-    <target name="uiinfo.list">
-        <CHANNEL.do channel="uk" verb="collect"/>
-        <exec executable="xsltproc" failonerror="true">
-            <arg value="${build.dir}/list_uiinfo.xsl"/>
-            <arg value="${mdx.dir}/uk/collected.xml"/>
-        </exec>
-    </target>
-
-    <!--
         *******************************
         ***                         ***
         ***   M I S C E L L A N Y   ***
@@ -2338,6 +2408,7 @@
         <CHANNEL.do channel="uk" verb="statistics"/>
         <fixcrlf file="${output.dir}/${mdaggr.stats}" eol="lf" encoding="UTF-8"/>
     </target>
+
 
     <!--
         This variant generates a much simpler file, intended for use when building the
@@ -2534,6 +2605,35 @@
         <echo>Checking against future rulesets.</echo>
         <CHANNEL.do verb="checkFuture" channel="uk"/>
         <echo>Check complete.</echo>
+    </target>
+
+    <!--
+        compare.members
+
+        Runs the compare-members.sh script, comparing Salesforce and UKf member data
+    -->
+    <target name="compare.members" depends="extract.members.to.csv">
+        <echo>Running compare.members</echo>
+        <exec executable="bash" failonerror="true">
+            <arg value="${utilities.dir}/compare-members.sh"/>
+            <arg value="${temp.dir}/ukf-members.csv"/>
+        </exec>
+        <delete file="${temp.dir}/ukf-members.csv" quiet="true" verbose="false"/>
+    </target>
+
+    <!--
+        extract.members.to.csv
+
+        Extract the ID and Name elements in UKf members to a CSV file for compare-members.sh to use
+    -->
+    <target name="extract.members.to.csv">
+        <echo>Running extract.members.to.csv</echo>
+        <exec executable="xsltproc" failonerror="true">
+            <arg value="--output"/>
+            <arg value="${temp.dir}/ukf-members.csv"/>
+            <arg value="${utilities.dir}/members-to-csv.xsl"/>
+            <arg value="../ukf-data/members/members.xml"/>
+        </exec>
     </target>
 
     <!--

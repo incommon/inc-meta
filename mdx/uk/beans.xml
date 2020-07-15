@@ -239,6 +239,26 @@
     <bean id="check_uk_keydesc_key" parent="mda.XSLValidationStage"
         p:XSLResource="classpath:uk/check_uk_keydesc_key.xsl"/>
 
+    <!--
+        check_uk_email
+
+        Check that md:EmailAddress elements match our format, as
+        described by the EmailAddressStringValidator. In particular,
+        this requires the "mailto:" scheme."
+    -->
+    <bean id="check_uk_email" parent="ukf.StringElementValidationStage"
+        p:elementName-ref="md-EmailAddress">
+        <property name="validators">
+            <bean id="format" parent="ukf.EmailAddressStringValidator"/>
+        </property>
+    </bean>
+
+    <!--
+        check_uk_extensions
+    -->
+    <bean id="check_uk_extensions" parent="mda.XSLValidationStage"
+        p:XSLResource="classpath:uk/check_uk_extensions.xsl"/>
+
 
     <!--
         check_uk_mdattr
@@ -348,6 +368,8 @@
 
                 <ref bean="populateItemIds"/>
                 <ref bean="uk_populateIds"/>
+                <bean id="uk_populateFlowConstraints"
+                    parent="ukf.EntityDescriptorFlowConstraintPopulationStage"/>
                 <ref bean="uk_default_regauth"/>
                 <ref bean="populateRegistrationAuthorities"/>
 
@@ -356,9 +378,11 @@
                 <bean id="check_ukfedlabel" parent="mda.XSLValidationStage"
                     p:XSLResource="classpath:uk/check_ukfedlabel.xsl"/>
                 <ref bean="check_ukreg"/>
+                <ref bean="check_uk_email"/>
                 <ref bean="check_owner"/>
                 <ref bean="check_uk_keydesc_key"/>
                 <ref bean="check_uk_mdattr"/>
+                <ref bean="check_uk_extensions"/>
                 <ref bean="check_uk_mdrps"/>
                 <ref bean="check_uk_urlenc"/>
                 <ref bean="check_uk_mdui_dn_en_present"/>
@@ -507,6 +531,7 @@
         <property name="transformParameters">
             <map>
                 <entry key="memberDocument" value-ref="uk_membersDocument"/>
+                <entry key="now_ISO" value-ref="now_ISO"/>
             </map>
         </property>
     </bean>
@@ -522,6 +547,10 @@
     <bean id="uk_statisticsPipeline" parent="mda.SimplePipeline">
         <property name="stages">
             <list>
+                <!-- Apply flow constraints for this flow. -->
+                <bean id="flowConstraints" parent="ukf.FlowConstraintApplyingStage"
+                    p:flowName="statistics"/>
+
                 <ref bean="assemble"/>
                 <ref bean="uk_generateStatistics"/>
                 <ref bean="uk_serializeStatistics"/>

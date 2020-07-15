@@ -41,6 +41,7 @@
         Java class parent shorthand beans.
     -->
     <bean id="File" abstract="true" class="java.io.File"/>
+    <bean id="Instant" abstract="true" class="java.time.Instant"/>
     <bean id="String" abstract="true" class="java.lang.String"/>
     <bean id="QName" abstract="true" class="javax.xml.namespace.QName"/>
 
@@ -140,6 +141,85 @@
 
     <!-- *** Default Shibboleth component bean id property from Spring bean id *** -->
     <bean class="net.shibboleth.ext.spring.config.IdentifiableBeanPostProcessor" lazy-init="false"/>
+
+    <!--
+        *******************************************************
+        ***                                                 ***
+        ***   D A T E   A N D   T I M E   H A N D L I N G   ***
+        ***                                                 ***
+        *******************************************************
+    -->
+
+    <!--
+        Approximately when the Spring context was initialised,
+        as a java.time.Instant.
+    -->
+    <bean id="start_instant_raw" parent="Instant" factory-method="now"/>
+
+    <!--
+        A java.time.Instant representing 00:00:00Z today.
+
+        We use this to pin timestamps in aggregates intended for comparison.
+    -->
+    <bean id="today_instant_raw" parent="Instant" factory-method="from"
+        c:_="#{ start_instant_raw.truncatedTo(T(java.time.temporal.ChronoUnit).DAYS) }"/>
+
+    <!--
+        Select the instant to use as "now" in places like aggregate generation.
+
+        By default, this will be the time the Spring context was initialised.
+        This may be overridden in order to provide a stable value for
+        run-to-run comparisons.
+
+        Set the now.instant.raw.name to the name of the overriding value bean.
+        If running from build.xml using ant, this needs to be prefixed by "mda.".
+
+        Example:
+
+            ant -Dmda.now.instant.raw.name=today_instant_raw ...
+    -->
+    <bean id="now_instant_raw" parent="Instant" factory-method="from"
+        c:_-ref="${now.instant.raw.name:start_instant_raw}"/>
+
+    <!--
+        now_instant_raw can have any precision. To get somewhat consistent
+        output, derive a new now_instant that truncates that to the second.
+    -->
+    <bean id="now_instant" parent="Instant" factory-method="from"
+        c:_="#{ now_instant_raw.truncatedTo(T(java.time.temporal.ChronoUnit).SECONDS) }"/>
+
+    <!--
+        Strings representing now_instant as an ISO 8601 UTC date/time
+        and as an ISO 8601 date.
+    -->
+    <bean id="now_ISO" parent="String" c:_="#{ now_instant.toString() }"/>
+    <bean id="now_date_ISO" parent="String" c:_="#{ now_ISO.substring(0,10) }"/>
+
+    <!--
+        The now_instant as a local date/time (in the system default
+        timezone), and as an ISO 8601 representation of that.
+    -->
+    <bean id="now_local" class="java.time.LocalDateTime"
+        factory-method="ofInstant"
+        c:_0-ref="now_instant"
+        c:_1="#{ T(java.time.ZoneId).systemDefault() }"/>
+    <bean id="now_local_ISO" parent="String" c:_="#{ now_local.toString() }"/>
+
+    <!--
+        Make a value for the validUntil attribute for any aggregates we
+        generate.
+
+        This is based on the now_instant plus a number of days specified
+        by the validUntil.aggregate.days property (or 14 days if for some reason
+        that is not defined).
+
+        Assumes that a day is exactly 86400 seconds, which is close enough for
+        these purposes.
+    -->
+    <bean id="validUntil_aggregate_days" class="java.lang.Integer" factory-method="parseInt"
+        c:_="${validUntil.aggregate.days:14}"/>
+    <bean id="validUntil_aggregate_ISO" parent="String"
+        c:_="#{ now_instant.plusSeconds(86400*validUntil_aggregate_days).toString()}"/>
 
     <!--
         ***********************************************
@@ -291,7 +371,13 @@
 
     <!--
         Federation registrationAuthority URIs.
+
+        Bean names are generally constructed from the 2-letter
+        ISO country code, underscore, and the federation acronym.
+
+        The list is ordered by bean name.
     -->
+    <bean id="al_rash_registrar"         parent="String" c:_="https://eduid.rash.al"/>
     <bean id="am_afire_registrar"        parent="String" c:_="https://aai.asnet.am"/>
     <bean id="ar_mate_registrar"         parent="String" c:_="http://www.federacionmate.gob.ar"/>
     <bean id="at_aconet_registrar"       parent="String" c:_="http://eduid.at"/>
@@ -303,9 +389,10 @@
     <bean id="ca_caf_registrar"          parent="String" c:_="http://www.canarie.ca"/>
     <bean id="ch_switchaai_registrar"    parent="String" c:_="http://rr.aai.switch.ch/"/>
     <bean id="cl_cofre_registrar"        parent="String" c:_="http://cofre.reuna.cl"/>
-    <bean id="cn_carsi_registrar"        parent="String" c:_="http://carsi.edu.cn"/>
+    <bean id="cn_carsi_registrar"        parent="String" c:_="https://www.carsi.edu.cn"/>
+    <bean id="cn_cstcloud_registrar"     parent="String" c:_="http://cstcloud.net"/><!-- A guess -->
     <bean id="co_colfire_registrar"      parent="String" c:_="http://colfire.co"/>
-    <bean id="cy_cynet_registrar"        parent="String" c:_="http://cynet.ac.cy"/>
+    <bean id="cy_cynet_registrar"        parent="String" c:_="https://cif.cynet.ac.cy"/>
     <bean id="cz_eduid_registrar"        parent="String" c:_="http://www.eduid.cz/"/>
     <bean id="de_dfnaai_registrar"       parent="String" c:_="https://www.aai.dfn.de"/>
     <bean id="dk_wayf_registrar"         parent="String" c:_="https://www.wayf.dk"/>
@@ -328,33 +415,46 @@
     <bean id="it_idem_registrar"         parent="String" c:_="http://www.idem.garr.it/"/>
     <bean id="jp_gakunin_registrar"      parent="String" c:_="https://www.gakunin.jp"/>
     <bean id="kr_kafe_registrar"         parent="String" c:_="http://kafe.kreonet.net"/>
+    <bean id="kg_krena_registrar"        parent="String" c:_="https://www.kif.kg"/>
     <bean id="lb_life_registrar"         parent="String" c:_="http://life.aub.edu.lb"/><!-- A guess -->
+    <bean id="lk_liaf_registrar"         parent="String" c:_="https://liaf.ac.lk"/>
     <bean id="lt_litnet_registrar"       parent="String" c:_="https://fedi.litnet.lt"/>
     <bean id="lu_eduid_registrar"        parent="String" c:_="http://eduid.lu"/>
     <bean id="lv_laife_registrar"        parent="String" c:_="http://laife.lanet.lv/"/>
+    <bean id="ma_eduidm_registrar"       parent="String" c:_="https://eduidm.ma"/>
     <bean id="md_leaf_registrar"         parent="String" c:_="http://federations.renam.md/"/>
     <bean id="me_eduid_registrar"        parent="String" c:_="http://mren.ac.me"/><!-- A guess -->
     <bean id="mk_aaiedumk_registrar"     parent="String" c:_="https://rr.aaiedu.mk"/>
+    <bean id="mt_ricerca_registrar"      parent="String" c:_="https://id.ricerka.net.mt"/>
     <bean id="mw_maren_registrar"        parent="String" c:_="https://maren.ac.mw"/><!-- A guess -->
-    <bean id="mz_cafmoz_registrar"       parent="String" c:_="http://cafmoz.morenet.ac.mz"/><!-- A guess -->
+    <bean id="my_sifulan_registrar"      parent="String" c:_="https://sifulan.my"/>
+    <bean id="mx_fenix_registrar"        parent="String" c:_="http://www.fenix.org.mx/"/><!-- A guess -->
+    <bean id="mz_cafmoz_registrar"       parent="String" c:_="http://cafmoz.morenet.ac.mz"/>
     <bean id="nl_surfconext_registrar"   parent="String" c:_="http://www.surfconext.nl/"/>
     <bean id="no_feide_registrar"        parent="String" c:_="http://feide.no/"/>
-    <bean id="nz_tuakiri_registrar"      parent="String" c:_="http://tuakiri.ac.nz/"/><!-- A guess -->
+    <bean id="nz_tuakiri_registrar"      parent="String" c:_="https://tuakiri.ac.nz/"/>
     <bean id="om_omankid_registrar"      parent="String" c:_="https://home.trc.gov.om"/>
+    <bean id="om_omren_registrar"        parent="String" c:_="http://www.omren.om"/>
+    <bean id="pk_pkifed_registrar"       parent="String" c:_="https://pkifed.pk"/>
     <bean id="pl_pionier_registrar"      parent="String" c:_="https://aai.pionier.net.pl"/>
     <bean id="pt_rctsaai_registrar"      parent="String" c:_="https://www.fccn.pt"/>
+    <bean id="ro_edunetid_registrar"     parent="String" c:_="http://eduid.roedu.net"/>
     <bean id="rs_amres_registrar"        parent="String" c:_="http://amres.ac.rs/"/><!-- A guess -->
-    <bean id="ru_fedurus_registrar"      parent="String" c:_="http://www.fedurus.ru/"/><!-- A guess -->
+    <bean id="ru_fedurus_registrar"      parent="String" c:_="http://arbicon.ru"/>
+    <bean id="ru_runnet_registrar"       parent="String" c:_="http://runnet.ru/"/>
+    <bean id="sa_maeen_registrar"        parent="String" c:_="https://www.maeen.sa"/>
     <bean id="se_swamid_registrar"       parent="String" c:_="http://www.swamid.se/"/>
     <bean id="sg_sgaf_registrar"         parent="String" c:_="https://www.singaren.net.sg"/>
     <bean id="si_arnes_registrar"        parent="String" c:_="http://aai.arnes.si"/>
     <bean id="sk_safeid_registrar"       parent="String" c:_="http://safeid.sk"/>
-    <bean id="tr_yetkim_registrar"       parent="String" c:_="http://aai.ulak.net.tr/"/><!-- A guess -->
+    <bean id="tj_tarena_registrar"       parent="String" c:_="http://www.tidf.tj/"/>
+    <bean id="tr_yetkim_registrar"       parent="String" c:_="https://yetkim.ulakbim.gov.tr/"/>
     <bean id="ua_peano_registrar"        parent="String" c:_="https://peano.uran.ua"/>
     <bean id="ug_rif_registrar"          parent="String" c:_="https://www.renu.ac.ug"/>
     <bean id="uk_ukf_registrar"          parent="String" c:_="http://ukfederation.org.uk"/>
     <bean id="us_incommon_registrar"     parent="String" c:_="https://incommon.org"/>
     <bean id="za_safire_registrar"       parent="String" c:_="https://safire.ac.za"/>
+    <bean id="zm_fidern_registrar"       parent="String" c:_="https://fidern.ac.zm"/>
 
 
 
@@ -374,77 +474,99 @@
                 <!--
                     eduGAIN participant registration authority display names as country codes.
 
+                    The display name for a country with only one registrar
+                    is the ISO 2-letter country code.
+
+                    If there is more than one registrar, each will be given
+                    a display name constructed from the country code, a hyphen,
+                    and a federation acronym.
+
                     The ordering here is as on the eduGAIN status page:
 
-                    http://www.edugain.org/technical/status.php
+                    https://technical.edugain.org/status
                 -->
-                <entry key-ref="dz_arnaai_registrar"          value="DZ"/>
-                <entry key-ref="ar_mate_registrar"            value="AR"/>
-                <entry key-ref="am_afire_registrar"           value="AM"/>
                 <entry key-ref="au_aaf_registrar"             value="AU"/>
+                <entry key-ref="hr_eduhr_registrar"           value="HR"/>
+                <entry key-ref="mk_aaiedumk_registrar"        value="MK"/>
                 <entry key-ref="at_aconet_registrar"          value="AT"/>
-                <entry key-ref="by_febas_registrar"           value="BY"/>
+                <entry key-ref="am_afire_registrar"           value="AM"/>
+                <entry key-ref="dz_arnaai_registrar"          value="DZ"/>
+                <entry key-ref="si_arnes_registrar"           value="SI"/>
                 <entry key-ref="be_belnet_registrar"          value="BE"/>
-                <entry key-ref="br_cafe_registrar"            value="BR"/>
                 <entry key-ref="ca_caf_registrar"             value="CA"/>
+                <entry key-ref="br_cafe_registrar"            value="BR"/>
+                <entry key-ref="mz_cafmoz_registrar"          value="MZ"/>
+                <entry key-ref="cn_carsi_registrar"           value="CN-CARSI"/>
                 <entry key-ref="cl_cofre_registrar"           value="CL"/>
                 <entry key-ref="co_colfire_registrar"         value="CO"/>
-                <entry key-ref="hr_eduhr_registrar"           value="HR"/>
-                <entry key-ref="cz_eduid_registrar"           value="CZ"/>
-                <entry key-ref="dk_wayf_registrar"            value="DK"/>
-                <entry key-ref="ec_minga_registrar"           value="EC"/>
-                <entry key-ref="ee_taat_registrar"            value="EE"/>
-                <entry key-ref="fi_haka_registrar"            value="FI"/>
-                <entry key-ref="fr_renater_registrar"         value="FR"/>
-                <entry key-ref="ge_gif_registrar"             value="GE"/>
+                <entry key-ref="cy_cynet_registrar"           value="CY"/>
                 <entry key-ref="de_dfnaai_registrar"          value="DE"/>
-                <entry key-ref="gr_grnet_registrar"           value="GR"/>
+                <entry key-ref="ie_edugate_registrar"         value="IE"/>
+                <entry key-ref="cz_eduid_registrar"           value="CZ"/>
                 <entry key-ref="hu_eduid_registrar"           value="HU"/>
+                <entry key-ref="lu_eduid_registrar"           value="LU"/>
+                <entry key-ref="ma_eduidm_registrar"          value="MA"/>
+                <entry key-ref="by_febas_registrar"           value="BY"/>
+                <entry key-ref="ru_fedurus_registrar"         value="RU-FEDURUS"/>
+                <entry key-ref="no_feide_registrar"           value="NO"/>
+                <entry key-ref="fr_renater_registrar"         value="FR"/>
+                <entry key-ref="zm_fidern_registrar"          value="ZM"/>
+                <entry key-ref="jp_gakunin_registrar"         value="JP"/>
+                <entry key-ref="ge_gif_registrar"             value="GE"/>
+                <entry key-ref="gr_grnet_registrar"           value="GR"/>
+                <entry key-ref="fi_haka_registrar"            value="FI"/>
+                <entry key-ref="hk_hkaf_registrar"            value="HK"/>
+                <entry key-ref="it_idem_registrar"            value="IT"/>
+                <entry key-ref="us_incommon_registrar"        value="US"/>
                 <entry key-ref="in_infed_registrar"           value="IN"/>
                 <entry key-ref="ir_irfed_registrar"           value="IR"/>
-                <entry key-ref="ie_edugate_registrar"         value="IE"/>
                 <entry key-ref="il_iif_registrar"             value="IL"/>
-                <entry key-ref="it_idem_registrar"            value="IT"/>
-                <entry key-ref="jp_gakunin_registrar"         value="JP"/>
                 <entry key-ref="kr_kafe_registrar"            value="KR"/>
+                <entry key-ref="kg_krena_registrar"           value="KG"/>
                 <entry key-ref="lv_laife_registrar"           value="LV"/>
-                <entry key-ref="lt_litnet_registrar"          value="LT"/>
-                <entry key-ref="lu_eduid_registrar"           value="LU"/>
-                <entry key-ref="mk_aaiedumk_registrar"        value="MK"/>
                 <entry key-ref="md_leaf_registrar"            value="MD"/>
-                <entry key-ref="no_feide_registrar"           value="NO"/>
-                <entry key-ref="om_omankid_registrar"         value="OM"/>
+                <entry key-ref="lt_litnet_registrar"          value="LT"/>
+                <entry key-ref="lk_liaf_registrar"            value="LK"/>
+                <entry key-ref="ar_mate_registrar"            value="AR"/>
+                <entry key-ref="ec_minga_registrar"           value="EC"/>
+                <entry key-ref="om_omankid_registrar"         value="OM-KID"/>
+                <entry key-ref="om_omren_registrar"           value="OM-REN"/>
+                <entry key-ref="ua_peano_registrar"           value="UA"/>
                 <entry key-ref="pl_pionier_registrar"         value="PL"/>
+                <entry key-ref="pk_pkifed_registrar"          value="PK"/>
+                <entry key-ref="al_rash_registrar"            value="AL"/>
                 <entry key-ref="pt_rctsaai_registrar"         value="PT"/>
-                <entry key-ref="sg_sgaf_registrar"            value="SG"/>
-                <entry key-ref="si_arnes_registrar"           value="SI"/>
+                <entry key-ref="mt_ricerca_registrar"         value="MT"/>
+                <entry key-ref="ug_rif_registrar"             value="UG"/>
+                <entry key-ref="ro_edunetid_registrar"        value="RO"/>
+                <entry key-ref="ru_runnet_registrar"          value="RU-RUNNET"/>
+                <entry key-ref="sa_maeen_registrar"           value="SA"/>
                 <entry key-ref="za_safire_registrar"          value="ZA"/>
+                <entry key-ref="sg_sgaf_registrar"            value="SG"/>
+                <entry key-ref="my_sifulan_registrar"         value="MY"/>
                 <entry key-ref="es_sir_registrar"             value="ES"/>
+                <entry key-ref="nl_surfconext_registrar"      value="NL"/>
                 <entry key-ref="se_swamid_registrar"          value="SE"/>
                 <entry key-ref="ch_switchaai_registrar"       value="CH"/>
-                <entry key-ref="nl_surfconext_registrar"      value="NL"/>
-                <entry key-ref="us_incommon_registrar"        value="US"/>
-                <entry key-ref="ug_rif_registrar"             value="UG"/>
-                <entry key-ref="ua_peano_registrar"           value="UA"/>
+                <entry key-ref="ee_taat_registrar"            value="EE"/>
+                <entry key-ref="nz_tuakiri_registrar"         value="NZ"/>
                 <entry key-ref="uk_ukf_registrar"             value="UK"/>
+                <entry key-ref="dk_wayf_registrar"            value="DK"/>
+                <entry key-ref="tr_yetkim_registrar"          value="TR"/>
 
                 <!-- eduGAIN voting-only members -->
                 <entry key-ref="bg_bif_registrar"             value="BG"/>
-                <entry key-ref="cy_cynet_registrar"           value="CY"/>
-                <entry key-ref="hk_hkaf_registrar"            value="HK"/>
                 <entry key-ref="it_gridp_registrar"           value="IT-GRIDP"/>
-                <entry key-ref="nz_tuakiri_registrar"         value="NZ"/>
-                <entry key-ref="tr_yetkim_registrar"          value="TR"/>
 
                 <!-- eduGAIN candidates -->
-                <entry key-ref="cn_carsi_registrar"           value="CN"/>
+                <entry key-ref="cn_cstcloud_registrar"        value="CN-CSTCLOUD"/>
+                <entry key-ref="me_eduid_registrar"           value="ME"/>
+                <entry key-ref="mx_fenix_registrar"           value="MX"/>
+                <entry key-ref="rs_amres_registrar"           value="RS"/>
                 <entry key-ref="lb_life_registrar"            value="LB"/>
                 <entry key-ref="mw_maren_registrar"           value="MW"/>
-                <entry key-ref="me_eduid_registrar"           value="ME"/>
-                <entry key-ref="mz_cafmoz_registrar"          value="MZ"/>
-                <entry key-ref="ru_fedurus_registrar"         value="RU"/>
-                <entry key-ref="rs_amres_registrar"           value="RS"/>
                 <entry key-ref="sk_safeid_registrar"          value="SK"/>
+                <entry key-ref="tj_tarena_registrar"          value="TJ"/>
             </map>
         </property>
     </bean>
@@ -732,6 +854,22 @@
     </bean>
 
     <!--
+        strip_mdui_logo_length
+
+        Filter out mdui:Logo elements whose text content is
+        longer than a threshold value. Add a warning to the
+        entity when this is done.
+    -->
+    <bean id="strip_mdui_logo_length" parent="mda.XSLTransformationStage"
+        p:XSLResource="classpath:strip-mdui-logo-length.xsl">
+        <property name="transformParameters">
+            <map>
+                <entry key="maxLength" value="${mdui.logo.length.remove:50000}"/>
+            </map>
+        </property>
+    </bean>
+
+    <!--
         *****************************************************
         ***                                               ***
         ***   S H I B B O L E T H   E X T E N S I O N S   ***
@@ -755,6 +893,9 @@
         ***************************
     -->
 
+    <bean id="ds-X509Certificate" parent="QName" c:_0-ref="ds_namespace"
+        c:_1="X509Certificate"/>
+
     <!--
         stripKeyNames
 
@@ -764,6 +905,15 @@
         p:elementName="KeyName"
         p:elementNamespace-ref="ds_namespace"/>
 
+    <!--
+        wrapX509Certificates
+
+        Normalise the text inside ds:X509Certificate elements by
+        removing all white space, then reformatting for 64 characters
+        per line.
+    -->
+    <bean id="wrapX509Certificates" parent="ukf.ElementBase64WrappingStage"
+        p:elementName-ref="ds-X509Certificate"/>
 
 
     <!--
@@ -1059,15 +1209,21 @@
                     </property>
                 </bean>
 
+                <!--
+                    Stages that modify metadata come first, so that
+                    anything they remove is not checked later.
+                -->
                 <ref bean="cleanImport"/>
+                <ref bean="wrapX509Certificates"/>
                 <ref bean="stripAAMDUI"/>
                 <ref bean="stripMDUILogoHttp"/>
                 <ref bean="trimImportElementWhitespace"/>
                 <ref bean="stripEmptyExtensions"/>
+                <ref bean="strip_mdui_logo_length"/>
+
                 <ref bean="checkSchemas"/>
                 <ref bean="CHECK_std"/>
                 <ref bean="check_dup_display"/>
-                <ref bean="check_shib_regscope"/>
                 <ref bean="check_namespaces"/>
 
                 <bean id="checkCertificates" parent="mda.X509ValidationStage">

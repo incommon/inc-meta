@@ -22,6 +22,21 @@
     -->
     <import resource="classpath:int_edugain/beans.xml"/>
 
+    <!--
+        Import inc-mda beans.
+    -->
+    <import resource="classpath:uk/org/iay/incommon/mda/beans.xml"/>
+
+    <!--
+        Import ukf channel beans, for uk_assemble.
+    -->
+    <import resource="classpath:uk/beans.xml"/>
+
+    <!--
+        Import UK federation ingress policy for eduGAIN.
+    -->
+    <import resource="classpath:uk/edugain-policy.xml"/>
+
     <bean id="serializeImported" parent="mda.SerializationStage">
         <property name="serializer" ref="serializer"/>
         <property name="outputFile">
@@ -50,6 +65,7 @@
             <list>
                 <ref bean="int_edugain_productionEntities"/>
                 <ref bean="standardImportActions"/>
+                <ref bean="edugainPolicy"/>
                 <ref bean="standardImportTail"/>
                 <ref bean="serializeImported"/>
             </list>
@@ -60,17 +76,6 @@
         <property name="stages">
             <list>
                 <ref bean="int_edugain_productionAggregate"/>
-                <ref bean="serializeImported"/>
-            </list>
-        </property>
-    </bean>
-
-    <bean id="importTest" parent="mda.SimplePipeline">
-        <property name="stages">
-            <list>
-                <ref bean="int_edugain_testEntities"/>
-                <ref bean="standardImportActions"/>
-                <ref bean="standardImportTail"/>
                 <ref bean="serializeImported"/>
             </list>
         </property>
@@ -94,6 +99,7 @@
                     p:designatedEntities-ref="int_edugain_verify_blacklist"/>
 
                 <ref bean="standardImportActions"/>
+                <ref bean="edugainPolicy"/>
                 <ref bean="errorTerminatingFilter"/>
             </list>
         </property>
@@ -114,6 +120,7 @@
                     p:designatedEntities-ref="int_edugain_verify_blacklist"/>
 
                 <ref bean="standardImportActions"/>
+                <ref bean="edugainPolicy"/>
                 <ref bean="errorTerminatingFilter"/>
             </list>
         </property>
@@ -133,6 +140,7 @@
 
                 <!-- remove all entities which still have errors -->
                 <ref bean="standardImportActions"/>
+                <ref bean="edugainPolicy"/>
                 <ref bean="errorRemover"/>
 
                 <!-- remove all entities *other* than the ones in the blacklist -->
@@ -164,7 +172,24 @@
                 <ref bean="int_edugain_productionEntities"/>
                 <ref bean="removeUKEntities"/>
 
+                <!--
+                    Sort the remaining entities by entity ID, so that any errors
+                    are reported in a stable order, even if some registrars
+                    have unstable output.
+                    
+                    Ideally this should be handled by an explicit ordering stage.
+                    Lacking one, we use the fact that we can use the ordering
+                    strategy ability of the EntitiesDescriptor assembler to
+                    order entities, and then disassemble again. Ordering is based
+                    on the ItemID populated into the item metadata.
+                -->
+                <ref bean="populateItemIds"/>
+                <ref bean="uk_assemble"/>
+                <ref bean="disassemble"/>
+
                 <ref bean="standardImportActions"/>
+                <ref bean="edugainPolicy"/>
+
                 <ref bean="warningAndErrorAnnouncer"/>
                 <ref bean="errorTerminator"/>
             </list>

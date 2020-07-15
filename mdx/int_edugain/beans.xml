@@ -23,35 +23,33 @@
     -->
     <!-- production aggregate -->
     <bean id="int_edugain_productionAggregate_url" parent="String">
-        <constructor-arg value="http://mds.edugain.org/"/>
+        <constructor-arg value="http://mds.edugain.org/edugain-v1.xml"/>
     </bean>
-    <!-- test aggregate -->
-    <bean id="int_edugain_testAggregate_url" parent="String">
-        <constructor-arg value="http://mds-test.edugain.org"/>
+    <!-- beta (test) aggregate -->
+    <bean id="int_edugain_betaAggregate_url" parent="String">
+        <constructor-arg value="http://mds.edugain.org/edugain-v1-beta.xml"/>
     </bean>
 
     <!--
         Fetches the eduGAIN production aggregate.
+
+        Other aggregates may be substituted if their location exists as a bean
+        named "int_edugain_<ID>Aggregate_url" above, and the property
+        "int.edugain.aggregate.name" is set to "<ID>". "production" is used
+        as the default.
+
+        If a flow is being run from build.xml using ant, the property name
+        needs to be prefixed with "mda.", as "mda.int.edugain.aggregate.name":
+
+            ant -Dmda.int.edugain.aggregate.name=beta ...		
     -->
     <bean id="int_edugain_productionAggregate" parent="mda.DOMResourceSourceStage">
         <property name="parserPool" ref="parserPool"/>
         <property name="DOMResource">
             <bean parent="HTTPResource">
                 <constructor-arg name="client" ref="httpClient"/>
-                <constructor-arg name="url" ref="int_edugain_productionAggregate_url"/>
-            </bean>
-        </property>
-    </bean>
-
-    <!--
-        Fetch the eduGAIN test aggregate.
-    -->
-    <bean id="int_edugain_testAggregate" parent="mda.DOMResourceSourceStage">
-        <property name="parserPool" ref="parserPool"/>
-        <property name="DOMResource">
-            <bean parent="HTTPResource">
-                <constructor-arg name="client" ref="httpClient"/>
-                <constructor-arg name="url" ref="int_edugain_testAggregate_url"/>
+                <constructor-arg name="url"
+                	ref="int_edugain_${int.edugain.aggregate.name:production}Aggregate_url"/>
             </bean>
         </property>
     </bean>
@@ -60,7 +58,7 @@
         eduGAIN signing certificate.
     -->
     <bean id="int_edugain_signingCertificate" parent="X509CertificateFactoryBean"
-        p:resource="classpath:int_edugain/mds-2014.cer"/>
+        p:resource="classpath:int_edugain/mds-v1.cer"/>
 
     <!--
         Check a signature against the eduGAIN signing certificate.
@@ -96,42 +94,6 @@
                 <ref bean="disassemble"/>
 
                 <ref bean="int_edugain_removeBlacklistedEntities"/>
-
-                <!--
-                    All eduGAIN entities should have mdrpi:RegistrationInfo elements, but
-                    we can't check the actual values.
-                -->
-                <ref bean="check_hasreginfo"/>
-            </list>
-        </property>
-    </bean>
-
-    <!--
-        Fetch the test entities as a collection.
-    -->
-    <bean id="int_edugain_testEntities" parent="mda.CompositeStage">
-        <property name="composedStages">
-            <list>
-                <ref bean="int_edugain_testAggregate"/>
-
-                <!--
-                    Check for fatal errors at the aggregate level:
-                        missing or expired validUntil attribute
-                        invalid signature
-                -->
-                <ref bean="check_validUntil"/>
-                <ref bean="int_edugain_checkSignature"/>
-                <ref bean="errorTerminatingFilter"/>
-
-                <ref bean="disassemble"/>
-
-                <ref bean="int_edugain_removeBlacklistedEntities"/>
-
-                <!--
-                    All eduGAIN entities should have mdrpi:RegistrationInfo elements, but
-                    we can't check the actual values.
-                -->
-                <ref bean="check_hasreginfo"/>
             </list>
         </property>
     </bean>

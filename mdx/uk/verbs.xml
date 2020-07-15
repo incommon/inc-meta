@@ -39,6 +39,19 @@
         <property name="stages">
             <list>
                 <ref bean="uk_registeredEntities"/>
+
+                <!--
+                    The rest of the pipeline is a duplicate of the
+                    uk_statisticsPipeline bean definition. It would
+                    be better to use that, but Pipeline isn't a thing
+                    that can appear within another Pipeline at
+                    present (MDA 0.9.x).
+                -->
+
+                <!-- Apply flow constraints for this flow. -->
+                <bean id="flowConstraints" parent="ukf.FlowConstraintApplyingStage"
+                    p:flowName="statistics"/>
+                
                 <ref bean="assemble"/>
                 <ref bean="uk_generateStatistics"/>
                 <ref bean="uk_serializeStatistics"/>
@@ -49,12 +62,17 @@
     <!--
         statistics.charting
 
-        Stand-along statistics generation for charting.
+        Stand-alone statistics generation for charting.
     -->
     <bean id="statistics.charting" parent="mda.SimplePipeline">
         <property name="stages">
             <list>
                 <ref bean="uk_registeredEntities"/>
+
+                <!-- Apply flow constraints for this flow. -->
+                <bean id="flowConstraints" parent="ukf.FlowConstraintApplyingStage"
+                    p:flowName="statistics"/>
+
                 <ref bean="assemble"/>
                 <bean parent="mda.XSLTransformationStage"
                     p:XSLResource="classpath:uk/statistics-charting.xsl">
@@ -146,11 +164,15 @@
                 <ref bean="uk_registeredEntities"/>
 
                 <!--
-                    The next four stages ensure that any errors are reported
+                    The next five stages ensure that any errors are reported
                     in entity ID order, even on systems where the native order
                     (which tends to reflect the file enumeration ordering)
-                    is arbitrary.  Ideally this should be handled by an optional
-                    ordering strategy on the announcing filter.
+                    is arbitrary.  Ideally this should be handled by an explicit
+                    ordering stage.
+
+                    The actual reordering is performed by the uk_assemble/disassemble
+                    stages; the subsequent "populate" stages restore the item
+                    metadata discarded by the uk_assemble stage.
                 -->
                 <ref bean="uk_assemble"/>
                 <ref bean="disassemble"/>
@@ -178,11 +200,15 @@
                 <ref bean="uk_registeredEntities"/>
 
                 <!--
-                    The next four stages ensure that any errors are reported
+                    The next five stages ensure that any errors are reported
                     in entity ID order, even on systems where the native order
                     (which tends to reflect the file enumeration ordering)
-                    is arbitrary.  Ideally this should be handled by an optional
-                    ordering strategy on the announcing filter.
+                    is arbitrary.  Ideally this should be handled by an explicit
+                    ordering stage.
+
+                    The actual reordering is performed by the uk_assemble/disassemble
+                    stages; the subsequent "populate" stages restore the item
+                    metadata discarded by the uk_assemble stage.
                 -->
                 <ref bean="uk_assemble"/>
                 <ref bean="disassemble"/>
@@ -294,7 +320,17 @@
 
                 <!-- transform into a fragment using our local conventions -->
                 <bean id="importTransform" parent="mda.XSLTransformationStage"
-                    p:XSLResource="classpath:uk/import.xsl"/>
+                    p:XSLResource="classpath:uk/import.xsl">
+                    <property name="transformParameters">
+                        <map>
+                            <entry key="now_ISO" value-ref="now_ISO"/>
+                            <entry key="now_date_ISO" value-ref="now_date_ISO"/>
+                        </map>
+                    </property>
+                </bean>
+
+                <!-- Normalise the text in ds:X509Certificate elements. -->
+                <ref bean="wrapX509Certificates"/>
 
                 <!-- normalise namespaces in a specific way -->
                 <bean id="normalizeFragment" parent="mda.XSLTransformationStage"
@@ -364,6 +400,7 @@
                     </property>
                 </bean>
 
+                <ref bean="check_uk_extensions"/>
                 <ref bean="check_uk_mdrps"/>
                 <ref bean="check_uk_urlenc"/>
                 <ref bean="check_future"/>
@@ -402,6 +439,7 @@
             <list>
                 <ref bean="uk_exportedEntities"/>
                 <ref bean="standardImportActions"/>
+                <ref bean="check_shib_regscope"/>
                 <ref bean="standardImportTail"/>
                 <ref bean="serializeImported"/>
             </list>

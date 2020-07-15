@@ -37,11 +37,6 @@
     xmlns:shibmd="urn:mace:shibboleth:metadata:1.0"
     xmlns:ukfedlabel="http://ukfederation.org.uk/2006/11/label"
 
-    xmlns:date="http://exslt.org/dates-and-times"
-    xmlns:mdxDates="xalan://uk.ac.sdss.xalan.md.Dates"
-    xmlns:mdxTextUtils="xalan://uk.ac.sdss.xalan.md.TextUtils"
-    extension-element-prefixes="date mdxDates mdxTextUtils"
-
     xmlns:xalan="http://xml.apache.org/xalan"
 
     exclude-result-prefixes="idpdisc init md mdui xalan"
@@ -55,6 +50,12 @@
     <xsl:output omit-xml-declaration="no" method="xml" encoding="UTF-8"
         indent="yes" xalan:indent-amount="4"
     />
+
+    <!--
+        Parameters passed in from verbs.xml.
+    -->
+    <xsl:param name="now_ISO"/>
+    <xsl:param name="now_date_ISO"/>
 
     <xsl:strip-space elements="md:EntityDescriptor"/>
 
@@ -136,7 +137,7 @@
                 -->
                 <ukfedlabel:Software name="*** FILL IN ***"
                     version="*** FILL IN OR REMOVE ***" fullVersion="*** FILL IN OR REMOVE ***">
-                    <xsl:attribute name="date"><xsl:value-of select="mdxDates:date()"/></xsl:attribute>
+                    <xsl:attribute name="date"><xsl:value-of select="$now_date_ISO"/></xsl:attribute>
                 </ukfedlabel:Software>
 
                 <!--
@@ -153,7 +154,7 @@
                 <xsl:element name="mdrpi:RegistrationInfo">
                     <xsl:attribute name="registrationAuthority">http://ukfederation.org.uk</xsl:attribute>
                     <xsl:attribute name="registrationInstant">
-                        <xsl:value-of select="mdxDates:dateAdd(date:date-time(), 0)"/>
+                        <xsl:value-of select="$now_ISO"/>
                     </xsl:attribute>
                     <xsl:element name="mdrpi:RegistrationPolicy">
                         <xsl:attribute name="xml:lang">en</xsl:attribute>
@@ -254,18 +255,6 @@
     -->
     <xsl:template match="ds:KeyName">
         <!-- do nothing -->
-    </xsl:template>
-
-
-    <!--
-        Normalise whitespace in X509Certificate elements.
-    -->
-    <xsl:template match="ds:X509Certificate">
-        <xsl:element name="ds:X509Certificate">
-            <xsl:text>&#10;</xsl:text>
-            <xsl:value-of select="mdxTextUtils:wrapBase64(.)"/>
-            <xsl:text>&#10;</xsl:text>
-        </xsl:element>
     </xsl:template>
 
 

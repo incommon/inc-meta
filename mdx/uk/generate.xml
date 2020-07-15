@@ -28,6 +28,20 @@
     -->
     <import resource="classpath:int_edugain/beans.xml"/>
 
+    <!--
+        Import beans for blocklists.
+    -->
+    <import resource="file:${blocklists.dir}/fallback-blocklist.xml"/>
+
+    <!--
+        Import inc-mda beans.
+    -->
+    <import resource="classpath:uk/org/iay/incommon/mda/beans.xml"/>
+
+    <!--
+        Import UK federation ingress policy for eduGAIN.
+    -->
+    <import resource="classpath:uk/edugain-policy.xml"/>
 
     <!--
         *****************************
@@ -71,13 +85,12 @@
     <!--
         assembleAggregate
 
-        Assemble a UK-style aggregate with an appropriate validUntil and ID.
+        Assemble a UK-style aggregate with an appropriate ID.
     -->
     <bean id="assembleAggregate" parent="mda.CompositeStage">
         <property name="composedStages">
             <list>
                 <ref bean="uk_assemble"/>
-                <bean parent="mda.SetValidUntilStage" p:validityDuration="${validUntil.aggregate.duration}"/>
                 <!--
                     setStaticID
 
@@ -211,29 +224,6 @@
         p:whitelistingEntities="false"
         p:designatedEntities-ref="importEntityBlacklist"/>
 
-    <!--
-        importCommonTail
-
-        Common actions to be performed on each import pipeline.
-    -->
-    <bean id="importCommonTail" parent="mda.CompositeStage">
-        <property name="composedStages">
-            <list>
-                <ref bean="removeUKEntities"/>
-                <ref bean="removeBlacklistedEntities"/>
-                <ref bean="standardImportActions"/>
-
-                <!--
-                    Silently remove entities which are marked as
-                    having errors.
-                -->
-                <ref bean="errorRemover"/>
-
-                <ref bean="uk_fix_mailto"/>
-            </list>
-        </property>
-    </bean>
-
     <bean id="entityAttributes.blacklist" parent="mda.EntityAttributeFilteringStage">
         <property name="whitelisting" value="false"/>
         <property name="rules">
@@ -259,7 +249,18 @@
                 -->
                 <ref bean="entityAttributes.blacklist"/>
 
-                <ref bean="importCommonTail"/>
+                <ref bean="removeUKEntities"/>
+                <ref bean="removeBlacklistedEntities"/>
+                <ref bean="standardImportActions"/>
+                <ref bean="edugainPolicy"/>
+
+                <!--
+                    Silently remove entities which are marked as
+                    having errors.
+                -->
+                <ref bean="errorRemover"/>
+
+                <ref bean="uk_fix_mailto"/>
             </list>
         </property>
     </bean>
@@ -278,6 +279,9 @@
             <map>
                 <entry key="publisher" value-ref="uk_federation_uri"/>
                 <entry key="validityDays" value="${validUntil.aggregate.days}"/>
+                <entry key="now_ISO" value-ref="now_ISO"/>
+                <entry key="now_local_ISO" value-ref="now_local_ISO"/>
+                <entry key="validUntil_ISO" value-ref="validUntil_aggregate_ISO"/>
             </map>
         </property>
     </bean>
@@ -294,6 +298,10 @@
     <bean id="uk_productionPipeline" parent="mda.SimplePipeline">
         <property name="stages">
             <list>
+                <!-- Apply flow constraints for this flow. -->
+                <bean id="flowConstraints" parent="ukf.FlowConstraintApplyingStage"
+                    p:flowName="production"/>
+
                 <!--
                     Enforce IdP display name uniqueness before assembling aggregate
                 -->
@@ -349,6 +357,10 @@
     <bean id="uk_wayfPipeline" parent="mda.SimplePipeline">
         <property name="stages">
             <list>
+                <!-- Apply flow constraints for this flow. -->
+                <bean id="flowConstraints" parent="ukf.FlowConstraintApplyingStage"
+                    p:flowName="wayf"/>
+                
                 <!--
                     Remove SIRTFI metadata.
                 -->
@@ -432,6 +444,9 @@
                     value="Central Discovery Service metadata; not for end entity use"/>
                 <entry key="publisher" value-ref="uk_federation_uri"/>
                 <entry key="validityDays" value="${validUntil.aggregate.days}"/>
+                <entry key="now_ISO" value-ref="now_ISO"/>
+                <entry key="now_local_ISO" value-ref="now_local_ISO"/>
+                <entry key="validUntil_ISO" value-ref="validUntil_aggregate_ISO"/>
             </map>
         </property>
     </bean>
@@ -469,6 +484,10 @@
     <bean id="CDSAllPipeline" parent="mda.SimplePipeline">
         <property name="stages">
             <list>
+                <!-- Apply flow constraints for this flow. -->
+                <bean id="flowConstraints" parent="ukf.FlowConstraintApplyingStage"
+                    p:flowName="cdsall"/>
+                
                 <!--
                     Enforce IdP display name uniqueness before assembling aggregate
                 -->
@@ -514,6 +533,9 @@
                 <entry key="extraText" value="Feature fallback metadata; not for production use"/>
                 <entry key="publisher" value-ref="uk_federation_uri"/>
                 <entry key="validityDays" value="${validUntil.aggregate.days}"/>
+                <entry key="now_ISO" value-ref="now_ISO"/>
+                <entry key="now_local_ISO" value-ref="now_local_ISO"/>
+                <entry key="validUntil_ISO" value-ref="validUntil_aggregate_ISO"/>
             </map>
         </property>
     </bean>
@@ -533,6 +555,14 @@
     <bean id="uk_fallbackPipeline" parent="mda.SimplePipeline">
         <property name="stages">
             <list>
+                <!-- Apply flow constraints for this flow. -->
+                <bean id="flowConstraints" parent="ukf.FlowConstraintApplyingStage"
+                    p:flowName="fallback"/>
+                
+                <bean id="removeFallbackBlocklist" parent="mda.EntityFilterStage"
+                    p:whitelistingEntities="false"
+                    p:designatedEntities-ref="fallbackEntityBlocklist"/>
+
                 <!--
                     Enforce IdP display name uniqueness before assembling aggregate
                 -->
@@ -567,6 +597,9 @@
                 <entry key="extraText" value="Feature test metadata; not for production use"/>
                 <entry key="publisher" value-ref="uk_federation_uri"/>
                 <entry key="validityDays" value="${validUntil.aggregate.days}"/>
+                <entry key="now_ISO" value-ref="now_ISO"/>
+                <entry key="now_local_ISO" value-ref="now_local_ISO"/>
+                <entry key="validUntil_ISO" value-ref="validUntil_aggregate_ISO"/>
             </map>
         </property>
     </bean>
@@ -586,6 +619,10 @@
     <bean id="uk_testPipeline" parent="mda.CompositeStage">
         <property name="composedStages">
             <list>
+                <!-- Apply flow constraints for this flow. -->
+                <bean id="flowConstraints" parent="ukf.FlowConstraintApplyingStage"
+                    p:flowName="test"/>
+                
                 <!--
                     Enforce IdP display name uniqueness before assembling aggregate
                 -->
@@ -594,6 +631,7 @@
 
                 <ref bean="uk_strip_UKFederationMember"/>
                 <ref bean="assembleAggregate"/>
+                <bean parent="mda.SetCacheDurationStage" p:cacheDuration="PT6H"/>
                 <ref bean="stripEntityScopes"/>
                 <ref bean="uk_finaliseTest"/>
                 <ref bean="uk_normaliseTest"/>
@@ -621,6 +659,9 @@
                 <entry key="extraText" value="Export metadata for use by partner federations"/>
                 <entry key="publisher" value-ref="uk_federation_uri"/>
                 <entry key="validityDays" value="${validUntil.aggregate.days}"/>
+                <entry key="now_ISO" value-ref="now_ISO"/>
+                <entry key="now_local_ISO" value-ref="now_local_ISO"/>
+                <entry key="validUntil_ISO" value-ref="validUntil_aggregate_ISO"/>
             </map>
         </property>
     </bean>
@@ -642,10 +683,14 @@
     <bean id="uk_exportPipeline" parent="mda.SimplePipeline">
         <property name="stages">
             <list>
+                <!-- Apply flow constraints for this flow. -->
+                <bean id="flowConstraints" parent="ukf.FlowConstraintApplyingStage"
+                    p:flowName="export"/>
+                
                 <!--
                     Additional rules excluding entities from the aggregate.
 
-                    The basic rule (expressed in uk_exportPreviewSelector) is that
+                    The basic rule (expressed in uk_exportSelector) is that
                     entities are excluded if they do not have the ExportOptOut label.
                     Additional rules below are applied to entities which do not
                     have the ExportOptIn label: in other words, a rule in this section
@@ -670,13 +715,6 @@
                             <property name="stages">
                                 <list>
 
-                                    <!-- Identity providers lacking support for SAML 2.0 -->
-                                    <bean id="SAML1onlyIdPs" parent="mda.XPathFilteringStage"
-                                        p:namespaceContext-ref="commonNamespaces"
-                                        p:XPathExpression="md:IDPSSODescriptor
-                                        [not(contains(@protocolSupportEnumeration,'urn:oasis:names:tc:SAML:2.0:protocol'))]">
-                                    </bean>
-
                                     <!-- Aggregated schools sector identity providers -->
                                     <!--
                                         Preferred implementation:
@@ -691,14 +729,6 @@
                                     <bean id="syntheticScopes" parent="mda.XPathFilteringStage"
                                         p:namespaceContext-ref="commonNamespaces"
                                         p:XPathExpression="//shibmd:Scope[contains(., '.eng.ukfederation.org.uk')]"/>
-                                    <!-- Specific providers not caught by the previous condition -->
-                                    <bean id="GlowScotland" parent="mda.EntityFilterStage">
-                                        <property name="designatedEntities">
-                                            <set>
-                                                <value>https://idp.glowscotland.org.uk/shibboleth</value>
-                                            </set>
-                                        </property>
-                                    </bean>
 
                                     <!-- Identity providers with regular expression scopes -->
                                     <bean id="regexScopes" parent="mda.XPathFilteringStage"
@@ -757,6 +787,10 @@
     <bean id="uk_exportPreviewPipeline" parent="mda.SimplePipeline">
         <property name="stages">
             <list>
+                <!-- Apply flow constraints for this flow. -->
+                <bean id="flowConstraints" parent="ukf.FlowConstraintApplyingStage"
+                    p:flowName="export-preview"/>
+                
                 <!--
                     Additional rules excluding entities from the aggregate.
 
@@ -785,13 +819,6 @@
                             <property name="stages">
                                 <list>
 
-                                    <!-- Identity providers lacking support for SAML 2.0 -->
-                                    <bean id="SAML1onlyIdPs" parent="mda.XPathFilteringStage"
-                                        p:namespaceContext-ref="commonNamespaces"
-                                        p:XPathExpression="md:IDPSSODescriptor
-                                            [not(contains(@protocolSupportEnumeration,'urn:oasis:names:tc:SAML:2.0:protocol'))]">
-                                    </bean>
-
                                     <!-- Aggregated schools sector identity providers -->
                                     <!--
                                         Preferred implementation:
@@ -806,14 +833,6 @@
                                     <bean id="syntheticScopes" parent="mda.XPathFilteringStage"
                                         p:namespaceContext-ref="commonNamespaces"
                                         p:XPathExpression="//shibmd:Scope[contains(., '.eng.ukfederation.org.uk')]"/>
-                                    <!-- Specific providers not caught by the previous condition -->
-                                    <bean id="GlowScotland" parent="mda.EntityFilterStage">
-                                        <property name="designatedEntities">
-                                            <set>
-                                                <value>https://idp.glowscotland.org.uk/shibboleth</value>
-                                            </set>
-                                        </property>
-                                    </bean>
 
                                     <!-- Identity providers with regular expression scopes -->
                                     <bean id="regexScopes" parent="mda.XPathFilteringStage"
@@ -835,6 +854,7 @@
                 <ref bean="assembleAggregate"/>
                 <ref bean="stripEntityScopes"/>
                 <ref bean="stripEmptyExtensions"/>
+                <bean parent="mda.SetCacheDurationStage" p:cacheDuration="PT6H"/>
                 <ref bean="uk_finaliseExport"/>
 
                 <bean id="uk_normaliseExportPreview" parent="mda.XSLTransformationStage"
