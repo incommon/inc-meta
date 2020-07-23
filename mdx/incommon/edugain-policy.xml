@@ -93,6 +93,14 @@
                 <ref bean="stripMDUILogoHttp"/>
 
                 <!--
+                    Sub-rule b.
+
+                    "..."
+                -->
+                <ref bean="strip_mdui_logo_length"/>
+                <ref bean="check_mdui_logo_length"/>
+
+                <!--
                     *************************************
                     ***                               ***
                     ***   P O L I C Y   R U L E   3   ***
