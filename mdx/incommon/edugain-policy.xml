@@ -79,17 +79,16 @@
                 <!--
                     Sub-rule a.
 
-                    "mdui:Logo elements with a URL that is not HTTPS-protected"
+                    "<mdui:Logo> elements with a URL that is not HTTPS-protected"
                 -->
                 <ref bean="stripMDUILogoHttp"/>
 
                 <!--
                     Sub-rule b.
 
-                    "..."
+                    "<mdui:Logo> elements with a value longer than 40,000 characters"
                 -->
                 <ref bean="strip_mdui_logo_length"/>
-                <ref bean="check_mdui_logo_length"/>
 
                 <!--
                     *************************************
@@ -449,7 +448,25 @@
                 <!--
                     *************************************
                     ***                               ***
-                    ***   P O L I C Y   R U L E   7   ***
+                    ***   P O L I C Y   R U L E   5   ***
+                    ***                               ***
+                    *************************************
+
+                    "Log a warning for each of the following conditions,
+                    without transforming the containing entity:"
+                -->
+
+                <!--
+                    Sub-rule a.
+
+                    "mdui:Logo elements with a value longer than 50,000 characters"
+                -->
+                <ref bean="check_mdui_logo_length"/>
+
+                <!--
+                    *************************************
+                    ***                               ***
+                    ***   P O L I C Y   R U L E   6   ***
                     ***                               ***
                     *************************************
 
