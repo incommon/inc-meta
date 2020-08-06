@@ -19,22 +19,13 @@
         Entities with errors are NOT removed here, so that this policy can be
         used in contexts where reporting is more appropriate than just removal.
 
-        Rule number references are to the Interfederation Technical Policy
-        pages on the Internet2 wiki. There are two versions:
+        For the current release, rule references here are to the
+        Interfederation Technical Policy page on the Internet2 wiki:
 
-        * Interfederation Technical Policy Development
-            * at https://spaces.internet2.edu/x/ugDABg
-            * documents the expected *next* deployment
-            * updated as changes are made in the master branch
-            * use this if you want to cross-reference numbers against
-              the development tooling
+            https://spaces.at.internet2.edu/x/zAgOCg
 
-        * Interfederation Technical Policy
-            * at https://spaces.internet2.edu/x/TgCNBQ
-            * documents the *current* deployment
-            * to cross-reference against this page, check out the specific
-              release mentioned there
-
+        Rule references may change during development, so the references here
+        may be out of step with the public page.
     -->
     <bean id="edugainPolicy" parent="mda.CompositeStage">
         <property name="composedStages">
