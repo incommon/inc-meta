@@ -234,6 +234,31 @@
         p:members-ref="uk_members"/>
 
     <!--
+        compromised.ukf
+
+        Check against UKf-specific list of compromised RSA keys.
+    -->
+    <bean id="compromised.ukf" parent="mda.X509RSAOpenSSLBlacklistValidator"
+        p:id="compromised.ukf">
+        <property name="blacklistResource">
+            <bean parent="FileSystemResource" c:_="${blocklists.dir}/compromised-keys.txt"/>
+        </property>
+    </bean>
+
+    <!--
+        check_ukf_compromised
+
+        Validation bean which just checks against the UKf-specific list of compromised RSA keys.
+    -->
+    <bean id="check_ukf_compromised" parent="mda.X509ValidationStage">
+        <property name="validators">
+            <list>
+                <ref bean="compromised.ukf"/>
+            </list>
+        </property>
+    </bean>
+
+    <!--
         check_uk_keydesc_key
     -->
     <bean id="check_uk_keydesc_key" parent="mda.XSLValidationStage"
@@ -302,6 +327,13 @@
     <bean id="check_uk_mdui_dn_en_present" parent="mda.XSLValidationStage"
         p:XSLResource="classpath:uk/check_uk_mdui_dn_en_present.xsl"/>
 
+    <!--
+        check_uk_rands
+
+        If an SP has the R&S entity category, it MUST have an MDRPS
+    -->
+    <bean id="check_uk_rands" parent="mda.XSLValidationStage"
+        p:XSLResource="classpath:uk/check_uk_rands.xsl"/>
 
     <!--
         ***************************************
@@ -387,6 +419,7 @@
                 <ref bean="check_uk_urlenc"/>
                 <ref bean="check_uk_mdui_dn_en_present"/>
                 <ref bean="check_uk_mdui_dn_en_match"/>
+                <ref bean="check_uk_rands"/>
                 <ref bean="check_dup_display"/>
 
                 <bean id="checkCertificates" parent="mda.X509ValidationStage">
@@ -417,6 +450,11 @@
                                 Again, don't need to check for keys below our minimum key size.
                             -->
                             <ref bean="compromised.2048"/>
+
+                            <!--
+                                Check against UKf-specific list of compromised RSA keys.
+                            -->
+                            <ref bean="compromised.ukf"/>
                         </list>
                     </property>
                 </bean>
@@ -436,13 +474,6 @@
     <bean id="uk_stripExtensions" parent="mda.XSLTransformationStage"
         p:XSLResource="classpath:uk/strip_extensions.xsl"/>
 
-
-    <!--
-        uk_strip_UKFederationMember
-    -->
-    <bean id="uk_strip_UKFederationMember" parent="mda.ElementStrippingStage"
-        p:elementNamespace-ref="ukfedlabel_namespace"
-        p:elementName="UKFederationMember"/>
 
     <!--
         ***********************************************
@@ -590,5 +621,19 @@
             </list>
         </property>
     </bean>
+
+    <!--
+        #############################################################
+        ###                                                       ###
+        ###   A D D   E N C R Y P T I O N   A L G O R I T H M S   ###
+        ###                                                       ###
+        #############################################################
+    -->
+
+    <!--
+        Add CBC EncryptionMethod where there is no other block algorithm
+    -->
+    <bean id="uk_add_cbc_encryption" parent="mda.XSLTransformationStage"
+        p:XSLResource="classpath:uk/add_cbc_encryption.xsl"/>
 
 </beans>

@@ -302,13 +302,13 @@
                 <bean id="flowConstraints" parent="ukf.FlowConstraintApplyingStage"
                     p:flowName="production"/>
 
-                <!--
-                    Enforce IdP display name uniqueness before assembling aggregate
-                -->
-                <ref bean="check_dup_display"/>
-                <ref bean="errorTerminatingFilter"/>
-
                 <ref bean="assembleAggregate"/>
+                <bean parent="mda.SetCacheDurationStage"
+                    p:cacheDuration="${cacheDuration.aggregate.duration}"/>
+                <ref bean="stripEntityScopes"/>
+
+                <ref bean="uk_add_cbc_encryption"/>
+
                 <ref bean="uk_finaliseProduction"/>
                 <ref bean="uk_normaliseNamespaces"/>
 
@@ -360,19 +360,16 @@
                 <!-- Apply flow constraints for this flow. -->
                 <bean id="flowConstraints" parent="ukf.FlowConstraintApplyingStage"
                     p:flowName="wayf"/>
-                
+
                 <!--
                     Remove SIRTFI metadata.
                 -->
                 <ref bean="strip.SIRTFI"/>
 
-                <!--
-                    Enforce IdP display name uniqueness before assembling aggregate
-                -->
-                <ref bean="check_dup_display"/>
-                <ref bean="errorTerminatingFilter"/>
-
                 <ref bean="assembleAggregate"/>
+                <bean parent="mda.SetCacheDurationStage"
+                    p:cacheDuration="${cacheDuration.aggregate.duration}"/>
+                <ref bean="stripEntityScopes"/>
 
                 <!--
                     Remove embedded images used in mdui:Logo elements.
@@ -415,7 +412,6 @@
                 <ref bean="stripComments"/>
 
                 <ref bean="stripAlgNamespace"/>
-                <ref bean="stripInitNamespace"/>
                 <ref bean="stripMdattrNamespace"/>
                 <ref bean="stripMdrpiNamespace"/>
                 <ref bean="stripUkfedlabelNamespace"/>
@@ -487,12 +483,67 @@
                 <!-- Apply flow constraints for this flow. -->
                 <bean id="flowConstraints" parent="ukf.FlowConstraintApplyingStage"
                     p:flowName="cdsall"/>
-                
+
+                <!-- make an aggregate first so that we're only traversing one item -->
+                <ref bean="assembleAggregate"/>
+                <bean parent="mda.SetCacheDurationStage"
+                    p:cacheDuration="${cacheDuration.aggregate.duration}"/>
+
+                <!-- remove many things that the CDS doesn't look at -->
+                <ref bean="stripInitNamespace"/>
+                <ref bean="CDSStripUnwanted"/>
+
                 <!--
-                    Enforce IdP display name uniqueness before assembling aggregate
+                    Remove embedded images used in mdui:Logo elements.
                 -->
-                <ref bean="check_dup_display"/>
+                <ref bean="stripMDUILogoData"/>
+                <ref bean="stripEmptyMDUIUIInfo"/>
+                <ref bean="stripEmptyExtensions"/>
+
+                <ref bean="CDSFinalise"/>
+                <ref bean="CDSNormaliseNamespaces"/>
+
+                <!-- schema validity check MUST pass -->
+                <ref bean="checkSchemas"/>
                 <ref bean="errorTerminatingFilter"/>
+
+                <ref bean="serializeCDSAllAggregate"/>
+            </list>
+        </property>
+    </bean>
+
+    <!--
+        *****************************************
+        ***                                   ***
+        ***   W U G E N   A G G R E G A T E   ***
+        ***                                   ***
+        *****************************************
+    -->
+
+    <!--
+        The Wugen aggregate includes all entities except standalone AttributeAuthorities
+        (which cannot have WAYFless URLs)
+    -->
+    <bean id="WugenSelector" parent="mda.XPathItemSelectionStrategy">
+        <constructor-arg value="/md:EntityDescriptor[md:IDPSSODescriptor or md:SPSSODescriptor]" />
+        <constructor-arg ref="commonNamespaces"/>
+    </bean>
+
+    <bean id="serializeWugenAggregate" parent="mda.SerializationStage">
+        <property name="serializer" ref="serializer"/>
+        <property name="outputFile">
+            <bean parent="File">
+                <constructor-arg value="${output.dir}/ukfederation-wugen-unsigned.xml"/>
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="WugenPipeline" parent="mda.SimplePipeline">
+        <property name="stages">
+            <list>
+                <!-- Apply flow constraints for this flow. -->
+                <bean id="flowConstraints" parent="ukf.FlowConstraintApplyingStage"
+                    p:flowName="wugen"/>
 
                 <!-- make an aggregate first so that we're only traversing one item -->
                 <ref bean="assembleAggregate"/>
@@ -514,7 +565,7 @@
                 <ref bean="checkSchemas"/>
                 <ref bean="errorTerminatingFilter"/>
 
-                <ref bean="serializeCDSAllAggregate"/>
+                <ref bean="serializeWugenAggregate"/>
             </list>
         </property>
     </bean>
@@ -558,18 +609,15 @@
                 <!-- Apply flow constraints for this flow. -->
                 <bean id="flowConstraints" parent="ukf.FlowConstraintApplyingStage"
                     p:flowName="fallback"/>
-                
+
                 <bean id="removeFallbackBlocklist" parent="mda.EntityFilterStage"
                     p:whitelistingEntities="false"
                     p:designatedEntities-ref="fallbackEntityBlocklist"/>
 
-                <!--
-                    Enforce IdP display name uniqueness before assembling aggregate
-                -->
-                <ref bean="check_dup_display"/>
-                <ref bean="errorTerminatingFilter"/>
-
                 <ref bean="assembleAggregate"/>
+                <bean parent="mda.SetCacheDurationStage"
+                    p:cacheDuration="${cacheDuration.aggregate.duration}"/>
+                <ref bean="stripEntityScopes"/>
                 <ref bean="stripEmptyExtensions"/>
                 <ref bean="uk_finaliseFallback"/>
                 <ref bean="uk_normaliseFallback"/>
@@ -622,17 +670,14 @@
                 <!-- Apply flow constraints for this flow. -->
                 <bean id="flowConstraints" parent="ukf.FlowConstraintApplyingStage"
                     p:flowName="test"/>
-                
-                <!--
-                    Enforce IdP display name uniqueness before assembling aggregate
-                -->
-                <ref bean="check_dup_display"/>
-                <ref bean="errorTerminatingFilter"/>
 
-                <ref bean="uk_strip_UKFederationMember"/>
                 <ref bean="assembleAggregate"/>
-                <bean parent="mda.SetCacheDurationStage" p:cacheDuration="PT6H"/>
+                <bean parent="mda.SetCacheDurationStage"
+                    p:cacheDuration="${cacheDuration.aggregate.duration}"/>
                 <ref bean="stripEntityScopes"/>
+
+                <ref bean="uk_add_cbc_encryption"/>
+
                 <ref bean="uk_finaliseTest"/>
                 <ref bean="uk_normaliseTest"/>
 
@@ -686,7 +731,7 @@
                 <!-- Apply flow constraints for this flow. -->
                 <bean id="flowConstraints" parent="ukf.FlowConstraintApplyingStage"
                     p:flowName="export"/>
-                
+
                 <!--
                     Additional rules excluding entities from the aggregate.
 
@@ -740,16 +785,15 @@
                     </property>
                 </bean>
 
-                <!--
-                    Enforce IdP display name uniqueness before assembling aggregate
-                -->
-                <ref bean="check_dup_display"/>
-                <ref bean="errorTerminatingFilter"/>
-
                 <ref bean="stripUkfedlabelNamespace"/>
                 <ref bean="assembleAggregate"/>
+                <bean parent="mda.SetCacheDurationStage"
+                    p:cacheDuration="${cacheDuration.aggregate.duration}"/>
                 <ref bean="stripEntityScopes"/>
                 <ref bean="stripEmptyExtensions"/>
+
+                <ref bean="uk_add_cbc_encryption"/>
+
                 <ref bean="uk_finaliseExport"/>
 
                 <bean id="uk_normaliseExport" parent="mda.XSLTransformationStage"
@@ -790,7 +834,7 @@
                 <!-- Apply flow constraints for this flow. -->
                 <bean id="flowConstraints" parent="ukf.FlowConstraintApplyingStage"
                     p:flowName="export-preview"/>
-                
+
                 <!--
                     Additional rules excluding entities from the aggregate.
 
@@ -844,17 +888,15 @@
                     </property>
                 </bean>
 
-                <!--
-                    Enforce IdP display name uniqueness before assembling aggregate
-                -->
-                <ref bean="check_dup_display"/>
-                <ref bean="errorTerminatingFilter"/>
-
                 <ref bean="stripUkfedlabelNamespace"/>
                 <ref bean="assembleAggregate"/>
+                <bean parent="mda.SetCacheDurationStage"
+                    p:cacheDuration="${cacheDuration.aggregate.duration}"/>
                 <ref bean="stripEntityScopes"/>
                 <ref bean="stripEmptyExtensions"/>
-                <bean parent="mda.SetCacheDurationStage" p:cacheDuration="PT6H"/>
+
+                <ref bean="uk_add_cbc_encryption"/>
+
                 <ref bean="uk_finaliseExport"/>
 
                 <bean id="uk_normaliseExportPreview" parent="mda.XSLTransformationStage"
@@ -1014,6 +1056,15 @@
                 </bean>
 
                 <!--
+                    Deconflict the discovery names of any entities
+                    brought in from production metadata exchange sources.
+                -->
+                <bean id="deconflictProductionMDXEntities"
+                    parent="ukf.IdPDisplayNameDuplicateAvoidingStage"
+                    p:registrationAuthorityDisplayNames-ref="registrationAuthorityDisplayNameMap"
+                />
+
+                <!--
                     *************************************************
                     ***                                           ***
                     ***   P R O D U C T I O N   E N T I T I E S   ***
@@ -1070,6 +1121,24 @@
                 </bean>
 
                 <!--
+                    Deconflict the discovery names of any entities
+                    brought in from pre-production metadata exchange sources.
+
+                    This will not affect entities from production sources
+                    which have already been renamed.
+                -->
+                <bean id="deconflictPreproductionMDXEntities"
+                    parent="ukf.IdPDisplayNameDuplicateAvoidingStage"
+                    p:registrationAuthorityDisplayNames-ref="registrationAuthorityDisplayNameMap"
+                />
+
+                <!--
+                    Output any INFO metadata we may have accumulated, such
+                    as from discovery name deconfliction.
+                -->
+                <ref bean="infoAnnouncer"/>
+
+                <!--
                     *********************************************************
                     ***                                                   ***
                     ***   P R E - P R O D U C T I O N   E N T I T I E S   ***
@@ -1091,6 +1160,10 @@
                             <bean class="net.shibboleth.utilities.java.support.collection.Pair">
                                 <constructor-arg ref="CDSAllPipeline"/>
                                 <constructor-arg ref="CDSAllSelector"/>
+                            </bean>
+                            <bean class="net.shibboleth.utilities.java.support.collection.Pair">
+                                <constructor-arg ref="WugenPipeline"/>
+                                <constructor-arg ref="WugenSelector"/>
                             </bean>
                         </list>
                     </property>

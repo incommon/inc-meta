@@ -109,10 +109,10 @@
     -->
 
     <!-- Default validUntil duration for all generated metadata, in days. -->
-    <property name="validUntil.default.days" value="14"/>
+    <property name="validUntil.default.days" value="21"/>
 
     <!-- Specific validUntil duration for aggregates, in days. -->
-    <property name="validUntil.aggregate.days" value="21"/>
+    <property name="validUntil.aggregate.days" value="${validUntil.default.days}"/>
     <!-- Same value, as an ISO 8601 duration. -->
     <property name="validUntil.aggregate.duration" value="P${validUntil.aggregate.days}D"/>
 
@@ -120,6 +120,13 @@
     <property name="validUntil.perEntity.days" value="${validUntil.default.days}"/>
     <!-- Same value, as an ISO 8601 duration. -->
     <property name="validUntil.perEntity.duration" value="P${validUntil.perEntity.days}D"/>
+
+    <!-- Default cacheDuration for all generated metadata, as an ISO 8601 duration. -->
+    <property name="cacheDuration.default.duration" value="PT6H"/>
+    <!-- Specific cacheDuration for aggregates. -->
+    <property name="cacheDuration.aggregate.duration" value="${cacheDuration.default.duration}"/>
+    <!-- Specific cacheDuration for per-entity metadata. -->
+    <property name="cacheDuration.perEntity.duration" value="${cacheDuration.default.duration}"/>
 
     <!--
         ***************************************************************
@@ -174,13 +181,6 @@
     <property name="md.dist.host-we-02.name" value="md-we-02.infr.ukfederation.org.uk"/>
     <property name="mdq.dist.name" value="mdq.ukfederation.org.uk"/>
     <property name="md.dist.path.name" value="/"/>
-
-    <property name="cdi-master.user" value="rsync"/>
-    <property name="cdi-master.name" value="cdi-master.ci.ti.ja.net"/>
-    <property name="cdi-master.ssh.port" value="8822"/>
-    <property name="cdi-master.temploc.name" value="/tmp/legacy-ukf"/>
-    <property name="cdi-master.md.path.name" value="/legacy-ukf-md/"/>
-    <property name="cdi-master.mdq.path.name" value="/legacy-ukf-mdq/"/>
 
     <!--
         Middlebox server properties.
@@ -265,6 +265,7 @@
     <property name="edugain.dir" value="${mdx.dir}/int_edugain"/>
     <property name="rules.dir" value="${mdx.dir}/_rules"/>
     <property name="utilities.dir" value="${basedir}/utilities"/>
+    <property name="githook.dir" value="${utilities.dir}/githooks"/>
 
     <!--
         Location of externally supplied tool bundles.
@@ -294,7 +295,7 @@
 
     <!--
         There are many separate processing "streams":  production, test, export,
-        fallback, "wayf", and "cdsall".
+        fallback, "wayf", "cdsall" and "wugen".
 
         Each stream has its own unsigned file, as follows:
     -->
@@ -306,6 +307,7 @@
     <property name="mdaggr.back.unsigned"   value="ukfederation-back-unsigned.xml"/>
     <property name="mdaggr.wayf.unsigned"   value="ukfederation-wayf-unsigned.xml"/>
     <property name="mdaggr.cdsall.unsigned" value="ukfederation-cdsall-unsigned.xml"/>
+    <property name="mdaggr.wugen.unsigned"  value="ukfederation-wugen-unsigned.xml"/>
 
     <!--
         Each stream also has its own signed file, as follows:
@@ -318,13 +320,18 @@
     <property name="mdaggr.back.signed"     value="ukfederation-back.xml"/>
     <property name="mdaggr.wayf.signed"     value="ukfederation-wayf.xml"/>
     <property name="mdaggr.cdsall.signed"   value="ukfederation-cdsall.xml"/>
+    <property name="mdaggr.wugen.signed"    value="ukfederation-wugen.xml"/>
 
     <!--
         Other files
     -->
     <property name="mdq.cache" value="mdqcache.tar.gz"/>
     <property name="mdaggr.stats" value="ukfederation-stats.html"/>
-
+    <property name="post-receive-githook" value="post-receive"/>
+    <property name="md.githook.path" value="/var/git/ukf-products/.git/hooks" />
+    <property name="mdaggr.discofeed.filtered" value="discofeed.json"/>
+    <property name="mdaggr.discofeed.all" value="discofeed-all.json"/>
+    <property name="md.discofeed.path" value="/tmp" />
 
     <!--
         *************************************************
@@ -555,6 +562,7 @@
 
     <!--
         Stage 4.1 of md process: Create the cache of MDQ responses, tar the whole lot.
+        DEPRECATED because mdq.createcache uses both MDA and xmlsectool
 
         Runs on: keymaster
 
@@ -566,6 +574,37 @@
         mdq.createcache,
         fs.tar.mdqcache">
         <echo>Stage 4 Success: MDQ cache created; all files comitted to data repository.</echo>
+    </target>
+
+    <!--
+        Stage 4.1.1 of md process: sign fragment files with MDA
+
+        Runs on: keymaster
+
+    -->
+    <target name="process.create-mdq-cache.sign.fragments" depends="samlmd.mdq.sign.fragments">
+        <echo>Stage 4.1.1 Success: MDQ fragments signed</echo>
+    </target>
+
+
+    <!--
+        Stage 4.1.2 of md process: sign MDQ all entities with xmlsectool
+
+        Runs on: keymaster
+
+    -->
+    <target name="process.create-mdq-cache.sign.all.entities" depends="samlmd.mdq.sign.all.entities">
+        <echo>Stage 4.1.2 Success: MDQ all entities file signed</echo>
+    </target>
+
+    <!--
+        Stage 4.1.3 of md process: create tarfile of files for MDQ
+
+        Runs on: keymaster
+
+    -->
+    <target name="process.create-mdq-cache.tarfile" depends="fs.tar.mdqcache">
+        <echo>Stage 4.1.3 Success: Created tarfile of MDQ fragments and all entities</echo>
     </target>
 
     <!--
@@ -625,7 +664,9 @@
         git.data.merge.masterintoimmediate,
         git.data.merge.immediateintodeferred,
         git.data.allbranches.pushtoorigin,
+        scp.githook,
         publish.mdqcache,
+        publish.json,
         publish.md,
         publish.otherfiles,
         samlmd.aggregates.verify.remote,
@@ -1224,7 +1265,7 @@
     -->
 
     <!--
-        Runs the stats-sync script to update the local stats cache
+        Sync the logfiles from the backend servers into a central location
     -->
     <target name="stats.sync">
         <echo>Updating local stats cache</echo>
@@ -1361,6 +1402,38 @@
     </macrodef>
 
     <!--
+        Verify file checksum of a metadata file held on the master distribution site.
+    -->
+    <macrodef name="VFY.remote.checksum.only">
+        <attribute name="i"/>
+        <attribute name="checksum"/>
+        <sequential>
+            <echo>Verifying checksum of @{i}...</echo>
+            <delete file="${temp.xml}" quiet="true" verbose="false"/>
+            <get src="@{i}" dest="${temp.xml}"/>
+
+            <!--
+                Check the checksum matches what was expected.
+            -->
+            <local name="checksum.of.downloaded.file"/>
+            <checksum file="${temp.xml}" property="checksum.of.downloaded.file"/>
+            <fail message="Checksum of file in repository and on backend server does NOT match.">
+                <condition>
+                    <not>
+                        <equals arg1="@{checksum}" arg2="${checksum.of.downloaded.file}"/>
+                    </not>
+                </condition>
+            </fail>
+            <echo>Checksum of file matches expected value</echo>
+
+            <!--
+                Delete the temporary file.
+            -->
+            <delete file="${temp.xml}" quiet="true" verbose="false"/>
+        </sequential>
+    </macrodef>
+
+    <!--
         Verify metadata files held on the master distribution site.
     -->
     <target name="samlmd.aggregates.verify.remote">
@@ -1379,86 +1452,80 @@
             property="mdaggr.export.signed.checksum"/>
         <checksum file="${aggregates.dir}/${mdaggr.export.preview.signed}"
             property="mdaggr.export.preview.signed.checksum"/>
-
-        <echo>Verifying metadata held at ${cdi-master.name}</echo>
-        <VFY.remote.and.checksum i="http://${cdi-master.name}${cdi-master.md.path.name}${mdaggr.prod.signed}"
-            checksum="${mdaggr.prod.signed.checksum}"/>
-        <VFY.remote.and.checksum i="http://${cdi-master.name}${cdi-master.md.path.name}${mdaggr.wayf.signed}"
-            checksum="${mdaggr.wayf.signed.checksum}"/>
-        <VFY.remote.and.checksum i="http://${cdi-master.name}${cdi-master.md.path.name}${mdaggr.cdsall.signed}"
-            checksum="${mdaggr.cdsall.signed.checksum}"/>
-        <VFY.remote.and.checksum i="http://${cdi-master.name}${cdi-master.md.path.name}${mdaggr.test.signed}"
-            checksum="${mdaggr.test.signed.checksum}"/>
-        <VFY.remote.and.checksum i="http://${cdi-master.name}${cdi-master.md.path.name}${mdaggr.back.signed}"
-            checksum="${mdaggr.back.signed.checksum}"/>
-        <VFY.remote.and.checksum i="http://${cdi-master.name}${cdi-master.md.path.name}${mdaggr.export.signed}"
-            checksum="${mdaggr.export.signed.checksum}"/>
-        <VFY.remote.and.checksum i="http://${cdi-master.name}${cdi-master.md.path.name}${mdaggr.export.preview.signed}"
-            checksum="${mdaggr.export.preview.signed.checksum}"/>
+        <checksum file="${aggregates.dir}/${mdaggr.wugen.signed}"
+            property="mdaggr.wugen.signed.checksum"/>
 
         <echo>Verifying metadata held at ${md.dist.host-ne-01.name}</echo>
-        <VFY.remote.and.checksum i="http://${md.dist.host-ne-01.name}${md.dist.path.name}${mdaggr.prod.signed}"
+        <VFY.remote.checksum.only i="http://${md.dist.host-ne-01.name}${md.dist.path.name}${mdaggr.prod.signed}"
             checksum="${mdaggr.prod.signed.checksum}"/>
-        <VFY.remote.and.checksum i="http://${md.dist.host-ne-01.name}${md.dist.path.name}${mdaggr.wayf.signed}"
+        <VFY.remote.checksum.only i="http://${md.dist.host-ne-01.name}${md.dist.path.name}${mdaggr.wayf.signed}"
             checksum="${mdaggr.wayf.signed.checksum}"/>
-        <VFY.remote.and.checksum i="http://${md.dist.host-ne-01.name}${md.dist.path.name}${mdaggr.cdsall.signed}"
+        <VFY.remote.checksum.only i="http://${md.dist.host-ne-01.name}${md.dist.path.name}${mdaggr.cdsall.signed}"
             checksum="${mdaggr.cdsall.signed.checksum}"/>
-        <VFY.remote.and.checksum i="http://${md.dist.host-ne-01.name}${md.dist.path.name}${mdaggr.test.signed}"
+        <VFY.remote.checksum.only i="http://${md.dist.host-ne-01.name}${md.dist.path.name}${mdaggr.test.signed}"
             checksum="${mdaggr.test.signed.checksum}"/>
-        <VFY.remote.and.checksum i="http://${md.dist.host-ne-01.name}${md.dist.path.name}${mdaggr.back.signed}"
+        <VFY.remote.checksum.only i="http://${md.dist.host-ne-01.name}${md.dist.path.name}${mdaggr.back.signed}"
             checksum="${mdaggr.back.signed.checksum}"/>
-        <VFY.remote.and.checksum i="http://${md.dist.host-ne-01.name}${md.dist.path.name}${mdaggr.export.signed}"
+        <VFY.remote.checksum.only i="http://${md.dist.host-ne-01.name}${md.dist.path.name}${mdaggr.export.signed}"
             checksum="${mdaggr.export.signed.checksum}"/>
-        <VFY.remote.and.checksum i="http://${md.dist.host-ne-01.name}${md.dist.path.name}${mdaggr.export.preview.signed}"
+        <VFY.remote.checksum.only i="http://${md.dist.host-ne-01.name}${md.dist.path.name}${mdaggr.export.preview.signed}"
             checksum="${mdaggr.export.preview.signed.checksum}"/>
+        <VFY.remote.checksum.only i="http://${md.dist.host-ne-01.name}${md.dist.path.name}${mdaggr.wugen.signed}"
+            checksum="${mdaggr.wugen.signed.checksum}"/>
 
         <echo>Verifying metadata held at ${md.dist.host-ne-02.name}</echo>
-        <VFY.remote.and.checksum i="http://${md.dist.host-ne-02.name}${md.dist.path.name}${mdaggr.prod.signed}"
+        <VFY.remote.checksum.only i="http://${md.dist.host-ne-02.name}${md.dist.path.name}${mdaggr.prod.signed}"
             checksum="${mdaggr.prod.signed.checksum}"/>
-        <VFY.remote.and.checksum i="http://${md.dist.host-ne-02.name}${md.dist.path.name}${mdaggr.wayf.signed}"
+        <VFY.remote.checksum.only i="http://${md.dist.host-ne-02.name}${md.dist.path.name}${mdaggr.wayf.signed}"
             checksum="${mdaggr.wayf.signed.checksum}"/>
-        <VFY.remote.and.checksum i="http://${md.dist.host-ne-02.name}${md.dist.path.name}${mdaggr.cdsall.signed}"
+        <VFY.remote.checksum.only i="http://${md.dist.host-ne-02.name}${md.dist.path.name}${mdaggr.cdsall.signed}"
             checksum="${mdaggr.cdsall.signed.checksum}"/>
-        <VFY.remote.and.checksum i="http://${md.dist.host-ne-02.name}${md.dist.path.name}${mdaggr.test.signed}"
+        <VFY.remote.checksum.only i="http://${md.dist.host-ne-02.name}${md.dist.path.name}${mdaggr.test.signed}"
             checksum="${mdaggr.test.signed.checksum}"/>
-        <VFY.remote.and.checksum i="http://${md.dist.host-ne-02.name}${md.dist.path.name}${mdaggr.back.signed}"
+        <VFY.remote.checksum.only i="http://${md.dist.host-ne-02.name}${md.dist.path.name}${mdaggr.back.signed}"
             checksum="${mdaggr.back.signed.checksum}"/>
-        <VFY.remote.and.checksum i="http://${md.dist.host-ne-02.name}${md.dist.path.name}${mdaggr.export.signed}"
+        <VFY.remote.checksum.only i="http://${md.dist.host-ne-02.name}${md.dist.path.name}${mdaggr.export.signed}"
             checksum="${mdaggr.export.signed.checksum}"/>
-        <VFY.remote.and.checksum i="http://${md.dist.host-ne-02.name}${md.dist.path.name}${mdaggr.export.preview.signed}"
+        <VFY.remote.checksum.only i="http://${md.dist.host-ne-02.name}${md.dist.path.name}${mdaggr.export.preview.signed}"
             checksum="${mdaggr.export.preview.signed.checksum}"/>
+        <VFY.remote.checksum.only i="http://${md.dist.host-ne-02.name}${md.dist.path.name}${mdaggr.wugen.signed}"
+            checksum="${mdaggr.wugen.signed.checksum}"/>
 
         <echo>Verifying metadata held at ${md.dist.host-we-01.name}</echo>
-        <VFY.remote.and.checksum i="http://${md.dist.host-we-01.name}${md.dist.path.name}${mdaggr.prod.signed}"
+        <VFY.remote.checksum.only i="http://${md.dist.host-we-01.name}${md.dist.path.name}${mdaggr.prod.signed}"
             checksum="${mdaggr.prod.signed.checksum}"/>
-        <VFY.remote.and.checksum i="http://${md.dist.host-we-01.name}${md.dist.path.name}${mdaggr.wayf.signed}"
+        <VFY.remote.checksum.only i="http://${md.dist.host-we-01.name}${md.dist.path.name}${mdaggr.wayf.signed}"
             checksum="${mdaggr.wayf.signed.checksum}"/>
-        <VFY.remote.and.checksum i="http://${md.dist.host-we-01.name}${md.dist.path.name}${mdaggr.cdsall.signed}"
+        <VFY.remote.checksum.only i="http://${md.dist.host-we-01.name}${md.dist.path.name}${mdaggr.cdsall.signed}"
             checksum="${mdaggr.cdsall.signed.checksum}"/>
-        <VFY.remote.and.checksum i="http://${md.dist.host-we-01.name}${md.dist.path.name}${mdaggr.test.signed}"
+        <VFY.remote.checksum.only i="http://${md.dist.host-we-01.name}${md.dist.path.name}${mdaggr.test.signed}"
             checksum="${mdaggr.test.signed.checksum}"/>
-        <VFY.remote.and.checksum i="http://${md.dist.host-we-01.name}${md.dist.path.name}${mdaggr.back.signed}"
+        <VFY.remote.checksum.only i="http://${md.dist.host-we-01.name}${md.dist.path.name}${mdaggr.back.signed}"
             checksum="${mdaggr.back.signed.checksum}"/>
-        <VFY.remote.and.checksum i="http://${md.dist.host-we-01.name}${md.dist.path.name}${mdaggr.export.signed}"
+        <VFY.remote.checksum.only i="http://${md.dist.host-we-01.name}${md.dist.path.name}${mdaggr.export.signed}"
             checksum="${mdaggr.export.signed.checksum}"/>
-        <VFY.remote.and.checksum i="http://${md.dist.host-we-01.name}${md.dist.path.name}${mdaggr.export.preview.signed}"
+        <VFY.remote.checksum.only i="http://${md.dist.host-we-01.name}${md.dist.path.name}${mdaggr.export.preview.signed}"
             checksum="${mdaggr.export.preview.signed.checksum}"/>
+        <VFY.remote.checksum.only i="http://${md.dist.host-we-01.name}${md.dist.path.name}${mdaggr.wugen.signed}"
+            checksum="${mdaggr.wugen.signed.checksum}"/>
 
         <echo>Verifying metadata held at ${md.dist.host-we-02.name}</echo>
-        <VFY.remote.and.checksum i="http://${md.dist.host-we-02.name}${md.dist.path.name}${mdaggr.prod.signed}"
+        <VFY.remote.checksum.only i="http://${md.dist.host-we-02.name}${md.dist.path.name}${mdaggr.prod.signed}"
             checksum="${mdaggr.prod.signed.checksum}"/>
-        <VFY.remote.and.checksum i="http://${md.dist.host-we-02.name}${md.dist.path.name}${mdaggr.wayf.signed}"
+        <VFY.remote.checksum.only i="http://${md.dist.host-we-02.name}${md.dist.path.name}${mdaggr.wayf.signed}"
             checksum="${mdaggr.wayf.signed.checksum}"/>
-        <VFY.remote.and.checksum i="http://${md.dist.host-we-02.name}${md.dist.path.name}${mdaggr.cdsall.signed}"
+        <VFY.remote.checksum.only i="http://${md.dist.host-we-02.name}${md.dist.path.name}${mdaggr.cdsall.signed}"
             checksum="${mdaggr.cdsall.signed.checksum}"/>
-        <VFY.remote.and.checksum i="http://${md.dist.host-we-02.name}${md.dist.path.name}${mdaggr.test.signed}"
+        <VFY.remote.checksum.only i="http://${md.dist.host-we-02.name}${md.dist.path.name}${mdaggr.test.signed}"
             checksum="${mdaggr.test.signed.checksum}"/>
-        <VFY.remote.and.checksum i="http://${md.dist.host-we-02.name}${md.dist.path.name}${mdaggr.back.signed}"
+        <VFY.remote.checksum.only i="http://${md.dist.host-we-02.name}${md.dist.path.name}${mdaggr.back.signed}"
             checksum="${mdaggr.back.signed.checksum}"/>
-        <VFY.remote.and.checksum i="http://${md.dist.host-we-02.name}${md.dist.path.name}${mdaggr.export.signed}"
+        <VFY.remote.checksum.only i="http://${md.dist.host-we-02.name}${md.dist.path.name}${mdaggr.export.signed}"
             checksum="${mdaggr.export.signed.checksum}"/>
-        <VFY.remote.and.checksum i="http://${md.dist.host-we-02.name}${md.dist.path.name}${mdaggr.export.preview.signed}"
+        <VFY.remote.checksum.only i="http://${md.dist.host-we-02.name}${md.dist.path.name}${mdaggr.export.preview.signed}"
             checksum="${mdaggr.export.preview.signed.checksum}"/>
+        <VFY.remote.checksum.only i="http://${md.dist.host-we-02.name}${md.dist.path.name}${mdaggr.wugen.signed}"
+            checksum="${mdaggr.wugen.signed.checksum}"/>
 
         <echo>Verification completed.</echo>
     </target>
@@ -1467,10 +1534,6 @@
         Verify a few select mdq files held on the master distribution site.
     -->
     <target name="samlmd.mdq.verify.remote">
-      <echo>Verifying MDQ held at ${cdi-master.name}${cdi-master.mdq.path.name}</echo>
-      <VFY.MDQ.remote i="http://${cdi-master.name}${cdi-master.mdq.path.name}entities/all"/>
-      <VFY.MDQ.remote i="http://${cdi-master.name}${cdi-master.mdq.path.name}entities/https%3A%2F%2Ftest-idp.ukfederation.org.uk%2Fidp%2Fshibboleth"/>
-      <VFY.MDQ.remote i="http://${cdi-master.name}${cdi-master.mdq.path.name}entities/https%3A%2F%2Ftest.ukfederation.org.uk%2Fentity"/>
       <echo>Verifying MDQ held at ${mdq.dist.name}</echo>
       <VFY.MDQ.remote i="http://${mdq.dist.name}/entities"/>
       <VFY.MDQ.remote i="http://${mdq.dist.name}/entities/https%3A%2F%2Ftest-idp.ukfederation.org.uk%2Fidp%2Fshibboleth"/>
@@ -1546,6 +1609,7 @@
         <MDNORM i="${output.dir}/${mdaggr.prod.unsigned}"/>
         <MDNORM i="${output.dir}/${mdaggr.wayf.unsigned}"/>
         <MDNORM.noblank i="${output.dir}/${mdaggr.cdsall.unsigned}"/>
+        <MDNORM.noblank i="${output.dir}/${mdaggr.wugen.unsigned}"/>
         <MDNORM i="${output.dir}/${mdaggr.test.unsigned}"/>
         <MDNORM i="${output.dir}/${mdaggr.export.unsigned}"/>
         <MDNORM i="${output.dir}/${mdaggr.export.preview.unsigned}"/>
@@ -1575,8 +1639,9 @@
         The individual properties listed here can be augmented or overridden
         by properties defined in the external properties files, e.g., build.properties.
     -->
-    <property name="mda.java.endorsed.dirs" value="${tools.dir}/endorsed"/>
     <property name="mda.blocklists.dir" value="${blocklists.dir}"/>
+    <property name="mda.cacheDuration.aggregate.duration" value="${cacheDuration.aggregate.duration}"/>
+    <property name="mda.cacheDuration.perEntity.duration" value="${cacheDuration.perEntity.duration}"/>
     <property name="mda.edugain.dir" value="${edugain.dir}"/>
     <property name="mda.entities.dir" value="${entities.dir}"/>
     <property name="mda.mdx.dir" value="${mdx.dir}"/>
@@ -1616,17 +1681,42 @@
                     <pathelement path="${mdx.dir}"/>
 
                     <!-- Include all APIs we may want to use. -->
+
+                    <!-- The Shibboleth MDA. -->
                     <fileset dir="${tools.mda}/lib">
                         <include name="*.jar"/>
                     </fileset>
+
+                    <!-- UK federation MDA beans, and ukf-members. -->
                     <fileset dir="${tools.dir}/ukf-mda">
                         <include name="*.jar"/>
                     </fileset>
-                    <fileset dir="${tools.dir}/xalan/lib">
-                        <include name="sdss-xalan-md-*.jar"/>
-                    </fileset>
+
+                    <!-- InCommon MDA beans. -->
                     <fileset dir="${tools.dir}/inc-mda">
                         <include name="*.jar"/>
+                    </fileset>
+
+                    <!-- Support libraries for any of the above. -->
+                    <fileset dir="${tools.dir}/lib">
+                        <include name="*.jar"/>
+                    </fileset>
+
+                    <!--
+                        Use Xalan as our XML processor.
+                        Note: this is not the old endorsement mechanism,
+                        despite the directory name. Instead, we just load
+                        it via the classpath.
+                    -->
+                    <fileset dir="${tools.dir}/xalan/impl">
+                        <include name="*.jar"/>
+                    </fileset>
+
+                    <!--
+                        Xalan-dependent UK federation classes.
+                    -->
+                    <fileset dir="${tools.dir}/xalan/lib">
+                        <include name="sdss-xalan-md-*.jar"/>
                     </fileset>
 
                     <!-- Include a per-target directory if set. -->
@@ -1639,7 +1729,8 @@
                     <propertyset refid="mda.properties"/>
                 </syspropertyset>
                 <jvmarg value="-enableassertions"/>
-                <arg value="--quiet"/>
+                <arg value="--logConfig"/>
+                <arg value="${tools.dir}/mda-logging.xml"/>
                 <arg value="@{config}"/>
                 <arg value="@{pipeline}"/>
             </java>
@@ -1932,6 +2023,9 @@
         <echo>Signing UKfed fallback metadata.</echo>
         <SIGN.uk i="${output.dir}/${mdaggr.back.unsigned}" o="${output.dir}/${mdaggr.back.signed}" digest="SHA-256"/>
 
+        <echo>Signing UKfed Wugen metadata.</echo>
+        <SIGN.uk i="${output.dir}/${mdaggr.wugen.unsigned}" o="${output.dir}/${mdaggr.wugen.signed}" digest="SHA-256"/>
+
     </target>
 
     <!--
@@ -1970,6 +2064,9 @@
         <echo>Verifying signed UK fallback metadata.</echo>
         <XMLSECTOOL.VFY.uk i="${output.dir}/${mdaggr.back.signed}"/>
 
+        <echo>Verifying signed UK Wugen metadata.</echo>
+        <XMLSECTOOL.VFY.uk i="${output.dir}/${mdaggr.wugen.signed}"/>
+
         <echo>Verification completed.</echo>
     </target>
 
@@ -1984,11 +2081,20 @@
     </target>
 
     <!--
+		Sign MDQ components: EntityDescriptor files and EntitiesDescriptor
+    -->
+    <target name="samlmd.mdq.sign" depends="
+        samlmd.mdq.sign.fragments,
+        samlmd.mdq.sign.all.entities">
+		<echo>MDQ fragments and all entities files signed.</echo>
+    </target>
+
+    <!--
         Break the production aggregate into per-entity metadata, sign the
         individual documents and write them as individual files into a
         destination directory.
     -->
-    <target name="samlmd.mdq.sign" depends="get.sign.uk.keyPassword">
+    <target name="samlmd.mdq.sign.fragments" depends="get.sign.uk.keyPassword">
         <property name="mda.mdq.input" value="${output.dir}/${mdaggr.prod.unsigned}"/>
         <property name="mda.sign.keyPassword" value="${sign.uk.keyPassword}"/>
         <echo>Generating per-entity metadata in ${mda.mdq.output}</echo>
@@ -1997,6 +2103,12 @@
         <mkdir dir="${mdq.output.dir}"/>
         <CHANNEL.do channel="uk" verb="mdq-multisign"/>
         <echo>Generation complete.</echo>
+    </target>
+
+    <!--
+        Sign the unsigned production aggregate, call it all.xml when signed for MDQ.
+    -->
+    <target name="samlmd.mdq.sign.all.entities" depends="get.sign.uk.keyPassword">
         <echo>Generating all.xml in ${mda.mdq.output}</echo>
         <SIGN.uk i="${output.dir}/${mdaggr.prod.unsigned}" o="${mdq.output.dir}/all.xml" digest="SHA-256"/>
         <echo>Generation complete.</echo>
@@ -2059,6 +2171,7 @@
                 <include name="${mdaggr.back.unsigned}"/>
                 <include name="${mdaggr.export.unsigned}"/>
                 <include name="${mdaggr.export.preview.unsigned}"/>
+                <include name="${mdaggr.wugen.unsigned}"/>
                 <include name="${mdaggr.stats}"/>
             </fileset>
         </scp>
@@ -2075,6 +2188,7 @@
                 <include name="${mdaggr.back.unsigned}"/>
                 <include name="${mdaggr.export.unsigned}"/>
                 <include name="${mdaggr.export.preview.unsigned}"/>
+                <include name="${mdaggr.wugen.unsigned}"/>
             </fileset>
         </scp>
     </target>
@@ -2088,6 +2202,7 @@
         <scp failonerror="true" remoteFile="${keymaster.url}/${mdaggr.back.signed}" todir="${aggregates.dir}" keyfile="~/.ssh/id_rsa" knownhosts="~/.ssh/known_hosts"/>
         <scp failonerror="true" remoteFile="${keymaster.url}/${mdaggr.export.signed}" todir="${aggregates.dir}" keyfile="~/.ssh/id_rsa" knownhosts="~/.ssh/known_hosts"/>
         <scp failonerror="true" remoteFile="${keymaster.url}/${mdaggr.export.preview.signed}" todir="${aggregates.dir}" keyfile="~/.ssh/id_rsa" knownhosts="~/.ssh/known_hosts"/>
+        <scp failonerror="true" remoteFile="${keymaster.url}/${mdaggr.wugen.signed}" todir="${aggregates.dir}" keyfile="~/.ssh/id_rsa" knownhosts="~/.ssh/known_hosts"/>
     </target>
 
     <target name="fs.scp.mdqcache.from.keymaster">
@@ -2144,17 +2259,63 @@
         ***********************************************
     -->
 
+    <target name="scp.githook">
+        <!--
+            Metadata servers have a post-receive githook to fix up outputs of metadata aggregation.
+            Not needed for CDI because githook included in the container already.
+        -->
+        <echo>Pushing post-receive githook to MD dist.</echo>
+        <echo>-> MD-NE-01</echo>
+        <scp failonerror="true" remoteTodir="${md.user}@${md.dist.host-ne-01.name}:${md.githook.path}" keyfile="~/.ssh/id_rsa" knownhosts="~/.ssh/known_hosts">
+            <fileset dir="${githook.dir}">
+                <include name="${post-receive-githook}"/>
+            </fileset>
+        </scp>
+        <sshexec
+            username="${md.user}" host="${md.dist.host-ne-01.name}" keyfile="~/.ssh/id_rsa" knownhosts="~/.ssh/known_hosts"
+            command="/usr/bin/chmod a+x ${md.githook.path}/${post-receive-githook}"
+            failonerror="true"
+        />
+        <echo>-> MD-NE-02</echo>
+        <scp failonerror="true" remoteTodir="${md.user}@${md.dist.host-ne-02.name}:${md.githook.path}" keyfile="~/.ssh/id_rsa" knownhosts="~/.ssh/known_hosts">
+            <fileset dir="${githook.dir}">
+                <include name="${post-receive-githook}"/>
+            </fileset>
+        </scp>
+        <sshexec
+            username="${md.user}" host="${md.dist.host-ne-02.name}" keyfile="~/.ssh/id_rsa" knownhosts="~/.ssh/known_hosts"
+            command="/usr/bin/chmod a+x ${md.githook.path}/${post-receive-githook}"
+            failonerror="true"
+        />
+        <echo>-> MD-WE-01</echo>
+        <scp failonerror="true" remoteTodir="${md.user}@${md.dist.host-we-01.name}:${md.githook.path}" keyfile="~/.ssh/id_rsa" knownhosts="~/.ssh/known_hosts">
+            <fileset dir="${githook.dir}">
+                <include name="${post-receive-githook}"/>
+            </fileset>
+        </scp>
+        <sshexec
+            username="${md.user}" host="${md.dist.host-we-01.name}" keyfile="~/.ssh/id_rsa" knownhosts="~/.ssh/known_hosts"
+            command="/usr/bin/chmod a+x ${md.githook.path}/${post-receive-githook}"
+            failonerror="true"
+        />
+        <echo>-> MD-WE-02</echo>
+        <scp failonerror="true" remoteTodir="${md.user}@${md.dist.host-we-02.name}:${md.githook.path}" keyfile="~/.ssh/id_rsa" knownhosts="~/.ssh/known_hosts">
+            <fileset dir="${githook.dir}">
+                <include name="${post-receive-githook}"/>
+            </fileset>
+        </scp>
+        <sshexec
+            username="${md.user}" host="${md.dist.host-we-02.name}" keyfile="~/.ssh/id_rsa" knownhosts="~/.ssh/known_hosts"
+            command="/usr/bin/chmod a+x ${md.githook.path}/${post-receive-githook}"
+            failonerror="true"
+        />
+    </target>
+
     <target name="publish.md">
         <!--
             Push metadata files for the UK Federation to the MD dist servers
         -->
         <echo>Pushing UK Federation metadata files to MD dist.</echo>
-        <echo>-> CDI-master</echo>
-        <exec executable="${git.executable}" dir="${shared.ws.dir}/${git.repo.project.products}" failonerror="true">
-            <arg value="push"/>
-            <arg value="cdi-master"/>
-            <arg value="master"/>
-        </exec>
         <echo>-> MD-NE-01</echo>
         <exec executable="${git.executable}" dir="${shared.ws.dir}/${git.repo.project.products}" failonerror="true">
             <arg value="push"/>
@@ -2173,7 +2334,7 @@
             <arg value="md-we-01"/>
             <arg value="master"/>
         </exec>
-        <echo>-> MD-WE-01</echo>
+        <echo>-> MD-WE-02</echo>
         <exec executable="${git.executable}" dir="${shared.ws.dir}/${git.repo.project.products}" failonerror="true">
             <arg value="push"/>
             <arg value="md-we-02"/>
@@ -2186,12 +2347,6 @@
             Push mdq cache tar to the MD dist servers
         -->
         <echo>Pushing UK Federation mdq cache to MD dist.</echo>
-        <echo>-> CDI-master</echo>
-        <scp failonerror="true" remoteTodir="${cdi-master.user}@${cdi-master.name}:${cdi-master.temploc.name}" port="${cdi-master.ssh.port}" keyfile="~/.ssh/id_rsa" knownhosts="~/.ssh/known_hosts">
-            <fileset dir="${output.dir}">
-                <include name="${mdq.cache}"/>
-            </fileset>
-        </scp>
         <echo>-> MD-NE-01</echo>
         <scp failonerror="true" remoteTodir="${md.user}@${md.dist.host-ne-01.name}:/tmp" keyfile="~/.ssh/id_rsa" knownhosts="~/.ssh/known_hosts">
             <fileset dir="${output.dir}">
@@ -2218,6 +2373,42 @@
         </scp>
     </target>
 
+    <target name="publish.json">
+        <!--
+            Push 2 JSON files to the MD dist servers
+        -->
+        <echo>Pushing UK Federation JSON files to MD dist.</echo>
+        <echo>-> MD-NE-01</echo>
+        <scp failonerror="true" remoteTodir="${md.user}@${md.dist.host-ne-01.name}:${md.discofeed.path}" keyfile="~/.ssh/id_rsa" knownhosts="~/.ssh/known_hosts">
+            <fileset dir="${output.dir}">
+                <include name="${mdaggr.discofeed.filtered}"/>
+                <include name="${mdaggr.discofeed.all}"/>
+            </fileset>
+        </scp>
+        <echo>-> MD-NE-02</echo>
+        <scp failonerror="true" remoteTodir="${md.user}@${md.dist.host-ne-02.name}:${md.discofeed.path}" keyfile="~/.ssh/id_rsa" knownhosts="~/.ssh/known_hosts">
+            <fileset dir="${output.dir}">
+                <include name="${mdaggr.discofeed.filtered}"/>
+                <include name="${mdaggr.discofeed.all}"/>
+            </fileset>
+        </scp>
+        <echo>-> MD-WE-01</echo>
+        <scp failonerror="true" remoteTodir="${md.user}@${md.dist.host-we-01.name}:${md.discofeed.path}" keyfile="~/.ssh/id_rsa" knownhosts="~/.ssh/known_hosts">
+            <fileset dir="${output.dir}">
+                <include name="${mdaggr.discofeed.filtered}"/>
+                <include name="${mdaggr.discofeed.all}"/>
+            </fileset>
+        </scp>
+        <echo>-> MD-WE-02</echo>
+        <scp failonerror="true" remoteTodir="${md.user}@${md.dist.host-we-02.name}:${md.discofeed.path}" keyfile="~/.ssh/id_rsa" knownhosts="~/.ssh/known_hosts">
+            <fileset dir="${output.dir}">
+                <include name="${mdaggr.discofeed.filtered}"/>
+                <include name="${mdaggr.discofeed.all}"/>
+            </fileset>
+        </scp>
+    </target>
+
+
     <target name="publish.otherfiles">
         <!--
             Push other files for the UK Federation to the web server - but only when in prod env!
@@ -2235,6 +2426,31 @@
                     <scp failonerror="true" remoteTodir="${www.url.members}" keyfile="~/.ssh/id_rsa" knownhosts="~/.ssh/known_hosts">
                         <fileset dir="${members.dir}">
                             <include name="members.xml"/>
+                        </fileset>
+                    </scp>
+                </then>
+        </if>
+    </target>
+
+    <target name="publish.generated.html">
+        <!--
+            Push HTML files generated outwith production pipeline to the web server - but only when in prod env!
+        -->
+        <if>
+            <equals arg1="${env}" arg2="prod"/>
+                <then>
+                    <echo>Pushing HTML files to web site.</echo>
+                    <echo>-> Web1</echo>
+                    <scp failonerror="true" remoteTodir="${www.url.members}" keyfile="~/.ssh/id_rsa" knownhosts="~/.ssh/known_hosts">
+                        <fileset dir="${build.dir}">
+                            <include name="orgnamescope.html"/>
+                            <include name="uai.html"/>
+                            <include name="dml.html"/>
+                        </fileset>
+                    </scp>
+                    <scp failonerror="true" remoteTodir="${www.url.stats}" keyfile="~/.ssh/id_rsa" knownhosts="~/.ssh/known_hosts">
+                        <fileset dir="${build.dir}">
+                            <include name="randssps.html"/>
                         </fileset>
                     </scp>
                 </then>
@@ -2633,6 +2849,78 @@
             <arg value="${temp.dir}/ukf-members.csv"/>
             <arg value="${utilities.dir}/members-to-csv.xsl"/>
             <arg value="../ukf-data/members/members.xml"/>
+        </exec>
+    </target>
+
+    <!--
+        generate.html.orgnamescope
+
+        Generates a HTML table of IdPs and their scopes
+
+        bodge-eacute.pl is an awful bodge to fix encodings
+    -->
+    <target name="generate.html.orgnamescope">
+        <echo>Running generate.html.orgnamescope XSLT</echo>
+        <exec executable="xsltproc" failonerror="true">
+            <arg value="--output" />
+            <arg value="${build.dir}/orgnamescope.html" />
+            <arg value="${utilities.dir}/orgnamescope.xsl" />
+            <arg value="${aggregates.dir}/ukfederation-metadata.xml" />
+        </exec>
+        <exec executable="perl" failonerror="true">
+            <arg value="${utilities.dir}/bodge-eacute.pl" />
+            <arg value="${build.dir}/orgnamescope.html" />
+        </exec>
+    </target>
+
+    <!--
+        generate.html.members
+
+        Generates a HTML table of member names and comments
+
+        bodge-eacute.pl is an awful bodge to fix encodings
+    -->
+    <target name="generate.html.members">
+        <echo>Running generate.html.members XSLT</echo>
+        <exec executable="xsltproc" failonerror="true">
+            <arg value="--output" />
+            <arg value="${build.dir}/dml.html" />
+            <arg value="${utilities.dir}/memberlist.xsl" />
+            <arg value="${members.dir}/members.xml" />
+        </exec>
+        <exec executable="perl" failonerror="true">
+            <arg value="${utilities.dir}/bodge-eacute.pl" />
+            <arg value="${build.dir}/dml.html" />
+        </exec>
+    </target>
+
+    <!--
+        generate.html.randssps
+
+        Generates a HTML table of SPs which assert the R&S entity category
+    -->
+    <target name="generate.html.randssps">
+        <echo>Running generate.html.randssps XSLT</echo>
+        <exec executable="xsltproc" failonerror="true">
+            <arg value="--output" />
+            <arg value="${build.dir}/randssps.html" />
+            <arg value="${utilities.dir}/list_rands_sps.xsl" />
+            <arg value="${aggregates.dir}/ukfederation-metadata.xml" />
+        </exec>
+    </target>
+
+    <!--
+        generate.html.uai
+
+        Generates a HTML table of IdPs asserting User Accountability
+    -->
+    <target name="generate.html.uai">
+        <echo>Running generate.html.uai XSLT</echo>
+        <exec executable="xsltproc" failonerror="true">
+            <arg value="--output" />
+            <arg value="${build.dir}/uai.html" />
+            <arg value="${utilities.dir}/ua-idp.xsl" />
+            <arg value="${aggregates.dir}/ukfederation-metadata.xml" />
         </exec>
     </target>
 

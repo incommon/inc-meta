@@ -51,9 +51,6 @@
                     </property>
                 </bean>
 
-                <!-- Remove UKFederationLabel elements. -->
-                <ref bean="uk_strip_UKFederationMember"/>
-
                 <!--
                     Remove xsi elements and attributes.
 
@@ -75,7 +72,7 @@
                         <bean parent="ukf.FixedStringIdentifierGenerationStrategy" c:_="_"/>
                     </constructor-arg>
                 </bean>
-                <bean parent="mda.SetCacheDurationStage" p:cacheDuration="PT6H"/>
+                <bean parent="mda.SetCacheDurationStage" p:cacheDuration="${cacheDuration.perEntity.duration}"/>
                 <bean parent="mda.SetValidUntilStage" p:validityDuration="${validUntil.perEntity.duration}"/>
 
                 <!-- Identity transform fixes signing issues. -->
