@@ -208,8 +208,8 @@
     <!-- MD SIGNING MOVE TO AWS (TIO-118) -->
 
     <!-- Define a private key factory (based on AWS CloudHSM) -->
-    <bean id="hsmPrivateKeyFactory" class="uk.org.iay.incommon.mda.cloudhsm.CaviumPrivateKeyFactoryBean"
-	    p:username="${sign.keyUser}" p:password="${sign.keyPassword}" p:keyHandle="${sign.keyHandle}" />
+    <bean id="hsmPrivateKeyFactory" class="uk.org.iay.incommon.mda.cloudhsm.CloudHSMPrivateKeyFactoryBean"
+	    p:username="${sign.keyUser}" p:password="${sign.keyPassword}" p:keyLabel="${sign.keyLabel}" />
 
     <!-- Signs items using a provided privateKeyFactory -->
     <bean id="signItems" parent="mda.XMLSignatureSigningStage">

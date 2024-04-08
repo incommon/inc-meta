@@ -12,8 +12,8 @@
     <import resource="classpath:incommon/mdq-all.xml" />
 
     <!-- Define a private key factory (based on AWS CloudHSM) to be used by the generateAll stage -->
-    <bean id="privateKeyFactory" class="uk.org.iay.incommon.mda.cloudhsm.CaviumPrivateKeyFactoryBean"
-        p:username="${sign.keyUser}" p:password="${sign.keyPassword}" p:keyHandle="${sign.keyHandle}" />
+    <bean id="privateKeyFactory" class="uk.org.iay.incommon.mda.cloudhsm.CloudHSMPrivateKeyFactoryBean"
+        p:username="${sign.keyUser}" p:password="${sign.keyPassword}" p:keyLabel="${sign.keyLabel}" />
 
     <!-- Generate all signed metadata required by the InCommon MDQ service  -->
     <bean id="mdq-all-cloudhsm" parent="mda.SimplePipeline">

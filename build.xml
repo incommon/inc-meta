@@ -1674,8 +1674,6 @@
         <sequential>
             <java classname="net.shibboleth.metadata.cli.SimpleCommandLine"
                 fork="true" failonerror="true" maxmemory="${java.max.memory}">
-                <sysproperty key="java.library.path" path="${mda.jni.path}"
-                    if:set="mda.jni.path"/>
                 <classpath>
                     <!-- Spring "classpath:" imports can be under the MDX directory -->
                     <pathelement path="${mdx.dir}"/>
@@ -1720,9 +1718,8 @@
                     </fileset>
 
                     <!-- Include a per-target directory if set. -->
-                    <fileset dir="${tools.dir}">
-                        <include name="${mda.classpath.extra}/*.jar"
-                            if="mda.classpath.extra"/>
+                    <fileset dir="${mda.classpath.extra}" if:set="mda.classpath.extra">
+                        <include name="*.jar"/>
                     </fileset>
                 </classpath>
                 <syspropertyset>
@@ -3058,11 +3055,10 @@
 	Generate the InCommon import aggregate signed using AWS CloudHSM
     -->
     <target name="inc.generate.import_sign">
-        <property name="mda.sign.keyHandle" value="${sign.keyHandle}"/>
+        <property name="mda.sign.keyLabel" value="${sign.keyLabel}"/>
         <property name="mda.sign.keyPassword" value="${sign.keyPassword}"/>
         <property name="mda.sign.keyUser" value="${sign.keyUser}"/>
-        <property name="mda.classpath.extra" value="inc-mda-cloudhsm"/>
-        <property name="mda.jni.path" value="/opt/cloudhsm/lib"/>
+        <property name="mda.classpath.extra" value="/opt/cloudhsm/java"/>
 
         <echo>Generating InCommon signed import aggregate in ${mda.inc.imported.xml}</echo>
         <echo>    (IdP-only aggregate in ${mda.inc.imported-idp.xml})</echo>
@@ -3079,11 +3075,10 @@
         Sign an aggregate using CloudHSM
     -->
     <target name="inc.generate.sign">
-        <property name="mda.sign.keyHandle" value="${sign.keyHandle}"/>
+        <property name="mda.sign.keyLabel" value="${sign.keyLabel}"/>
         <property name="mda.sign.keyPassword" value="${sign.keyPassword}"/>
         <property name="mda.sign.keyUser" value="${sign.keyUser}"/>
-        <property name="mda.classpath.extra" value="inc-mda-cloudhsm"/>
-        <property name="mda.jni.path" value="/opt/cloudhsm/lib"/>
+        <property name="mda.classpath.extra" value="/opt/cloudhsm/java"/>
 
         <echo>Generating signed aggregate in ${mda.inc.imported.xml}</echo>
         <echo>    from aggregate in ${mda.inc.production.xml}</echo>
@@ -3156,18 +3151,17 @@
 
         Properties:
 
-        Set sign.keyHandle to indicate the key to be used for signing.
+        Set sign.keyLabel to indicate the key to be used for signing.
 
         Set sign.keyUser and sign.keyPassword with credentials for the HSM user
         accessing the key.
     -->
     <target name="inc.mdq.generate.cloudhsm">
         <property name="mda.mdq.input" value="${mda.inc.imported.xml}"/>
-        <property name="mda.sign.keyHandle" value="${sign.keyHandle}"/>
+        <property name="mda.sign.keyLabel" value="${sign.keyLabel}"/>
         <property name="mda.sign.keyUser" value="${sign.keyUser}"/>
         <property name="mda.sign.keyPassword" value="${sign.keyPassword}"/>
-        <property name="mda.classpath.extra" value="inc-mda-cloudhsm"/>
-        <property name="mda.jni.path" value="/opt/cloudhsm/lib"/>
+        <property name="mda.classpath.extra" value="/opt/cloudhsm/java"/>
         <echo>Generating per-entity metadata in ${mda.mdq.output}</echo>
         <echo>    from unsigned aggregate in ${mda.mdq.input}</echo>
         <delete dir="${mdq.output.dir}" quiet="true"/>
@@ -3188,10 +3182,9 @@
         accessing the key.
     -->
     <target name="inc.mdq.generate.all.cloudhsm">
-        <property name="mda.classpath.extra" value="inc-mda-cloudhsm"/>
-        <property name="mda.jni.path" value="/opt/cloudhsm/lib"/>
+        <property name="mda.classpath.extra" value="/opt/cloudhsm/java"/>
         <property name="mda.mdq.input" value="${mda.inc.imported.xml}"/>
-        <property name="mda.sign.keyHandle" value="${sign.keyHandle}"/>
+        <property name="mda.sign.keyLabel" value="${sign.keyLabel}"/>
         <property name="mda.sign.keyPassword" value="${sign.keyPassword}"/>
         <property name="mda.sign.keyUser" value="${sign.keyUser}"/>
         <echo>Generating MDQ metadata in ${mda.mdq.output}</echo>

@@ -71,10 +71,10 @@
                 <!-- Sign each item. -->
                 <bean id="perform.signature" parent="mda.XMLSignatureSigningStage">
                     <property name="privateKey">
-                        <bean class="uk.org.iay.incommon.mda.cloudhsm.CaviumPrivateKeyFactoryBean"
+                        <bean class="uk.org.iay.incommon.mda.cloudhsm.CloudHSMPrivateKeyFactoryBean"
                             p:username="${sign.keyUser}"
                             p:password="${sign.keyPassword}"
-                            p:keyHandle="${sign.keyHandle}"
+                            p:keyLabel="${sign.keyLabel}"
                         />
                     </property>
                 </bean>
