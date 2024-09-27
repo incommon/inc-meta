@@ -34,11 +34,6 @@
     <import resource="file:${blocklists.dir}/fallback-blocklist.xml"/>
 
     <!--
-        Import inc-mda beans.
-    -->
-    <import resource="classpath:uk/org/iay/incommon/mda/beans.xml"/>
-
-    <!--
         Import UK federation ingress policy for eduGAIN.
     -->
     <import resource="classpath:uk/edugain-policy.xml"/>
@@ -50,28 +45,6 @@
         ***                       ***
         *****************************
     -->
-
-    <!-- This bean MUST be called "conversionService" to work properly. -->
-    <bean id="conversionService" class="org.springframework.context.support.ConversionServiceFactoryBean">
-        <property name="converters">
-            <set>
-                <bean class="net.shibboleth.ext.spring.config.DurationToLongConverter" />
-                <bean class="net.shibboleth.ext.spring.config.StringToIPRangeConverter" />
-                <bean class="net.shibboleth.ext.spring.config.BooleanToPredicateConverter" />
-                <bean class="net.shibboleth.ext.spring.config.StringBooleanToPredicateConverter" />
-                <bean class="net.shibboleth.ext.spring.config.StringToResourceConverter" />
-            </set>
-        </property>
-    </bean>
-
-    <!--
-        stripEntityScopes
-
-        Remove entity-level Scope elements, leaving only the ones associated
-        with role descriptors.
-    -->
-    <bean id="stripEntityScopes" parent="mda.XSLTransformationStage"
-        p:XSLResource="classpath:uk/entity_scopes.xsl"/>
 
     <!--
         finalise_parent
@@ -88,7 +61,7 @@
         Assemble a UK-style aggregate with an appropriate ID.
     -->
     <bean id="assembleAggregate" parent="mda.CompositeStage">
-        <property name="composedStages">
+        <property name="stages">
             <list>
                 <ref bean="uk_assemble"/>
                 <!--
@@ -97,9 +70,9 @@
                     Set the item's ID attribute to the static string "_".
                 -->
                 <bean id="setStaticID" parent="mda.GenerateIdStage">
-                    <constructor-arg>
-                        <bean parent="ukf.FixedStringIdentifierGenerationStrategy" c:_="_"/>
-                    </constructor-arg>
+                    <property name="generator">
+                        <bean parent="mda.FixedStringIdentifierGenerationStrategy" c:_="_"/>
+                    </property>
                 </bean>
             </list>
         </property>
@@ -114,7 +87,7 @@
         the registered metadata.
     -->
     <bean id="checkPublishable" parent="mda.CompositeStage">
-        <property name="composedStages">
+        <property name="stages">
             <list>
                 <ref bean="checkSchemas"/>
                 <ref bean="check_aggregate"/>
@@ -136,26 +109,8 @@
     <!--
         Entity attribute matcher for the SIRTFI assurance certification.
     -->
-    <bean id="SIRTFI.entity.attribute.matcher" parent="mda.MultiPredicateMatcher">
-        <property name="nameFormatPredicate">
-            <bean class="com.google.common.base.Predicates"
-                factory-method="equalTo"
-                c:_="urn:oasis:names:tc:SAML:2.0:attrname-format:uri"
-            />
-        </property>
-        <property name="namePredicate">
-            <bean class="com.google.common.base.Predicates"
-                factory-method="equalTo"
-                c:_="urn:oasis:names:tc:SAML:attribute:assurance-certification"
-            />
-        </property>
-        <property name="valuePredicate">
-            <bean class="com.google.common.base.Predicates"
-                factory-method="equalTo"
-                c:_="https://refeds.org/sirtfi"
-            />
-        </property>
-    </bean>
+    <bean id="SIRTFI.entity.attribute.matcher" parent="mda.AssuranceCertificationMatcher"
+        c:_="https://refeds.org/sirtfi"/>
 
     <!--
         Remove the REFEDS metadata namespace.
@@ -167,7 +122,7 @@
         Strip SIRTFI information.
     -->
     <bean id="strip.SIRTFI" parent="mda.CompositeStage">
-        <property name="composedStages">
+        <property name="stages">
             <list>
                 <!-- remove REFEDS contacts associated with SIRTFI -->
                 <bean id="strip.SIRTFI.contacts" parent="mda.XSLTransformationStage"
@@ -178,7 +133,7 @@
 
                 <!-- remove the SIRTFI entity attribute -->
                 <bean id="entityAttributes" parent="mda.EntityAttributeFilteringStage"
-                    p:whitelisting="false">
+                    p:keeping="false">
                     <property name="rules">
                         <list>
                             <ref bean="SIRTFI.entity.attribute.matcher"/>
@@ -212,7 +167,7 @@
             </list>
         </property>
         <property name="requiringRegistrationInformation" value="true"/>
-        <property name="whitelistingRegistrationAuthorities" value="false"/>
+        <property name="keepingRegistrationAuthorities" value="false"/>
     </bean>
 
     <!--
@@ -221,11 +176,11 @@
         Filter out entities which are included in our global import blacklist.
     -->
     <bean id="removeBlacklistedEntities" parent="mda.EntityFilterStage"
-        p:whitelistingEntities="false"
+        p:keepingEntities="false"
         p:designatedEntities-ref="importEntityBlacklist"/>
 
     <bean id="entityAttributes.blacklist" parent="mda.EntityAttributeFilteringStage">
-        <property name="whitelisting" value="false"/>
+        <property name="keeping" value="false"/>
         <property name="rules">
             <list>
                 <!-- Deny "InCommon registration" attribute (duplicates mdrpi:registrationAuthority) -->
@@ -305,9 +260,6 @@
                 <ref bean="assembleAggregate"/>
                 <bean parent="mda.SetCacheDurationStage"
                     p:cacheDuration="${cacheDuration.aggregate.duration}"/>
-                <ref bean="stripEntityScopes"/>
-
-                <ref bean="uk_add_cbc_encryption"/>
 
                 <ref bean="uk_finaliseProduction"/>
                 <ref bean="uk_normaliseNamespaces"/>
@@ -369,7 +321,6 @@
                 <ref bean="assembleAggregate"/>
                 <bean parent="mda.SetCacheDurationStage"
                     p:cacheDuration="${cacheDuration.aggregate.duration}"/>
-                <ref bean="stripEntityScopes"/>
 
                 <!--
                     Remove embedded images used in mdui:Logo elements.
@@ -407,7 +358,7 @@
         removes everything it does not need.
     -->
     <bean id="CDSStripUnwanted" parent="mda.CompositeStage">
-        <property name="composedStages">
+        <property name="stages">
             <list>
                 <ref bean="stripComments"/>
 
@@ -611,13 +562,12 @@
                     p:flowName="fallback"/>
 
                 <bean id="removeFallbackBlocklist" parent="mda.EntityFilterStage"
-                    p:whitelistingEntities="false"
+                    p:keepingEntities="false"
                     p:designatedEntities-ref="fallbackEntityBlocklist"/>
 
                 <ref bean="assembleAggregate"/>
                 <bean parent="mda.SetCacheDurationStage"
                     p:cacheDuration="${cacheDuration.aggregate.duration}"/>
-                <ref bean="stripEntityScopes"/>
                 <ref bean="stripEmptyExtensions"/>
                 <ref bean="uk_finaliseFallback"/>
                 <ref bean="uk_normaliseFallback"/>
@@ -665,7 +615,7 @@
     </bean>
 
     <bean id="uk_testPipeline" parent="mda.CompositeStage">
-        <property name="composedStages">
+        <property name="stages">
             <list>
                 <!-- Apply flow constraints for this flow. -->
                 <bean id="flowConstraints" parent="ukf.FlowConstraintApplyingStage"
@@ -674,9 +624,6 @@
                 <ref bean="assembleAggregate"/>
                 <bean parent="mda.SetCacheDurationStage"
                     p:cacheDuration="${cacheDuration.aggregate.duration}"/>
-                <ref bean="stripEntityScopes"/>
-
-                <ref bean="uk_add_cbc_encryption"/>
 
                 <ref bean="uk_finaliseTest"/>
                 <ref bean="uk_normaliseTest"/>
@@ -789,10 +736,7 @@
                 <ref bean="assembleAggregate"/>
                 <bean parent="mda.SetCacheDurationStage"
                     p:cacheDuration="${cacheDuration.aggregate.duration}"/>
-                <ref bean="stripEntityScopes"/>
                 <ref bean="stripEmptyExtensions"/>
-
-                <ref bean="uk_add_cbc_encryption"/>
 
                 <ref bean="uk_finaliseExport"/>
 
@@ -892,10 +836,7 @@
                 <ref bean="assembleAggregate"/>
                 <bean parent="mda.SetCacheDurationStage"
                     p:cacheDuration="${cacheDuration.aggregate.duration}"/>
-                <ref bean="stripEntityScopes"/>
                 <ref bean="stripEmptyExtensions"/>
-
-                <ref bean="uk_add_cbc_encryption"/>
 
                 <ref bean="uk_finaliseExport"/>
 
@@ -960,9 +901,9 @@
                     Fork a new output pipeline for the registrar statistics.
                 -->
                 <bean id="rawRegistrarDemux" parent="mda.PipelineDemultiplexerStage">
-                    <property name="pipelineAndSelectionStrategies">
+                    <property name="pipelinesAndStrategies">
                         <list>
-                            <bean class="net.shibboleth.utilities.java.support.collection.Pair">
+                            <bean parent="mda.PipelineAndStrategy">
                                 <constructor-arg ref="uk_statisticsPipeline"/>
                                 <constructor-arg ref="everythingSelector"/>
                             </bean>
@@ -1009,13 +950,13 @@
                     too many UK-specific transformations are performed.
                 -->
                 <bean id="registrarDemux" parent="mda.PipelineDemultiplexerStage">
-                    <property name="pipelineAndSelectionStrategies">
+                    <property name="pipelinesAndStrategies">
                         <list>
-                            <bean class="net.shibboleth.utilities.java.support.collection.Pair">
+                            <bean parent="mda.PipelineAndStrategy">
                                 <constructor-arg ref="uk_exportPipeline"/>
                                 <constructor-arg ref="uk_exportSelector"/>
                             </bean>
-                            <bean class="net.shibboleth.utilities.java.support.collection.Pair">
+                            <bean parent="mda.PipelineAndStrategy">
                                 <constructor-arg ref="uk_exportPreviewPipeline"/>
                                 <constructor-arg ref="uk_exportPreviewSelector"/>
                             </bean>
@@ -1081,17 +1022,17 @@
                     Fork into new pipelines for the production, fallback and WAYF aggregates.
                 -->
                 <bean id="productionDemux" parent="mda.PipelineDemultiplexerStage">
-                    <property name="pipelineAndSelectionStrategies">
+                    <property name="pipelinesAndStrategies">
                         <list>
-                            <bean class="net.shibboleth.utilities.java.support.collection.Pair">
+                            <bean parent="mda.PipelineAndStrategy">
                                 <constructor-arg ref="uk_productionPipeline"/>
                                 <constructor-arg ref="everythingSelector"/>
                             </bean>
-                            <bean class="net.shibboleth.utilities.java.support.collection.Pair">
+                            <bean parent="mda.PipelineAndStrategy">
                                 <constructor-arg ref="uk_fallbackPipeline"/>
                                 <constructor-arg ref="everythingSelector"/>
                             </bean>
-                            <bean class="net.shibboleth.utilities.java.support.collection.Pair">
+                            <bean parent="mda.PipelineAndStrategy">
                                 <constructor-arg ref="uk_wayfPipeline"/>
                                 <constructor-arg ref="uk_wayfSelector"/>
                             </bean>
@@ -1155,13 +1096,13 @@
                     Fork into new pipelines for additional aggregates.
                 -->
                 <bean id="preProductionDemux" parent="mda.PipelineDemultiplexerStage">
-                    <property name="pipelineAndSelectionStrategies">
+                    <property name="pipelinesAndStrategies">
                         <list>
-                            <bean class="net.shibboleth.utilities.java.support.collection.Pair">
+                            <bean parent="mda.PipelineAndStrategy">
                                 <constructor-arg ref="CDSAllPipeline"/>
                                 <constructor-arg ref="CDSAllSelector"/>
                             </bean>
-                            <bean class="net.shibboleth.utilities.java.support.collection.Pair">
+                            <bean parent="mda.PipelineAndStrategy">
                                 <constructor-arg ref="WugenPipeline"/>
                                 <constructor-arg ref="WugenSelector"/>
                             </bean>

@@ -22,7 +22,7 @@
     <!--
         Pick up Shibboleth MDA beans.
     -->
-    <import resource="mda-beans.xml"/>
+    <import resource="classpath:net/shibboleth/metadata/beans.xml"/>
 
     <!--
         Pick up UK federation MDA beans.
@@ -54,12 +54,6 @@
         class="org.springframework.core.io.FileSystemResource"/>
 
     <!--
-        Shibboleth-defined Resource class parent bean.
-    -->
-    <bean id="HTTPResource" abstract="true"
-        class="net.shibboleth.ext.spring.resource.HTTPResource"/>
-
-    <!--
         component_parent
 
         Parent for anything based on the Shibboleth component system.
@@ -73,7 +67,8 @@
 
         Parent for XML Signature validation stages.
 
-        Applies global algorithm blacklists. For values, see:
+        Applies global algorithm exclusions. For values, see:
+
             http://www.w3.org/TR/xmlsec-algorithms/
 
         Establishes a default of *not* permitting empty references
@@ -82,12 +77,12 @@
         require it.
     -->
     <bean id="XMLSignatureValidationStage" abstract="true" parent="mda.XMLSignatureValidationStage">
-        <property name="blacklistedDigests">
+        <property name="disallowedDigests">
             <list>
                 <value>http://www.w3.org/2001/04/xmldsig-more#md5</value>
             </list>
         </property>
-        <property name="blacklistedSignatureMethods">
+        <property name="disallowedSignatureMethods">
             <list>
                 <value>http://www.w3.org/2001/04/xmldsig-more#rsa-md5</value>
             </list>
@@ -103,13 +98,13 @@
     -->
     <bean id="XMLSignatureValidationStageSHA256" abstract="true"
         parent="XMLSignatureValidationStage">
-        <property name="blacklistedDigests">
+        <property name="disallowedDigests">
             <list>
                 <value>http://www.w3.org/2000/09/xmldsig#sha1</value>
                 <value>http://www.w3.org/2001/04/xmldsig-more#md5</value>
             </list>
         </property>
-        <property name="blacklistedSignatureMethods">
+        <property name="disallowedSignatureMethods">
             <list>
                 <value>http://www.w3.org/2000/09/xmldsig#rsa-sha1</value>
                 <value>http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha1</value>
@@ -118,29 +113,31 @@
         </property>
     </bean>
 
-    <!-- *** Parent beans for Shibboleth spring-extensions factory beans. *** -->
-
-    <bean id="DOMDocumentFactoryBean" abstract="true"
-        class="net.shibboleth.ext.spring.factory.DOMDocumentFactoryBean"/>
-
-    <!-- PKCS11PrivateKeyFactoryBean is in MDA in V0.9.2. -->
-    <bean id="PKCS11PrivateKeyFactoryBean" abstract="true"
-        class="net.shibboleth.metadata.util.PKCS11PrivateKeyFactoryBean"/>
-
-    <bean id="PrivateKeyFactoryBean" abstract="true"
-        class="net.shibboleth.ext.spring.factory.PrivateKeyFactoryBean"/>
-
-    <bean id="PublicKeyFactoryBean" abstract="true"
-        class="net.shibboleth.ext.spring.factory.PublicKeyFactoryBean"/>
-
-    <bean id="X509CertificateChainFactoryBean" abstract="true"
-        class="net.shibboleth.ext.spring.factory.X509CertificateChainFactoryBean"/>
-
-    <bean id="X509CertificateFactoryBean" abstract="true"
-        class="net.shibboleth.ext.spring.factory.X509CertificateFactoryBean"/>
-
     <!-- *** Default Shibboleth component bean id property from Spring bean id *** -->
-    <bean class="net.shibboleth.ext.spring.config.IdentifiableBeanPostProcessor" lazy-init="false"/>
+    <bean parent="mda.IdentifiableBeanPostProcessor" lazy-init="false"/>
+
+
+    <!--
+        *****************************
+        ***                       ***
+        ***   U T I L I T I E S   ***
+        ***                       ***
+        *****************************
+    -->
+
+    <!-- This bean MUST be called "conversionService" to work properly. -->
+    <bean id="conversionService" class="org.springframework.context.support.ConversionServiceFactoryBean">
+        <property name="converters">
+            <set>
+                <bean parent="mda.StringToDurationConverter"/>
+                <bean parent="mda.StringToIPRangeConverter"/>
+                <bean parent="mda.BooleanToPredicateConverter"/>
+                <bean parent="mda.StringBooleanToPredicateConverter"/>
+                <bean parent="mda.StringToResourceConverter"/>
+            </set>
+        </property>
+    </bean>
+
 
     <!--
         *******************************************************
@@ -263,7 +260,7 @@
         A NamespaceContext that assigns the usual prefix for each of the commonly used XML namespaces.
         This is used in the evaluation of XPath expressions.
     -->
-    <bean id="commonNamespaces" class="net.shibboleth.utilities.java.support.xml.SimpleNamespaceContext">
+    <bean id="commonNamespaces" parent="mda.SimpleNamespaceContext">
         <constructor-arg>
             <util:map map-class="java.util.HashMap">
                 <entry key="alg"        value-ref="alg_namespace"/>
@@ -392,7 +389,7 @@
     <bean id="ch_switchaai_registrar"    parent="String" c:_="http://rr.aai.switch.ch/"/>
     <bean id="cl_cofre_registrar"        parent="String" c:_="http://cofre.reuna.cl"/>
     <bean id="cn_carsi_registrar"        parent="String" c:_="https://www.carsi.edu.cn"/>
-    <bean id="cn_cstcloud_registrar"     parent="String" c:_="https://cstcloud.net/"/>
+    <bean id="cn_cstcloud_registrar"     parent="String" c:_="https://www.cstcloud.net/"/>
     <bean id="co_colfire_registrar"      parent="String" c:_="http://colfire.co"/>
     <bean id="cy_cynet_registrar"        parent="String" c:_="https://cif.cynet.ac.cy"/>
     <bean id="cz_eduid_registrar"        parent="String" c:_="http://www.eduid.cz/"/>
@@ -433,6 +430,7 @@
     <bean id="mx_fenix_registrar"        parent="String" c:_="http://www.fenix.org.mx"/>
     <bean id="mz_cafmoz_registrar"       parent="String" c:_="http://cafmoz.morenet.ac.mz"/>
     <bean id="nl_surfconext_registrar"   parent="String" c:_="http://www.surfconext.nl/"/>
+    <bean id="ng_eduidng_registrar"      parent="String" c:_="https://www.eduid.ng"/>
     <bean id="no_feide_registrar"        parent="String" c:_="http://feide.no/"/>
     <bean id="nz_tuakiri_registrar"      parent="String" c:_="https://tuakiri.ac.nz/"/>
     <bean id="om_omankid_registrar"      parent="String" c:_="https://www.trc.gov.om/trcweb/"/>
@@ -449,6 +447,7 @@
     <bean id="sg_sgaf_registrar"         parent="String" c:_="https://www.singaren.net.sg"/>
     <bean id="si_arnes_registrar"        parent="String" c:_="http://aai.arnes.si"/>
     <bean id="sk_safeid_registrar"       parent="String" c:_="http://safeid.sk"/>
+    <bean id="th_thaiidf_registrar"      parent="String" c:_="http://idf.thairen.net.th"/>
     <bean id="tj_tarena_registrar"       parent="String" c:_="http://www.tidf.tj/"/>
     <bean id="tr_yetkim_registrar"       parent="String" c:_="https://yetkim.org.tr/"/>
     <bean id="ua_peano_registrar"        parent="String" c:_="https://peano.uran.ua"/>
@@ -501,6 +500,7 @@
         <entry key-ref="cz_eduid_registrar"           value="CZ"/>
         <entry key-ref="hu_eduid_registrar"           value="HU"/>
         <entry key-ref="lu_eduid_registrar"           value="LU"/>
+        <entry key-ref="ng_eduidng_registrar"         value="NG"/>
         <entry key-ref="ma_eduidm_registrar"          value="MA"/>
         <entry key-ref="by_febas_registrar"           value="BY"/>
         <entry key-ref="ru_fedurus_registrar"         value="RU-FEDURUS"/>
@@ -547,6 +547,7 @@
         <entry key-ref="se_swamid_registrar"          value="SE"/>
         <entry key-ref="ch_switchaai_registrar"       value="CH"/>
         <entry key-ref="ee_taat_registrar"            value="EE"/>
+        <entry key-ref="th_thaiidf_registrar"         value="TH"/>
         <entry key-ref="bd_tigerfed_registrar"        value="BD"/>
         <entry key-ref="nz_tuakiri_registrar"         value="NZ"/>
         <entry key-ref="uk_ukf_registrar"             value="UK"/>
@@ -675,7 +676,7 @@
         any items that had errors.  Items with just warnings are retained.
     -->
     <bean id="errorAnnouncingFilter" parent="mda.CompositeStage">
-        <property name="composedStages">
+        <property name="stages">
             <list>
                 <ref bean="warningAndErrorAnnouncer"/>
                 <ref bean="errorRemover"/>
@@ -691,7 +692,7 @@
         Warnings are not announced, and do not cause termination.
     -->
     <bean id="errorTerminatingFilter" parent="mda.CompositeStage">
-        <property name="composedStages">
+        <property name="stages">
             <list>
                 <ref bean="errorAnnouncer"/>
                 <ref bean="errorTerminator"/>
@@ -713,16 +714,26 @@
         QNames for SAML metadata elements.
     -->
     <bean id="md-AdditionalMetadataLocation"  parent="QName" c:_0-ref="md_namespace" c:_1="AdditionalMetadataLocation"/>
+    <bean id="md-ArtifactResolutionService"   parent="QName" c:_0-ref="md_namespace" c:_1="ArtifactResolutionService"/>
+    <bean id="md-AssertionConsumerService"    parent="QName" c:_0-ref="md_namespace" c:_1="AssertionConsumerService"/>
+    <bean id="md-AssertionIDRequestService"   parent="QName" c:_0-ref="md_namespace" c:_1="AssertionIDRequestService"/>
     <bean id="md-AttributeProfile"            parent="QName" c:_0-ref="md_namespace" c:_1="AttributeProfile"/>
+    <bean id="md-AttributeService"            parent="QName" c:_0-ref="md_namespace" c:_1="AttributeService"/>
+    <bean id="md-AuthnQueryService"           parent="QName" c:_0-ref="md_namespace" c:_1="AuthnQueryService"/>
+    <bean id="md-AuthzService"                parent="QName" c:_0-ref="md_namespace" c:_1="AuthzService"/>
     <bean id="md-Company"                     parent="QName" c:_0-ref="md_namespace" c:_1="Company"/>
     <bean id="md-EmailAddress"                parent="QName" c:_0-ref="md_namespace" c:_1="EmailAddress"/>
     <bean id="md-GivenName"                   parent="QName" c:_0-ref="md_namespace" c:_1="GivenName"/>
+    <bean id="md-ManageNameIDService"         parent="QName" c:_0-ref="md_namespace" c:_1="ManageNameIDService"/>
     <bean id="md-NameIDFormat"                parent="QName" c:_0-ref="md_namespace" c:_1="NameIDFormat"/>
+    <bean id="md-NameIDMappingService"        parent="QName" c:_0-ref="md_namespace" c:_1="NameIDMappingService"/>
     <bean id="md-OrganizationDisplayName"     parent="QName" c:_0-ref="md_namespace" c:_1="OrganizationDisplayName"/>
     <bean id="md-OrganizationName"            parent="QName" c:_0-ref="md_namespace" c:_1="OrganizationName"/>
     <bean id="md-OrganizationURL"             parent="QName" c:_0-ref="md_namespace" c:_1="OrganizationURL"/>
     <bean id="md-ServiceDescription"          parent="QName" c:_0-ref="md_namespace" c:_1="ServiceDescription"/>
     <bean id="md-ServiceName"                 parent="QName" c:_0-ref="md_namespace" c:_1="ServiceName"/>
+    <bean id="md-SingleLogoutService"         parent="QName" c:_0-ref="md_namespace" c:_1="SingleLogoutService"/>
+    <bean id="md-SingleSignOnService"         parent="QName" c:_0-ref="md_namespace" c:_1="SingleSignOnService"/>
     <bean id="md-SurName"                     parent="QName" c:_0-ref="md_namespace" c:_1="SurName"/>
     <bean id="md-TelephoneNumber"             parent="QName" c:_0-ref="md_namespace" c:_1="TelephoneNumber"/>
 
@@ -962,11 +973,10 @@
 
         These options can be removed once the underlying issue has been resolved.
     -->
-    <bean id="httpClientBuilder"
-        class="net.shibboleth.utilities.java.support.httpclient.HttpClientBuilder"
+    <bean id="httpClientBuilder" parent="mda.HttpClientBuilder"
         p:connectionDisregardTLSCertificate="true"
-        p:socketTimeout="100000"
-        p:connectionTimeout="100000"
+        p:socketTimeout="PT100S"
+        p:connectionTimeout="PT100S"
     />
 
     <!--
@@ -981,8 +991,7 @@
 
         A pre-configured parser pool for use by source stages.
     -->
-    <bean id="parserPool" parent="component_parent"
-        class="net.shibboleth.utilities.java.support.xml.BasicParserPool"
+    <bean id="parserPool" parent="mda.BasicParserPool"
         p:ignoreComments="false"
         p:ignoreElementContentWhitespace="false"/>
 
@@ -1200,7 +1209,7 @@
         that is left to the caller.
     -->
     <bean id="standardImportActions" parent="mda.CompositeStage">
-        <property name="composedStages">
+        <property name="stages">
             <list>
                 <ref bean="populateItemIds"/>
                 <ref bean="populateRegistrationAuthorities"/>
@@ -1210,7 +1219,7 @@
                     other than the ones we accept from partners.
                 -->
                 <bean id="whitelistImportedNamespaces" parent="mda.NamespacesStrippingStage"
-                    p:whitelisting="true">
+                    p:keeping="true">
                     <property name="namespaces">
                         <set>
                             <ref bean="alg_namespace"/>
@@ -1243,42 +1252,13 @@
                 <ref bean="trimImportElementWhitespace"/>
                 <ref bean="stripEmptyExtensions"/>
                 <ref bean="strip_mdui_logo_length"/>
+                <ref bean="uk_add_cbc_encryption"/>
 
                 <ref bean="checkSchemas"/>
                 <ref bean="CHECK_std"/>
                 <ref bean="check_namespaces"/>
 
-                <bean id="checkCertificates" parent="mda.X509ValidationStage">
-                    <property name="validators">
-                        <list>
-                            <!-- Error on DSA keys. -->
-                            <bean p:id="DSA" parent="ukf.X509DSADetector"/>
-
-                            <!-- Error on RSA key length less than 2048 bits. -->
-                            <bean p:id="RSAKeyLength" parent="mda.X509RSAKeyLengthValidator"
-                                p:warningBoundary="0" p:errorBoundary="2048"/>
-                            <!-- Error on small RSA public exponents. -->
-                            <bean p:id="RSAExponent" parent="mda.X509RSAExponentValidator"/>
-                            <!-- Error on keys vulnerable to ROCA. -->
-                            <bean p:id="ROCA" parent="ukf.X509ROCAValidator"/>
-
-                            <!--
-                                Debian weak key blacklists.
-
-                                Don't need to check for keys below our minimum key size.
-                            -->
-                            <ref bean="debian.2048"/>
-                            <ref bean="debian.4096"/>
-
-                            <!--
-                                Compromised key blacklists.
-
-                                Again, don't need to check for keys below our minimum key size.
-                            -->
-                            <ref bean="compromised.2048"/>
-                        </list>
-                    </property>
-                </bean>
+                <ref bean="check_standard_certificates"/>
 
             </list>
         </property>
@@ -1292,7 +1272,7 @@
         namespaces in the document ready for serialisation.
     -->
     <bean id="standardImportTail" parent="mda.CompositeStage">
-        <property name="composedStages">
+        <property name="stages">
             <list>
                 <!-- announce and remove any entities with errors -->
                 <ref bean="errorAnnouncingFilter"/>

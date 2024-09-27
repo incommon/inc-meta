@@ -60,41 +60,6 @@
     </bean>
 
     <!--
-        statistics.charting
-
-        Stand-alone statistics generation for charting.
-    -->
-    <bean id="statistics.charting" parent="mda.SimplePipeline">
-        <property name="stages">
-            <list>
-                <ref bean="uk_registeredEntities"/>
-
-                <!-- Apply flow constraints for this flow. -->
-                <bean id="flowConstraints" parent="ukf.FlowConstraintApplyingStage"
-                    p:flowName="statistics"/>
-
-                <ref bean="assemble"/>
-                <bean parent="mda.XSLTransformationStage"
-                    p:XSLResource="classpath:uk/statistics-charting.xsl">
-                    <property name="transformParameters">
-                        <map>
-                            <entry key="memberDocument" value-ref="uk_membersDocument"/>
-                        </map>
-                    </property>
-                </bean>
-                <bean parent="mda.SerializationStage">
-                    <property name="serializer" ref="serializer"/>
-                    <property name="outputFile">
-                        <bean parent="File">
-                            <constructor-arg value="${output.dir}/statistics-charting.html"/>
-                        </bean>
-                    </property>
-                </bean>
-            </list>
-        </property>
-    </bean>
-
-    <!--
         sp_mdui_test
 
         Generates a page of links to discovery services, for each SP that
@@ -290,7 +255,7 @@
                     we don't accept from registrants.
                 -->
                 <bean id="whitelistImportedNamespaces" parent="mda.NamespacesStrippingStage"
-                    p:whitelisting="true">
+                    p:keeping="true">
                     <property name="namespaces">
                         <set>
                             <ref bean="alg_namespace"/>
@@ -374,7 +339,7 @@
                     <property name="validators">
                         <list>
                             <!-- Error on DSA keys. -->
-                            <bean p:id="DSA" parent="ukf.X509DSADetector"/>
+                            <bean p:id="DSA" parent="mda.X509DSADetector"/>
 
                             <!-- Error on RSA key length less than 2048 bits. -->
                             <bean p:id="RSAKeyLength" parent="mda.X509RSAKeyLengthValidator"
@@ -382,10 +347,10 @@
                             <!-- Error on small RSA public exponents. -->
                             <bean p:id="RSAExponent" parent="mda.X509RSAExponentValidator"/>
                             <!-- Error on keys vulnerable to ROCA. -->
-                            <bean p:id="ROCA" parent="ukf.X509ROCAValidator"/>
+                            <bean p:id="ROCA" parent="mda.X509ROCAValidator"/>
 
                             <!--
-                                Debian weak key blacklists.
+                                Debian weak key lists.
 
                                 Don't need to check for keys below our minimum key size.
                             -->
@@ -393,7 +358,7 @@
                             <ref bean="debian.4096"/>
 
                             <!--
-                                Compromised key blacklists.
+                                Compromised key lists.
 
                                 Again, don't need to check for keys below our minimum key size.
                             -->

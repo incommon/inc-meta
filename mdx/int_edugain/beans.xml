@@ -29,9 +29,13 @@
     <bean id="int_edugain_betaAggregate_url" parent="String">
         <constructor-arg value="http://mds.edugain.org/edugain-v1-beta.xml"/>
     </bean>
+    <!-- Downloaded copy of production aggregate. -->
+    <bean id="int_edugain_productionAggregate_file" parent="File">
+        <constructor-arg value="${output.edugain.download}"/>
+    </bean>
 
     <!--
-        Fetches the eduGAIN production aggregate.
+        Fetches the eduGAIN production aggregate from its designated URL.
 
         Other aggregates may be substituted if their location exists as a bean
         named "int_edugain_<ID>Aggregate_url" above, and the property
@@ -46,18 +50,29 @@
     <bean id="int_edugain_productionAggregate" parent="mda.DOMResourceSourceStage">
         <property name="parserPool" ref="parserPool"/>
         <property name="DOMResource">
-            <bean parent="HTTPResource">
+            <bean parent="mda.HTTPResource">
                 <constructor-arg name="client" ref="httpClient"/>
                 <constructor-arg name="url"
-                	ref="int_edugain_${int.edugain.aggregate.name:production}Aggregate_url"/>
+                    ref="int_edugain_${int.edugain.aggregate.name:production}Aggregate_url"/>
             </bean>
+        </property>
+    </bean>
+
+    <!--
+        Fetches the downloaded copy of the eduGAIN production aggregate.
+    -->
+    <bean id="int_edugain_productionAggregate_fromFile" parent="mda.DOMResourceSourceStage">
+        <property name="parserPool" ref="parserPool"/>
+        <property name="DOMResource">
+            <bean parent="FileSystemResource"
+                c:_-ref="int_edugain_productionAggregate_file"/>
         </property>
     </bean>
 
     <!--
         eduGAIN signing certificate.
     -->
-    <bean id="int_edugain_signingCertificate" parent="X509CertificateFactoryBean"
+    <bean id="int_edugain_signingCertificate" parent="mda.X509CertificateFactoryBean"
         p:resource="classpath:int_edugain/mds-v2.cer"/>
 
     <!--
@@ -71,24 +86,25 @@
         Remove blacklisted entities.
     -->
     <bean id="int_edugain_removeBlacklistedEntities" parent="mda.EntityFilterStage"
-        p:whitelistingEntities="false"
+        p:keepingEntities="false"
         p:designatedEntities-ref="int_edugain_entity_blacklist"/>
 
     <!--
         Fetch the production entities as a collection.
     -->
     <bean id="int_edugain_productionEntities" parent="mda.CompositeStage">
-        <property name="composedStages">
+        <property name="stages">
             <list>
-                <ref bean="int_edugain_productionAggregate"/>
+                <ref bean="int_edugain_productionAggregate_fromFile"/>
 
                 <!--
                     Check for fatal errors at the aggregate level:
                         missing or expired validUntil attribute
-                        invalid signature
+
+                    Signature was checked when the file was downloaded,
+                    so we don't need to do it again here.
                 -->
                 <ref bean="check_validUntil"/>
-                <ref bean="int_edugain_checkSignature"/>
                 <ref bean="errorTerminatingFilter"/>
 
                 <ref bean="disassemble"/>

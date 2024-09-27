@@ -2,9 +2,17 @@
 *~
 .*swp
 
+# Java heap dumps
+*.hprof
+
 # GUI metadata files
 .DS_Store
 Thumbs.db
+
+# Eclipse files
+.classpath
+.project
+.settings
 
 # /
 /private
