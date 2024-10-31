@@ -39,47 +39,7 @@
         <property name="stages">
             <list>
                 <ref bean="uk_registeredEntities"/>
-
-                <!--
-                    The rest of the pipeline is a duplicate of the
-                    uk_statisticsPipeline bean definition. It would
-                    be better to use that, but Pipeline isn't a thing
-                    that can appear within another Pipeline at
-                    present (MDA 0.9.x).
-                -->
-
-                <!-- Apply flow constraints for this flow. -->
-                <bean id="flowConstraints" parent="ukf.FlowConstraintApplyingStage"
-                    p:flowName="statistics"/>
-                
-                <ref bean="assemble"/>
-                <ref bean="uk_generateStatistics"/>
-                <ref bean="uk_serializeStatistics"/>
-            </list>
-        </property>
-    </bean>
-
-    <!--
-        sp_mdui_test
-
-        Generates a page of links to discovery services, for each SP that
-        has mdui:uiinfo metadata.
-    -->
-    <bean id="sp_mdui_test" parent="mda.SimplePipeline">
-        <property name="stages">
-            <list>
-                <ref bean="uk_registeredEntities"/>
-                <ref bean="assemble"/>
-                <bean id="process" parent="mda.XSLTransformationStage"
-                    p:XSLResource="classpath:uk/sp_mdui_test.xsl"/>
-                <bean id="serialize" parent="mda.SerializationStage">
-                    <property name="serializer" ref="serializer"/>
-                    <property name="outputFile">
-                        <bean parent="File">
-                            <constructor-arg value="${mdx.dir}/uk/temp.html"/>
-                        </bean>
-                    </property>
-                </bean>
+                <ref bean="uk_statisticsPipeline"/>
             </list>
         </property>
     </bean>
