@@ -47,7 +47,7 @@
     -->
     <bean id="remove_blacklisted_incommon_entities"
         parent="mda.EntityFilterStage"
-        p:whitelistingEntities="false"
+        p:keepingEntities="false"
         p:designatedEntities-ref="incommon_entity_blacklist"/>
 
 </beans>

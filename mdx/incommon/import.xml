@@ -42,7 +42,7 @@
     -->
 
     <bean id="common.output" parent="mda.CompositeStage">
-        <property name="composedStages">
+        <property name="stages">
             <list>
                 <!-- Construct a new aggregate from the collection of entities. -->
                 <bean id="inc.assemble" parent="mda.EntitiesDescriptorAssemblerStage">
@@ -245,7 +245,7 @@
                         </list>
                     </property>
                     <property name="requiringRegistrationInformation" value="true"/>
-                    <property name="whitelistingRegistrationAuthorities" value="true"/>
+                    <property name="keepingRegistrationAuthorities" value="true"/>
                 </bean>
 
                 <!-- Include a default registrationAuthority for each entity. -->
@@ -275,10 +275,10 @@
 
                 <!-- Fork new pipelines to generate special aggregates. -->
                 <bean id="demux" parent="mda.PipelineDemultiplexerStage">
-                    <property name="pipelineAndSelectionStrategies">
+                    <property name="pipelinesAndStrategies">
                         <list>
                             <!-- IdP-only aggregate. -->
-                            <bean class="net.shibboleth.utilities.java.support.collection.Pair">
+                            <bean parent="mda.PipelineAndStrategy">
                                 <constructor-arg ref="idp.pipeline"/>
                                 <constructor-arg ref="idp.selector"/>
                             </bean>

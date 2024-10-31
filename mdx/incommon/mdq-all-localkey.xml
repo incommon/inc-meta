@@ -12,7 +12,8 @@
     <import resource="classpath:incommon/mdq-all.xml" />
 
     <!-- Define a private key factory (based on a local key) to be used by the generateAll stage -->
-    <bean id="privateKeyFactory" parent="PrivateKeyFactoryBean" p:resource="${sign.keyResource}"
+    <bean id="privateKeyFactory" parent="mda.PrivateKeyFactoryBean"
+        p:resource="${sign.keyResource}"
         p:privateKeyPassword="${sign.keyPassword}" />
 
     <!-- Generate all signed metadata required by the InCommon MDQ service  -->

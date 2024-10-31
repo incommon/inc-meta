@@ -37,7 +37,7 @@
 
     -->
     <bean id="edugainPolicy" parent="mda.CompositeStage">
-        <property name="composedStages">
+        <property name="stages">
             <list>
 
                 <!--
@@ -67,7 +67,7 @@
                         </list>
                     </property>
                     <property name="requiringRegistrationInformation" value="true"/>
-                    <property name="whitelistingRegistrationAuthorities" value="false"/>
+                    <property name="keepingRegistrationAuthorities" value="false"/>
                 </bean>
 
                 <!--
@@ -121,7 +121,7 @@
                     All entity attributes on the Entity Attribute Blacklist.
                 -->
                 <bean id="entityAttributes" parent="mda.EntityAttributeFilteringStage"
-                    p:whitelisting="false">
+                    p:keeping="false">
                     <property name="rules">
                         <list>
                             <!-- "registered by InCommon" entity category. -->
@@ -188,7 +188,7 @@
                     defined in namespaces not on the XML Namespace Whitelist.
                 -->
                 <bean id="whitelistImportedNamespaces" parent="mda.NamespacesStrippingStage"
-                    p:whitelisting="true">
+                    p:keeping="true">
                     <property name="namespaces">
                         <set>
                             <ref bean="alg_namespace"/>
@@ -293,13 +293,12 @@
 
                     Perform detailed scope checking.
                 -->
-                <bean id="checkScopes" parent="inc.stage_parent"
-                    class="uk.org.iay.incommon.mda.dom.saml.shib.ScopeValidationStage">
+                <bean id="checkScopes" parent="mda.ScopeValidationStage">
                     <property name="validators">
                         <list>
-                            <bean p:id="empty" parent="inc.RejectStringRegexValidator"
+                            <bean p:id="empty" parent="mda.RejectStringRegexValidator"
                                 p:regex="" p:message="scope element must not be empty"/>
-                            <bean p:id="whiteSpace" parent="inc.RejectStringRegexValidator"
+                            <bean p:id="whiteSpace" parent="mda.RejectStringRegexValidator"
                                 p:regex=".*\s.*" p:message="scope '%s' includes white space"/>
 
                             <!--
@@ -308,17 +307,17 @@
                                 nevertheless known to be legitimately used as
                                 security domains.
                             -->
-                            <bean p:id="mil.no" parent="inc.AcceptStringValueValidator"
+                            <bean p:id="mil.no" parent="mda.AcceptStringValueValidator"
                                 p:value="mil.no"/>
 
-                            <bean p:id="domainName" parent="inc.AsDomainNameStringValidator"
+                            <bean p:id="domainName" parent="mda.AsDomainNameStringValidator"
                                 p:message="scope is not a valid domain name: %s">
                                 <property name="validators">
                                     <list>
                                         <!-- DNS name validators -->
-                                        <bean p:id="publicSuffix" parent="inc.RejectDomainNamePublicSuffixValidator"
+                                        <bean p:id="publicSuffix" parent="mda.RejectDomainNamePublicSuffixValidator"
                                             p:message="scope is a public suffix: '%s'"/>
-                                        <bean p:id="noPublicSuffix" parent="inc.RejectDomainNameNotUnderPublicSuffixValidator"
+                                        <bean p:id="noPublicSuffix" parent="mda.RejectDomainNameNotUnderPublicSuffixValidator"
                                             p:message="scope is not under a public suffix: '%s'"/>
                                     </list>
                                 </property>
@@ -327,25 +326,25 @@
                     </property>
                     <property name="regexpValidators">
                         <list>
-                            <bean p:id="empty" parent="inc.RejectStringRegexValidator"
+                            <bean p:id="empty" parent="mda.RejectStringRegexValidator"
                                 p:regex="" p:message="regex scope element must not be empty"/>
-                            <bean p:id="whiteSpace" parent="inc.RejectStringRegexValidator"
+                            <bean p:id="whiteSpace" parent="mda.RejectStringRegexValidator"
                                 p:regex=".*\s.*" p:message="regex scope '%s' includes white space"/>
-                            <bean p:id="endAnchor" parent="inc.RejectStringRegexValidator"
+                            <bean p:id="endAnchor" parent="mda.RejectStringRegexValidator"
                                 p:regex=".*[^$]" p:message="regex scope '%s' does not end with an anchor ('$')"/>
-                            <bean p:id="literalTail" parent="inc.AsLiteralTailStringValidator"
+                            <bean p:id="literalTail" parent="mda.AsLiteralTailStringValidator"
                                 p:message="regular expression '%s' does not end with a literal tail">
                                 <property name="validators">
                                     <!-- validators to apply to the literal tail -->
                                     <list>
-                                        <bean p:id="domainName" parent="inc.AsDomainNameStringValidator"
+                                        <bean p:id="domainName" parent="mda.AsDomainNameStringValidator"
                                             p:message="literal tail is not a valid domain name: %s">
                                             <property name="validators">
                                                 <list>
                                                     <!-- DNS name validators for the literal tail -->
-                                                    <bean p:id="publicSuffix" parent="inc.RejectDomainNamePublicSuffixValidator"
+                                                    <bean p:id="publicSuffix" parent="mda.RejectDomainNamePublicSuffixValidator"
                                                         p:message="literal tail is a public suffix: '%s'"/>
-                                                    <bean p:id="noPublicSuffix" parent="inc.RejectDomainNameNotUnderPublicSuffixValidator"
+                                                    <bean p:id="noPublicSuffix" parent="mda.RejectDomainNameNotUnderPublicSuffixValidator"
                                                         p:message="literal tail is not under a public suffix: '%s'"/>
                                                 </list>
                                             </property>

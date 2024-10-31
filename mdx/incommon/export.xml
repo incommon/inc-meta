@@ -56,7 +56,7 @@
 
                 <!-- Remove all but the entities we want to export. -->
                 <bean id="applyEntityWhitelist" parent="mda.EntityFilterStage"
-                    p:whitelistingEntities="true"
+                    p:keepingEntities="true"
                     p:designatedEntities-ref="incommon_edugain_export_whitelist"/>
 
                 <!-- Include a default registrationAuthority for each entity. -->

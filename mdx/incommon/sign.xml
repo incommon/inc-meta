@@ -42,7 +42,7 @@
     -->
 
     <bean id="common.output" parent="mda.CompositeStage">
-        <property name="composedStages">
+        <property name="stages">
             <list>
                 <!-- Construct a new aggregate from the collection of entities. -->
                 <bean id="inc.assemble" parent="mda.EntitiesDescriptorAssemblerStage">
@@ -218,7 +218,7 @@
         </property>
         <property name="certificates">
             <list>
-                <bean id="us_incommon_signingCertificate" parent="X509CertificateFactoryBean"
+                <bean id="us_incommon_signingCertificate" parent="mda.X509CertificateFactoryBean"
                     p:resource="classpath:us_incommon/inc-md-cert.pem"/>
             </list>
         </property>
