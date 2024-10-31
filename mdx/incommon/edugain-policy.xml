@@ -427,6 +427,8 @@
 
                 <!-- Sub-rule q. -->
                 <ref bean="check_mdui_xslt"/>
+                <ref bean="check_mdui_logo_url"/>
+                <ref bean="check_mdui_urls"/>
 
                 <!-- Sub-rule r. -->
                 <ref bean="check_rands"/>
@@ -436,6 +438,8 @@
 
                 <!-- Sub-rule t. -->
                 <ref bean="check_saml2meta"/>
+                <ref bean="check_saml2meta_urlattrs"/>
+                <ref bean="check_saml2meta_urls"/>
                 <ref bean="check_saml_strings"/>
                 <ref bean="check_misc"/>
 
