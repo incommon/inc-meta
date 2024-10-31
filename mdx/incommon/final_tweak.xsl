@@ -10,10 +10,6 @@
 	xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"
 	xmlns:mdrpi="urn:oasis:names:tc:SAML:metadata:rpi"
 
-	xmlns:date="http://exslt.org/dates-and-times"
-	xmlns:mdxDates="xalan://uk.ac.sdss.xalan.md.Dates"
-	extension-element-prefixes="date mdxDates"
-
 	xmlns="urn:oasis:names:tc:SAML:2.0:metadata"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
@@ -44,10 +40,36 @@
 		This parameter determines the number of days between the aggregation instant and the
 		end of validity of the signed metadata.
 	-->
-	<xsl:param name="validityDays" select="14"/>
+	<xsl:param name="validityDays"/>
 
-	<xsl:variable name="now" select="date:date-time()"/>
-	<xsl:variable name="validUntil" select="mdxDates:dateAdd($now, $validityDays)"/>
+	<!--
+	    now_ISO
+
+	    This parameter is an ISO8601 representation of the UTC instant
+	    at which the aggregate generation started.
+
+	    Example: 2019-10-23T10:25:11Z
+	-->
+	<xsl:param name="now_ISO"/>
+
+	<!--
+	    now_local_ISO
+
+	    This parameter is an ISO8601 representation of the local time
+	    at which the aggregate generation started.
+
+		Example: 2019-10-23T11:25:11
+	-->
+	<xsl:param name="now_local_ISO"/>
+
+	<!--
+	    valid_until_ISO
+
+        This parameter is an ISO8601 representation of the UTC instant
+        at which the aggregate will become invalid. This has been computed
+        by the caller as now_ISO + validityDays days.
+    -->
+    <xsl:param name="valid_until_ISO"/>
 
 	<!--
 		documentID
@@ -59,9 +81,8 @@
 		that the signature explicitly references an identifier attribute in the element
 		being signed, in this case the document element.
 	-->
-	<xsl:variable name="normalisedNow" select="mdxDates:dateAdd($now, 0)"/>
 	<xsl:variable name="documentID"
-		select="concat('INC', translate($normalisedNow, ':-Z', ''))"/>
+		select="concat('INC', translate($now_ISO, ':-Z', ''))"/>
 
 	<!--
 		Document root.
@@ -76,7 +97,7 @@
 	<xsl:template match="/md:EntitiesDescriptor">
 		<EntitiesDescriptor>
 			<xsl:attribute name="validUntil">
-				<xsl:value-of select="$validUntil"/>
+				<xsl:value-of select="$valid_until_ISO"/>
 			</xsl:attribute>
 			<xsl:attribute name="ID">
 				<xsl:value-of select="$documentID"/>
@@ -128,7 +149,7 @@
 				<xsl:value-of select="$publisher"/>
 			</xsl:attribute>
 			<xsl:attribute name="creationInstant">
-				<xsl:value-of select="$normalisedNow"/>
+				<xsl:value-of select="$now_ISO"/>
 			</xsl:attribute>
 		</xsl:element>
 	</xsl:template>

@@ -96,6 +96,10 @@
                         <map>
                             <entry key="extraText" value="eduGAIN export metadata"/>
                             <entry key="publisher" value-ref="us_incommon_registrar"/>
+                            <entry key="validityDays" value="${validUntil.aggregate.days}"/>
+                            <entry key="now_ISO" value-ref="now_ISO"/>
+                            <entry key="now_local_ISO" value-ref="now_local_ISO"/>
+                            <entry key="valid_until_ISO" value-ref="validUntil_aggregate_ISO"/>
                         </map>
                     </property>
                 </bean>
