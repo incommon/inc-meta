@@ -3131,7 +3131,7 @@
     -->
     <target name="inc.mdq.generate.all.localkey" depends="get.sign.uk.keyPassword">
         <property name="mda.mdq.input" value="${mda.inc.imported.xml}"/>
-        <property name="mda.sign.keyPassword" value="${sign.keyPassword}"/>
+        <property name="mda.sign.keyPassword" value="${sign.uk.keyPassword}"/>
         <echo>Generating MDQ metadata in ${mda.mdq.output}</echo>
         <echo>    from unsigned aggregate in ${mda.mdq.input}</echo>
         <delete dir="${mdq.output.dir}" quiet="true"/>
