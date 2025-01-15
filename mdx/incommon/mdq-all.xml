@@ -124,7 +124,7 @@
                     p:XSLResource="classpath:incommon/ns_norm_import.xsl" />
 
                 <!-- Sign the aggregate -->
-                <ref bean="signItems" />
+                <ref bean="signAggregate" />
 
             </list>
         </property>
@@ -230,6 +230,25 @@
     <bean id="signItems" parent="mda.XMLSignatureSigningStage">
         <property name="privateKey">
             <ref bean="privateKeyFactory" />
+        </property>
+    </bean>
+
+    <!--
+        signAggregate
+
+        Signs an aggregate using a privateKeyFactory defined elsewhere.
+        For aggregates, we include the certificate alongside the
+        signature. 
+    -->
+    <bean id="signAggregate" parent="mda.XMLSignatureSigningStage">
+        <property name="privateKey">
+            <ref bean="privateKeyFactory" />
+        </property>
+        <property name="certificates">
+            <list>
+                <bean id="us_incommon_signingCertificate" parent="mda.X509CertificateFactoryBean"
+                    p:resource="classpath:us_incommon/inc-md-cert.pem"/>
+            </list>
         </property>
     </bean>
 
