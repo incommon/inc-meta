@@ -1,0 +1,10 @@
+{
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+    "settings": {
+        "terminal.integrated.cwd": "/mda/inc/inc-meta/tests/incommon/scripts"
+    },
+    "workspaceMount": "source=${localWorkspaceFolder},target=/mda/inc/inc-meta,type=bind",
+    "workspaceFolder": "/mda/inc/inc-meta"
+}

@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><md:EntitiesDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" xmlns="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:alg="urn:oasis:names:tc:SAML:metadata:algsupport" xmlns:algsupport="urn:oasis:names:tc:SAML:metadata:algsupport" xmlns:auth="http://docs.oasis-open.org/wsfed/authorization/200706" xmlns:disco="urn:oasis:names:tc:SAML:profiles:SSO:idp-discovery-protocol" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:dsig="http://www.w3.org/2000/09/xmldsig#" xmlns:eduidmd="http://eduid.cz/schema/metadata/1.0" xmlns:eidas="http://eidas.europa.eu/saml-extensions" xmlns:elab="http://eduserv.org.uk/labels" xmlns:fed="http://docs.oasis-open.org/wsfed/federation/200706" xmlns:hoksso="urn:oasis:names:tc:SAML:2.0:profiles:holder-of-key:SSO:browser" xmlns:idpdisc="urn:oasis:names:tc:SAML:profiles:SSO:idp-discovery-protocol" xmlns:init="urn:oasis:names:tc:SAML:profiles:SSO:request-init" xmlns:mdattr="urn:oasis:names:tc:SAML:metadata:attribute" xmlns:mdrpi="urn:oasis:names:tc:SAML:metadata:rpi" xmlns:mdui="urn:oasis:names:tc:SAML:metadata:ui" xmlns:mduri="urn:oasis:names:tc:SAML:2.0:attrname-format:uri" xmlns:ns0="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:ns1="http://www.w3.org/2000/09/xmldsig#" xmlns:ns2="urn:oasis:names:tc:SAML:metadata:attribute" xmlns:ns3="urn:oasis:names:tc:SAML:2.0:assertion" xmlns:ns4="urn:oasis:names:tc:SAML:profiles:SSO:idp-discovery-protocol" xmlns:ns5="urn:oasis:names:tc:SAML:metadata:algsupport" xmlns:ns6="urn:oasis:names:tc:SAML:profiles:SSO:idp-discovery-protocol" xmlns:ns7="urn:oasis:names:tc:SAML:metadata:ui" xmlns:oaf="http://schemas.eduserv.org.uk/openathens-federation/1.0" xmlns:privacy="http://docs.oasis-open.org/wsfed/privacy/200706" xmlns:pyff="http://pyff.io/NS" xmlns:q1="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:refeds="http://refeds.org/metadata" xmlns:remd="http://refeds.org/metadata" xmlns:renater="https://federation.renater.fr/metadata" xmlns:req="urn:oasis:names:tc:SAML:profiles:SSO:request-init" xmlns:req-attr="urn:oasis:names:tc:SAML:protocol:ext:req-attr" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" xmlns:saml1md="urn:mace:shibboleth:metadata:1.0" xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion" xmlns:samla="urn:oasis:names:tc:SAML:2.0:assertion" xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" xmlns:ser="http://eidas.europa.eu/metadata/servicelist" xmlns:shibmd="urn:mace:shibboleth:metadata:1.0" xmlns:taat="http://www.eenet.ee/EENet/urn" xmlns:ti="https://seamlessaccess.org/NS/trustinfo" xmlns:ukfedlabel="http://ukfederation.org.uk/2006/11/label" xmlns:wayf="http://wayf.dk/2014/08/wayf" xmlns:wsa="http://www.w3.org/2005/08/addressing" xmlns:xenc="http://www.w3.org/2001/04/xmlenc#" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:xrd="http://docs.oasis-open.org/ns/xri/xrd-1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ID="eduGAIN" Name="http://edugain.org/" cacheDuration="PT6H" validUntil="2025-08-02T15:29:56Z">
+  <ds:Signature><ds:SignedInfo><ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/><ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/><ds:Reference URI="#eduGAIN"><ds:Transforms><ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/><ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#WithComments"/></ds:Transforms><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><ds:DigestValue>BH6UzP4yTXQCUUgZxVwzsU7kTgDlbb4+DRkU21UDcyY=</ds:DigestValue></ds:Reference></ds:SignedInfo><ds:SignatureValue>wgiyVKQC3RX/fr9zf87Ij1tAN04KJr5bIijt55qHnIQrpd4PUSEjdEK8Uuv6gcU4Wq22hdy5CfbRw8nk0QhXtYQruZBPyzbu5IfRi0vatd5DdMbgFXWXQLZ86yR2qciC+bfJW2vlCJmVzNH6ZakkaTkNAdyvO3e6cs6NoKv9IKLCcGVR9pj+RNKORq4JyKcawd9J+6UDiOAPIr1nQdGnZyqK+5uuuHCU6P63l50XjoYrfQ5cAP4jY2EjvaSbB+lJ7xgjWq6/Zoo2fDRuq6aQVYVgmMHM80SNCoIO151WhBo1IBrnvNpgd8KnSIEcKfs0velg3Pxajp4SlZrEnfXaM9dVj15fzWVFJ9yjq77HtHFeAvs8WL48RjbEywgtCIz28U9u4WwuY5OdI9Kj1k8pwkBh5lFQZlYkoy/UikIfU1NDXBd7vRIoAYaoGBNixkfwfaQJeYkG+9AMv/qJrj8V17ReC0j0Pkuf0c5Lb1UQg2WfVEEGA8NWDczuRVJw9/CBqqyTbnRgs1CFgwsr4cLRHBY1F2al/qei/374UuhIanNXY8LCc7otbysTfqvk4PhEUCEs1ZZ6fXer4K8fPvnTOTuxH4TfLjtGK+se3oK/P5tKGsBSxSvtBL2NnXM0UukfcROwEN2DIWi/PB2+w61ZkrsS4doIZ/APBdRRR/x66bg=</ds:SignatureValue><ds:KeyInfo><ds:X509Data><ds:X509Certificate>MIIFSzCCAzOgAwIBAgIUY99qGOKOxV+iz/+tWfwixuh0CpowDQYJKoZIhvcNAQEL
+BQAwNTEOMAwGA1UECgwFR0VBTlQxIzAhBgNVBAMMGmVkdUdBSU4gUlNBIFNpZ25l
+ciBDQSAyMDIyMB4XDTIyMDMwODA5MjIzMloXDTQyMDMwODA5MjIzMlowNTEOMAwG
+A1UECgwFR0VBTlQxIzAhBgNVBAMMGmVkdUdBSU4gUlNBIFNpZ25lciBDQSAyMDIy
+MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA1H2PdoPu4QLKqfcg7uC9
+rzPA04tdUAdbdnByPddLFEeOfYUxkzbbmrEkUbvL65YAibbxJwEioIQTgSwrtoHL
+nT/puQnux7T7en5qYRDLpX7qR2ssNN4TiXS8Z8qDmI+LQw9YnNpI35qHguHKBr2J
+kbM7qdq6+8KQD0aK+7FyPcGsYDnOoLlJ8cfmIxY7mumfEbiAni/z/pP4Mo2g4rf4
+GY8nhHudJea6qSvxIGLRy7GlL0VOY/PCnxl+EPYSRZYEJEc9jNXsepIzpSU5AM6r
+kwO6Ue+5crYtJMey07b0IEaFNHc/Omt5KY+UO0ewYnjcdnKa5MWgTntxs+AzDiMp
+dIXGemo2SKfcqmAPUW8bLNFABdwxq/Bhcsqb1K+e4C61dPyI2rDWpaM+NIRLvpLD
+jDZsaMnhZK6/ezxKV4h94YKSF1fTunZsyEtaot53ztXjUgvALMFb/XqAes3V+o7D
+WSQ1JYvifkk2agzjel+A9m+e7UgaBuuqfwpkClgMExrB8CJI1xBuAHI/yldoaITL
+auPKWYb+bXpkPg8BznYhGIA9TSqTPNwd0WmH1SZ1lmINuN8ElKRmi+DKkKe9NRXf
+/jS3PKg9NnrFS9fnhTeaI8ikVSh8qPDfsUYtuDF1SL7B+27yT3+7WKCD6gqu/J4P
+8iYELM++C29VgApxlHnLdO8CAwEAAaNTMFEwHQYDVR0OBBYEFEgBijs8UaPzEW81
+hco9oyNH27b3MB8GA1UdIwQYMBaAFEgBijs8UaPzEW81hco9oyNH27b3MA8GA1Ud
+EwEB/wQFMAMBAf8wDQYJKoZIhvcNAQELBQADggIBAMTQKHe5mybVO4hlTHeha1xo
+/OYREQsa0We4nR5Rbga6xDMHCjnDYdfZg6VqbgGUA97kOAymhlIFO0pNKGowlOdR
+o9AjEhW2mq2itD7e4T4bDWqJ+6YAVc94DIVAjaY8BSJiet5BccXB8oles+W9nQ8k
+k24X2uCa3lWTbUaNGootbN+DVKVvX85zt5p707++yRQJZH4AWSAgpglnnIxo/y2Z
+rVUl8LvbwU4SuSQnyorfaiA0Q4NCnJPoZh1sEyfqvcVkH915RwP+0Vl7oXYgYKx0
+52U+G6I3w5qm/PafUQ4K2hn2KIHYDCz4P8DV6pbUqzoZ15BvLPu/3eenzqvdtoGj
+hD8/3VxowicLrV69gEWJZ89VMjjPTHp7XyrEvKq4n7uquLArS3dW3+mNrmeFRA99
+Y59RFgtroEbIyk5Z/AQA0vuTfEATIMdn/jbeLC2juz57AAnuu6mE72KBdZY3OK2u
+F1sQCop/lWfN/khleo5EBWucQ+a7nZnByd6J0sp70AxjSOBTP5I0TBcdZgaDXJpH
+b4pOwX4EQeXUwlYTh2eYoZRP2thTdH0QrXKEEicynmBfvECz/4nAPwLPYk+yK9/a
+bYYSBn/KbBhBie7chsknzJ+XXb4C9ROubuuAl26yPQxX5uI03lYkVExpj5SdHzts
+/ULLKN5t9Us3gc9SQ3+6</ds:X509Certificate></ds:X509Data></ds:KeyInfo></ds:Signature><md:Extensions>
+    <mdrpi:PublicationInfo creationInstant="2025-07-28T15:29:47Z" publisher="http://mds.edugain.org/"/>
+  </md:Extensions>
+  <md:EntityDescriptor entityID="https://idp.edugain.example.edu/idp/shibboleth">
+    <md:Extensions>
+      <mdrpi:RegistrationInfo registrationAuthority="https://edugain.example.edu">
+        <mdrpi:RegistrationPolicy xml:lang="en">https://example.server.com/Policy-v1.0.pdf</mdrpi:RegistrationPolicy>
+      </mdrpi:RegistrationInfo>
+    </md:Extensions>
+    <md:IDPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+      <md:Extensions>
+        <shibmd:Scope regexp="false">edugain.example.edu</shibmd:Scope>
+        <mdui:UIInfo>
+          <mdui:DisplayName xml:lang="en">Example IdP for eduGAIN</mdui:DisplayName>
+          <mdui:Description xml:lang="en">Example IdP for eduGAIN</mdui:Description>
+          <mdui:Logo height="80" width="80" xml:lang="en">https://example.server.com/idp/images/logo.png</mdui:Logo>
+        </mdui:UIInfo>
+      </md:Extensions>
+      <md:KeyDescriptor use="signing">
+        <ds:KeyInfo>
+          <ds:X509Data>
+            <ds:X509Certificate>
+MIIEKDCCApCgAwIBAgIVAK3+epRpBYLkDFqBDJP9WacC+I7YMA0GCSqGSIb3DQEBCwUAMBoxGDAW
+BgNVBAMMD2lkcC5tYXJlbi5hYy5tdzAeFw0yNTAyMjUxMjQyMDZaFw00NTAyMjUxMjQyMDZaMBox
+GDAWBgNVBAMMD2lkcC5tYXJlbi5hYy5tdzCCAaIwDQYJKoZIhvcNAQEBBQADggGPADCCAYoCggGB
+ANp2cU7amXDFx7ZbPgo1lzwB1aF/LirEjfmeLirqK5giWJsgM9H8pxJjC3wQsposaKjvrH574N1L
++yzwHZxHFImyEqp323lcPXzjBuCKQrSkTOxmVrrKSOEwMNQ9fpNluf67J7MvlumN1/OSwesEyA98
+u5J6spp1B2uq9uERyqRbKprxJoNHVfHXlI1bDEc4UqTW2Ca86p9yLjulzvCaN/kM5x76fYdvmGGG
+cmKgjNnc/nc8AsToKHE/2qzbE9AvfR4mEQ/JTf4sJE92rytDu3fr6LvpL8QrnabWe4jW0kjk/9ow
+UBsFAaIvo89qcjxANuY9wM0kTWO8Js0pK220hlim8/tOTFPWKmxNwa3BdKtmtNwI8L5ZQoN40Aq+
+oqy7MD0xl6JUsC7AymAsPYoSPntzAbNwr7Xku0fRwSk4Qki8BB4qrDkQ65jr3T+M87K8hnrKiKYy
+iwWHzoVa6uFINfjngZKy35ThD5cJ7JB7JBYnbE/3fRsfUSf1soFSuJdSaQIDAQABo2UwYzAdBgNV
+HQ4EFgQUmZ2pcY599AATx9dv1TG0sMhmNqQwQgYDVR0RBDswOYIPaWRwLm1hcmVuLmFjLm13hiZo
+dHRwczovL2lkcC5tYXJlbi5hYy5tdy9pZHAvc2hpYmJvbGV0aDANBgkqhkiG9w0BAQsFAAOCAYEA
+gvQQs9E3bI0WYKaaqwaekD/3LIV6haGYChQISFq7KBxcjSEpuAJif6P3cnjtlaiFwFtgZlh4PGZh
+jXxFyZRkunF8iwPAeZfyWvbwwk+zuPBvE0WNPdfzV2yeqQAzp1TnXP9fcgaRE1FCLzlGA0vgtBuf
+/pXLHw9gV+mcOZV0c6D/GSzshgpH+oRek3Cs1WmjttzFlkcQomCBat1e195Wu6nG7YE0SKsYY7+w
+WEB6rqzVdCPc1UsjpPSPCBbPWX5vD3AgO0VUEpdX9HIxCuBL24R2dMleww9bgErxDOjWOETN5Uv1
+SdGPTG3L1SdDvPnPGfjbYphKpcSpzIhO8HhhcUpUULklBRdgzDWZ8LVcT66O0B4ZRxkRk0zTlkCY
+vZvKZoeeAwuIVbLmfysxw8A74AbAzy/SshG1TJsDntwRUGCpCwsXl+Kvtd7HITTeKjfbItucB471
+MCNlu+JA+MrzGZc7CnjWHgSYkBnaVfjug9ZGxlt7OkEZsV6oxvWy71Av
+                    </ds:X509Certificate>
+          </ds:X509Data>
+        </ds:KeyInfo>
+      </md:KeyDescriptor>
+      <md:KeyDescriptor use="signing">
+        <ds:KeyInfo>
+          <ds:X509Data>
+            <ds:X509Certificate>
+MIIEKDCCApCgAwIBAgIVAKYkzlzQ42lHFsDX1fgwgnxyxT74MA0GCSqGSIb3DQEBCwUAMBoxGDAW
+BgNVBAMMD2lkcC5tYXJlbi5hYy5tdzAeFw0yNTAyMjUxMjQyMDVaFw00NTAyMjUxMjQyMDVaMBox
+GDAWBgNVBAMMD2lkcC5tYXJlbi5hYy5tdzCCAaIwDQYJKoZIhvcNAQEBBQADggGPADCCAYoCggGB
+AJUaaKVXg50HPzyCHqAtReMRPId9KP21LqdqcJtzZdmWpwoFKanY7sWNE7zLsIcerDp5lxFEM670
+ILO4dUJlQEWQBi7hHWe1jDLaruN/0a694Ptz/ncs3fIdnXs5Jt+RkSlTMHwSDWq/KdkMNc5tAeaw
+s1CyHaNPNa23fP4iA57LHKpJa7YPCgDABpdx0easTiUCuAOUQu5IeeIZGU0684iaTC7fcuYaIG/p
+majFZL+kqwskN0YsJn+mfO0Pcq9QpDQlSYv+X4uEy6fprfQWwALhwiifFLA4TdSVUObb9QkVgCqo
+vOTNScw9fkfsOhTGtj/A9vfaf0ekOtcWLwcJHUj2rTeGXCnWE0/mUqTmvn7NKlwLYkXUSMYSlSEM
+ZEHMtNkPz2HH1hrhPb7VbKLfekG4k10Vz7QSiyGudALmEpxtmBrz7JMmjmv60MvmOiodGFAs53lL
+fTjvYxxmOLvjRSYrt1itRLni932KgI/VQPDpwmS3tUtZI5jfR7bA4hF+9QIDAQABo2UwYzAdBgNV
+HQ4EFgQU54aph3TZpsUp1YtPNoMurShgyrowQgYDVR0RBDswOYIPaWRwLm1hcmVuLmFjLm13hiZo
+dHRwczovL2lkcC5tYXJlbi5hYy5tdy9pZHAvc2hpYmJvbGV0aDANBgkqhkiG9w0BAQsFAAOCAYEA
+TPaNsUAR/NHEdRQ4ahOQGW3ohbBOg5ven9wTBSKhRTJYZDLdDT7aKodS0DXWIYWN/+WWkdYs8hmz
+mmB5sYmSfJP/PLdjl7p632dsu0P8nlJaWhw+rQ7I7nogKSnKIkGqp/SUBq6cqP9I0Xy9Q/08IjHB
+Bd4OunnRjjYdU87yyhBi7dYBO8X1b2M0X7B5VM0Ig4M9XrjMOfdBzgXi5b4q3Y0o3lqNA0CFLarX
+Gyev+qJ/rWA3iOZas/lWO3TC8gWlY1mNiaZmGnHauqJqPVK2qgzjN2uJHGFXHtBMLphiPLkCG/1Y
+V20CYpX2pN82nLSNtcQlFD0oTmTgjv7abfhfcn8yA6Zw9iXicTpJVJR5rbaJ8JY1XYq6PqFtcMUB
+B/IyINRPpwZmo/npLH1o5LzXfKJXjxX4vmAVz19rL1Bk4ad96qE3vzn6+kKq+c97bZqiPQiaPLb/
+pK+jqOPkWfE5intH8cqLJ8qIi2pmWHnnxrQpQ4nsaztCq8cnJ9muKKCM
+                    </ds:X509Certificate>
+          </ds:X509Data>
+        </ds:KeyInfo>
+      </md:KeyDescriptor>
+      <md:KeyDescriptor use="encryption">
+        <ds:KeyInfo>
+          <ds:X509Data>
+            <ds:X509Certificate>
+MIIEJzCCAo+gAwIBAgIUFsBZm9KQOzx8TL3LuDzyMyc50WkwDQYJKoZIhvcNAQELBQAwGjEYMBYG
+A1UEAwwPaWRwLm1hcmVuLmFjLm13MB4XDTI1MDIyNTEyNDIwNloXDTQ1MDIyNTEyNDIwNlowGjEY
+MBYGA1UEAwwPaWRwLm1hcmVuLmFjLm13MIIBojANBgkqhkiG9w0BAQEFAAOCAY8AMIIBigKCAYEA
+mtbsq2HLu/lXVgBl07pfvojQMADa8LBnzHMLcH/4vm7QDm2jKZKCK11Xyn1pdTDeVOE1/uHfm8BP
+cwWWKcWEY+lyIWSijPyiBo3PenpVfd/gLsI9L8BoKPzbQMFIVMJd8pvZ+k6CpyAkK/ePH/LLTmNV
+LK5O0wtZSAyoPLtmPAtssVlzqVvcmAYSxLao+/uwLGaTB54Gxki4kQkRN+ydfD6Afy0Slw9jvRb9
+yHXw3GyIc7zlWilgkvu+wm9vlJ18bxgSozkv4PCEWirxPl36XzW7KxSCBpIbKNc3KTskMDKesAL/
+w2kJODBdsAj11AKO8gkotstQzCZLefsdFSq0zUqtp10RZaemz+OVTG/FHM/1T0l+t6e2FQG3tJAP
++W760Gnt0YmnrZ9WjryIdOjQkA2RGIMJKthLu80k8AlWG/Ukk8gTOs+JZYBlJQFJ9ItFz5jXru3h
+QtROJ+7G3nSaiGtpki1f5BP8vV/XjzaUFdFEnbReB3AdUoj0/WnrUZtFAgMBAAGjZTBjMB0GA1Ud
+DgQWBBSThV/OvOzPYkPuTxSEuuBWiVmCVjBCBgNVHREEOzA5gg9pZHAubWFyZW4uYWMubXeGJmh0
+dHBzOi8vaWRwLm1hcmVuLmFjLm13L2lkcC9zaGliYm9sZXRoMA0GCSqGSIb3DQEBCwUAA4IBgQAM
+tkfqBgHIVQfVAa/TvutCHDY/0ZQCs/Zy4xT2ycKM18+M/eYLVKCwA4yDnStrckYYPt0o+uw7W9mL
+z8o1+pPONO/P2vZ0m7QszHH4nbv6XMpUnGBxV+x/JHsEsJkTSLZdIyR/vMNSgA9vMdt+DrwOcmhM
+0CrcEnNGuNFctBdUXW/juvoGIZJR8YUTpMbteBjFMtYLHA7eNaZGYgW+Ay9xV4Uh+VoNNinly/ka
+xd5gcJvmtbQS79o/g1HdOc/14USXsPWGDszFafy25d+8mRnnDL2rx0Sp0Eza7c9V/uozGzBiuBgd
+mf3RmuGSP37ESswiYPGOzJS+bwPmMixtNI/YNr5OizAWMpdUJvTi9l2hUdjdnNwO9jJW0Ytd72Pl
+gXP7dr9U0aiyUO2fWkf11XLsR7w2EJlXisv0gZw/NAoQjj6IaYypox/ltxDhSFXN94vH8hJE8MpT
+wn2o+KL6rZHCiWfybfZAjZaH/poZz/kbOz1rRqFEmQtKUz70Y78auBQ=
+                    </ds:X509Certificate>
+          </ds:X509Data>
+        </ds:KeyInfo>
+      </md:KeyDescriptor>
+      <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP" Location="https://idp.edugain.example.edu/idp/profile/SAML2/SOAP/ArtifactResolution"/>
+      <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://idp.edugain.example.edu/idp/profile/SAML2/Redirect/SLO"/>
+      <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://idp.edugain.example.edu/idp/profile/SAML2/POST/SLO"/>
+      <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</md:NameIDFormat>
+      <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:persistent</md:NameIDFormat>
+      <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST-SimpleSign" Location="https://idp.edugain.example.edu/idp/profile/SAML2/POST-SimpleSign/SSO"/>
+      <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://idp.edugain.example.edu/idp/profile/SAML2/Redirect/SSO"/>
+      <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://idp.edugain.example.edu/idp/profile/SAML2/POST/SSO"/>
+    </md:IDPSSODescriptor>
+    <md:Organization>
+      <md:OrganizationName xml:lang="en"> eduGAIN example  </md:OrganizationName>
+      <md:OrganizationDisplayName xml:lang="en"> eduGain example </md:OrganizationDisplayName>
+      <md:OrganizationURL xml:lang="en"> https://edugain.example.edu </md:OrganizationURL>
+    </md:Organization>
+    <md:ContactPerson contactType="technical">
+      <md:EmailAddress>mailto:systems@edugain.example.edu</md:EmailAddress>
+    </md:ContactPerson>
+    <md:ContactPerson contactType="support">
+      <md:EmailAddress>mailto:support@edugain.example.edu</md:EmailAddress>
+    </md:ContactPerson>
+  </md:EntityDescriptor>
+<EntityDescriptor entityID="https://identityproxy.sp.example.edugain.edu/sp/saml2">
+    <Extensions>
+      <mdrpi:RegistrationInfo registrationAuthority="https://sp.example.edugain.edu" registrationInstant="2023-12-29T18:40:00Z">
+        <mdrpi:RegistrationPolicy xml:lang="en">https://gif.sp.example.edugain.edu/pdf/metadatastatement.pdf</mdrpi:RegistrationPolicy>
+      </mdrpi:RegistrationInfo>
+    </Extensions>
+    <SPSSODescriptor AuthnRequestsSigned="true" WantAssertionsSigned="true" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+      <Extensions>
+        <idpdisc:DiscoveryResponse Binding="urn:oasis:names:tc:SAML:profiles:SSO:idp-discovery-protocol" Location="https://identityproxy.sp.example.edugain.edu/sp/disco" index="1"/>
+        <mdui:UIInfo>
+          <mdui:DisplayName xml:lang="en">eduGAIN Example SP</mdui:DisplayName>
+          <mdui:Description xml:lang="en">eduGAIN Example SP</mdui:Description>
+          <mdui:Keywords xml:lang="se">Satosa SP-SE</mdui:Keywords>
+          <mdui:Keywords xml:lang="en">Satosa SP-EN</mdui:Keywords>
+          <mdui:InformationURL xml:lang="en">http://sp.example.edugain.edu/</mdui:InformationURL>
+          <mdui:PrivacyStatementURL xml:lang="en">http://sp.example.edugain.edu/</mdui:PrivacyStatementURL>
+          <mdui:Logo height="80" width="80">https://wsidp.sp.example.edugain.edu/idp/images/logo.png</mdui:Logo>
+        </mdui:UIInfo>
+      </Extensions>
+      <KeyDescriptor>
+        <ds:KeyInfo>
+          <ds:X509Data>
+            <ds:X509Certificate>
+MIIEATCCAumgAwIBAgIUS4N+ue40exBaQsY3B6rcNQRcFZAwDQYJKoZIhvcNAQEL
+BQAwgY8xCzAJBgNVBAYTAkdIMQ4wDAYDVQQIDAVHaGFuYTEOMAwGA1UEBwwFQWNj
+cmExDzANBgNVBAoMBkdBUk5FVDEPMA0GA1UECwwGR0FSTkVUMRwwGgYDVQQDDBNw
+cm94eS5nYXJuZXQuZWR1LmdoMSAwHgYJKoZIhvcNAQkBFhFub2NAZ2FybmV0LmVk
+dS5naDAeFw0yNDA4MzExNzIyNDRaFw0yNTA4MzExNzIyNDRaMIGPMQswCQYDVQQG
+EwJHSDEOMAwGA1UECAwFR2hhbmExDjAMBgNVBAcMBUFjY3JhMQ8wDQYDVQQKDAZH
+QVJORVQxDzANBgNVBAsMBkdBUk5FVDEcMBoGA1UEAwwTcHJveHkuZ2FybmV0LmVk
+dS5naDEgMB4GCSqGSIb3DQEJARYRbm9jQGdhcm5ldC5lZHUuZ2gwggEiMA0GCSqG
+SIb3DQEBAQUAA4IBDwAwggEKAoIBAQCMwnFBOO1iAtGGLiTkflGJL6+jJVnQiOB2
+mnTZJvoMzRrD1PSrnexftZ4HFhZN7+6mqp/KzO4CeVyWILPH8D1s3dOju5pLM1Al
+6PcUDyx3fSHzOTQ2CKIyygapdhlARQ9G4nJCs1ch38szwDOTZlTf5ddAkDCveG6u
+GZKmoBXTMH3Vf2L0VpRA+NBzA6YYPTYBZ/q+rUa/RgqlKsRdHJkw20IEEkweRmcV
+CpRFXeK2oex9Qej9zAgHwHCbBOfcs5B/Z6M5NB6SvS4EFumZVFvGd6o7TnKKjARo
+XhH5bovBIjiQ/+RCAgOoWYR9+8iis2njwqXWSAqcF1phi7R0olSzAgMBAAGjUzBR
+MB0GA1UdDgQWBBSzC8ESDVwCfcONyo+BgdVi74mp3TAfBgNVHSMEGDAWgBSzC8ES
+DVwCfcONyo+BgdVi74mp3TAPBgNVHRMBAf8EBTADAQH/MA0GCSqGSIb3DQEBCwUA
+A4IBAQATOEuBFJOPuZwSL1bn+sJnu7vI9RDdn8d6YzydKc/83WmrMfEsN9QLTYr2
+IrBRR5hsFtOucGTgqn+0/fEB5sKCKIM0tsbSJpmx9bG3W6WG5xQ+FiIjRiOa3wdK
+MXMVPlza1zWAGdR39T/acG8Vt7jtpDA436dsZyRAfSDsz3EJHKT6/afDNrIzY/rg
+ofsmgmwUUN0pPni9tGyzGlmC9cBszYFGX16ksRdOuWCvyyw46stYo6pIHGIJqpuG
+vjLEEu/SD3S9BDNCVnU3xCWHAJuiMuWL78nuAYLOnapV9BQ1wfZAPyfrF7BfJQAc
+rCQ5wiQlCiUdMUTWlNVfhJR1n5Pp
+</ds:X509Certificate>
+          </ds:X509Data>
+        </ds:KeyInfo>
+      </KeyDescriptor>
+      <NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</NameIDFormat>
+      <AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://identityproxy.sp.example.edugain.edu/sp/acs/post" index="1"/>
+    </SPSSODescriptor>
+    <Organization>
+      <OrganizationName xml:lang="en">sp.example.edugain.edu</OrganizationName>
+      <OrganizationDisplayName xml:lang="en">sp.example.edugain.edu</OrganizationDisplayName>
+      <OrganizationURL xml:lang="en">http://sp.example.edugain.edu</OrganizationURL>
+    </Organization>
+    <ContactPerson contactType="technical">
+      <GivenName>Technical</GivenName>
+      <EmailAddress>mailto:admin@sp.example.edugain.edu</EmailAddress>
+    </ContactPerson>
+    <ContactPerson contactType="technical">
+      <GivenName>Technical</GivenName>
+      <EmailAddress>mailto:admin@sp.example.edugain.edu</EmailAddress>
+    </ContactPerson>
+  </EntityDescriptor>
+</md:EntitiesDescriptor>
