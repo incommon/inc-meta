@@ -34,28 +34,15 @@ info "Starting at $(date)"
 debug "Using local key"
 
 # The inc.generate.import_sign_localkey target erroneously depends on sign.uk.keyPassword
-# The mda.inc.imported-idp.xml is  the parameter for the unsigned idp-only aggregate output file
+# The mda.inc.imported-idp.xml is the parameter for the unsigned idp-only aggregate output file
 # The mda.inc.imported.xml is the parameter for the unsigned aggregate output file
-ANT_OPTS=(inc.generate.import_sign_localkey \
+ANT_OPTS=(inc.generate.import_local \
   "-Dedugain.dir=/mda/inc/inc-meta/mdx/int_edugain" \
   "-Dmda.inc.edugain.xml=tests/incommon/data/test-edugain-metadata.xml" \
   "-Dmda.inc.imported.xml=/tmp/incommon-and-edugain-metadata.xml" \
   "-Dmda.inc.imported-idp.xml=/tmp/incommon-and-edugain-idp-metadata.xml" \
   "-Dmda.inc.production.xml=tests/incommon/data/test-metadata.xml" \
-  "-Dmda.sign.keyResource=file:///keys/mda-signing.key" \
-  "-Dshared.ws.dir=/mda/inc/inc-meta" \
-  "-Dsign.uk.keyPassword=dummypassword")
-
-# Set source for signed InCommon metadata aggregate
-MD_SOURCE_FILE=$MDQ_HOME/tests/incommon/data/test-metadata.xml
-MD_SOURCE_CERT=/$MDQ_HOME/tests/incommon/data/test-cert.pem
-
-# Create temp local signing key/cert
-SGNPWD=dummypassword
-export SGNPWD
-mkdir -p /keys
-[ ! -L /keys/mda-signing.crt ] && ln -s /$MDQ_HOME/tests/incommon/data/mda-signing.crt /keys/mda-signing.crt
-[ ! -L /keys/mda-signing.key ] && ln -s /$MDQ_HOME/tests/incommon/data/mda-signing.key /keys/mda-signing.key
+  "-Dshared.ws.dir=/mda/inc/inc-meta")
 
 # Generate all required metadata for the MDQ service
 debug "Generating metadata"

@@ -213,4 +213,92 @@ rCQ5wiQlCiUdMUTWlNVfhJR1n5Pp
       <EmailAddress>mailto:admin@sp.example.edugain.edu</EmailAddress>
     </ContactPerson>
   </EntityDescriptor>
+  <md:EntityDescriptor entityID="https://erroneous.edugain.example/auth/saml2/sp/metadata.php">
+    <md:Extensions>
+      <mdrpi:RegistrationInfo registrationAuthority="erroneous.edugain.example" registrationInstant="2025-07-08T19:08:09Z">
+        <mdrpi:RegistrationPolicy xml:lang="en">https://gif.erroneous.edugain.example/pdf/statement.pdf</mdrpi:RegistrationPolicy>
+      </mdrpi:RegistrationInfo>
+    </md:Extensions>
+    <md:SPSSODescriptor AuthnRequestsSigned="true" WantAssertionsSigned="true" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol urn:oasis:names:tc:SAML:1.1:protocol">
+      <md:Extensions>
+        <mdui:UIInfo>
+          <mdui:DisplayName xml:lang="en">eduGAIN Error Example</mdui:DisplayName>
+          <mdui:Description xml:lang="en">eduGAIN Error Example Description</mdui:Description>
+          <mdui:InformationURL xml:lang="en">https://learn.erroneous.edugain.example</mdui:InformationURL>
+          <mdui:Logo height="80" width="80">https://logo.erroneous.edugain.example/images/logo.png</mdui:Logo>
+        </mdui:UIInfo>
+      </md:Extensions>
+      <md:KeyDescriptor use="signing">
+        <ds:KeyInfo>
+          <ds:X509Data>
+            <ds:X509Certificate>
+MIIEGjCCAwKgAwIBAgIBADANBgkqhkiG9w0BAQsFADCBpTEMMAoGA1UEAwwDR09M
+MQswCQYDVQQGEwJHSDEgMB4GCSqGSIb3DQEJARYRbm9jQGdhcm5ldC5lZHUuZ2gx
+DjAMBgNVBAcMBUxlZ29uMS0wKwYDVQQKDCRHaGFuYWlhbiBBY2FkZW1pYyAmIFJl
+c2VhcmNoIE5ldHdvcmsxFjAUBgNVBAgMDUdyZWF0ZXIgQWNjcmExDzANBgNVBAsM
+BkdBUk5FVDAeFw0yNTA3MDgxODM0MTNaFw0zNTA3MDYxODM0MTNaMIGlMQwwCgYD
+VQQDDANHT0wxCzAJBgNVBAYTAkdIMSAwHgYJKoZIhvcNAQkBFhFub2NAZ2FybmV0
+LmVkdS5naDEOMAwGA1UEBwwFTGVnb24xLTArBgNVBAoMJEdoYW5haWFuIEFjYWRl
+bWljICYgUmVzZWFyY2ggTmV0d29yazEWMBQGA1UECAwNR3JlYXRlciBBY2NyYTEP
+MA0GA1UECwwGR0FSTkVUMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA
+uaAlMu6fdqp8+R9O3uvuV/ZiHkpqiLK/nV+eBhK43HPzdjp+OF1EYM6Dums4HaJK
+MmmmKaIY9hajhC6kV9Gzkql7/FXVdN9VR/aeP7uw2wX3gq4QHHLCy6IsUVuOls7e
+89pGroOakOxrD/Vlc/MYCi5/+mhGuBm6s5o+tRnAfZbjdmFyq1yStVJVGyNpDZOR
+pa/5yZm7v9ISFIL5Ff/jI1FUyHvbr807KgXsKOb6uQuD5rUU5EvLP/3Dmx3OBMgB
+QWnsNfyMBEj210hKHo81xRZiM2OEuNUWKvQ6TXJ7ffRaVKltqSqlzKGp8hQyhcnB
+FqYIOBRYOq/RY2Aid/nZSwIDAQABo1MwUTAdBgNVHQ4EFgQUv7X6mRnIyzF0rsEy
+mLZbO7m8Kz4wHwYDVR0jBBgwFoAUv7X6mRnIyzF0rsEymLZbO7m8Kz4wDwYDVR0T
+AQH/BAUwAwEB/zANBgkqhkiG9w0BAQsFAAOCAQEAcjxsyzB8OOoLpmfowGBWwtA7
+FDP8EspxAENkB73rsXcGlla2FrWcts5JTM1QaXXV3gp2yHQsf3bnQojMuyOhlEN9
+4g2D3hMIe0ii7D6EySf/0+30eVk2Gm4baTkU4iC6AAG6fCGdbV/S35W/LNoUNa43
+w6VZlf3Bm5Ll1DT4tKakA14LLisEYgrHUXTmaHO6ClgKMQSQ4TMLuMsaF7loS7ic
+eOm0U96yXmqMKDqHnI3z1m+nQMSQHALGkRy04ixJTZLaKK6vdUUFMS3RIIYtCIkY
+ZpU3r74KB02RD1kzRTCsK2SkD202ZjKQVC970TgiMyRMl4H1lF+H9RQ5PoU3KQ==
+</ds:X509Certificate>
+          </ds:X509Data>
+        </ds:KeyInfo>
+      </md:KeyDescriptor>
+      <md:KeyDescriptor use="encryption">
+        <ds:KeyInfo>
+          <ds:X509Data>
+            <ds:X509Certificate>
+MIIEGjCCAwKgAwIBAgIBADANBgkqhkiG9w0BAQsFADCBpTEMMAoGA1UEAwwDR09M
+MQswCQYDVQQGEwJHSDEgMB4GCSqGSIb3DQEJARYRbm9jQGdhcm5ldC5lZHUuZ2gx
+DjAMBgNVBAcMBUxlZ29uMS0wKwYDVQQKDCRHaGFuYWlhbiBBY2FkZW1pYyAmIFJl
+c2VhcmNoIE5ldHdvcmsxFjAUBgNVBAgMDUdyZWF0ZXIgQWNjcmExDzANBgNVBAsM
+BkdBUk5FVDAeFw0yNTA3MDgxODM0MTNaFw0zNTA3MDYxODM0MTNaMIGlMQwwCgYD
+VQQDDANHT0wxCzAJBgNVBAYTAkdIMSAwHgYJKoZIhvcNAQkBFhFub2NAZ2FybmV0
+LmVkdS5naDEOMAwGA1UEBwwFTGVnb24xLTArBgNVBAoMJEdoYW5haWFuIEFjYWRl
+bWljICYgUmVzZWFyY2ggTmV0d29yazEWMBQGA1UECAwNR3JlYXRlciBBY2NyYTEP
+MA0GA1UECwwGR0FSTkVUMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA
+uaAlMu6fdqp8+R9O3uvuV/ZiHkpqiLK/nV+eBhK43HPzdjp+OF1EYM6Dums4HaJK
+MmmmKaIY9hajhC6kV9Gzkql7/FXVdN9VR/aeP7uw2wX3gq4QHHLCy6IsUVuOls7e
+89pGroOakOxrD/Vlc/MYCi5/+mhGuBm6s5o+tRnAfZbjdmFyq1yStVJVGyNpDZOR
+pa/5yZm7v9ISFIL5Ff/jI1FUyHvbr807KgXsKOb6uQuD5rUU5EvLP/3Dmx3OBMgB
+QWnsNfyMBEj210hKHo81xRZiM2OEuNUWKvQ6TXJ7ffRaVKltqSqlzKGp8hQyhcnB
+FqYIOBRYOq/RY2Aid/nZSwIDAQABo1MwUTAdBgNVHQ4EFgQUv7X6mRnIyzF0rsEy
+mLZbO7m8Kz4wHwYDVR0jBBgwFoAUv7X6mRnIyzF0rsEymLZbO7m8Kz4wDwYDVR0T
+AQH/BAUwAwEB/zANBgkqhkiG9w0BAQsFAAOCAQEAcjxsyzB8OOoLpmfowGBWwtA7
+FDP8EspxAENkB73rsXcGlla2FrWcts5JTM1QaXXV3gp2yHQsf3bnQojMuyOhlEN9
+4g2D3hMIe0ii7D6EySf/0+30eVk2Gm4baTkU4iC6AAG6fCGdbV/S35W/LNoUNa43
+w6VZlf3Bm5Ll1DT4tKakA14LLisEYgrHUXTmaHO6ClgKMQSQ4TMLuMsaF7loS7ic
+eOm0U96yXmqMKDqHnI3z1m+nQMSQHALGkRy04ixJTZLaKK6vdUUFMS3RIIYtCIkY
+ZpU3r74KB02RD1kzRTCsK2SkD202ZjKQVC970TgiMyRMl4H1lF+H9RQ5PoU3KQ==
+</ds:X509Certificate>
+          </ds:X509Data>
+        </ds:KeyInfo>
+      </md:KeyDescriptor>
+      <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://erroneous.edugain.example/auth/saml2/sp/saml2-logout.php/erroneous.edugain.example"/>
+      <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:persistent</md:NameIDFormat>
+      <md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://erroneous.edugain.example/auth/saml2/sp/saml2-acs.php/erroneous.edugain.example" index="0"/>
+    </md:SPSSODescriptor>
+    <md:Organization>
+      <md:OrganizationName xml:lang="en">eduGAIN Error Example</md:OrganizationName>
+      <md:OrganizationDisplayName xml:lang="en">eduGAIN Error Example</md:OrganizationDisplayName>
+      <md:OrganizationURL xml:lang="en">https://erroneous.edugain.example</md:OrganizationURL>
+    </md:Organization>
+    <md:ContactPerson contactType="technical">
+      <md:EmailAddress>mailto:noc@erroneous.edugain.example</md:EmailAddress>
+    </md:ContactPerson>
+  </md:EntityDescriptor>
 </md:EntitiesDescriptor>

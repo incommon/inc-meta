@@ -3057,6 +3057,20 @@
     </target>
 
     <!--
+        inc.generate.import_local
+
+        Generate the InCommon import aggregate for local testing
+    -->
+    <target name="inc.generate.import_local">
+        <echo>Generating InCommon import aggregate in ${mda.inc.imported.xml}</echo>
+        <echo>    (IdP-only aggregate in ${mda.inc.imported-idp.xml})</echo>
+        <echo>    from production aggregate in ${mda.inc.production.xml}</echo>
+        <echo>    and selected eduGAIN entities from ${mda.inc.edugain.xml}...</echo>
+        <CHANNEL.do channel="incommon" verb="import_local"/>
+        <echo>Generation complete.</echo>
+    </target>
+
+    <!--
 	inc.generate.import_sign
 
 	Generate the InCommon import aggregate signed using AWS CloudHSM
@@ -3108,6 +3122,21 @@
         <echo>    from aggregate in ${mda.inc.production.xml}</echo>
         <echo>    signed using AWS CloudHSM</echo>
         <CHANNEL.do channel="incommon" verb="sign"/>
+        <echo>Generation complete.</echo>
+    </target>
+
+    <!--
+        inc.generate.sign_localkey
+
+        Sign an aggregate using a local key
+    -->
+    <target name="inc.generate.sign_localkey">
+        <property name="mda.sign.keyPassword" value="${sign.uk.keyPassword}"/>
+
+        <echo>Generating signed aggregate in ${mda.inc.imported.xml}</echo>
+        <echo>    from aggregate in ${mda.inc.production.xml}</echo>
+        <echo>    signed using a local key</echo>
+        <CHANNEL.do channel="incommon" verb="sign_localkey"/>
         <echo>Generation complete.</echo>
     </target>
 
@@ -3228,6 +3257,18 @@
     <target name="inc.edugain.report">
         <echo>Looking for errors in eduGAIN entities from ${mda.inc.edugain.xml}...</echo>
         <CHANNEL.do channel="incommon" verb="report"/>
+        <echo>Report complete.</echo>
+    </target>
+
+    <!--
+        inc.edugain.report_local
+
+        Report on the eduGAIN entities filtered out because of errors detected.
+        Used for local testing only
+    -->
+    <target name="inc.edugain.report_local">
+        <echo>Looking for errors in eduGAIN entities from ${mda.inc.edugain.xml}...</echo>
+        <CHANNEL.do channel="incommon" verb="report_local"/>
         <echo>Report complete.</echo>
     </target>
 

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EntitiesDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:shibmd="urn:mace:shibboleth:metadata:1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ID="_20250630T203049" validUntil="2025-07-14T20:30:49Z">
+<md:Extensions xmlns:mdrpi="urn:oasis:names:tc:SAML:metadata:rpi">
+<mdrpi:PublicationInfo creationInstant="2025-06-30T20:30:49Z" publisher="https://incommon.org"/>
+</md:Extensions>
+
+<!-- Example exported entity -->
+<EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" entityID="https://incommon.export.example.com/Saml2">
+  <Extensions xmlns:mdattr="urn:oasis:names:tc:SAML:metadata:attribute" xmlns:mdrpi="urn:oasis:names:tc:SAML:metadata:rpi">
+    <mdrpi:RegistrationInfo registrationAuthority="https://incommon.org"/>
+    <mdattr:EntityAttributes xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">
+      <saml:Attribute NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri" Name="urn:oasis:names:tc:SAML:attribute:assurance-certification">
+        <saml:AttributeValue>https://refeds.org/sirtfi</saml:AttributeValue>
+      </saml:Attribute>
+      <saml:Attribute NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri" Name="http://macedir.org/entity-category">
+        <saml:AttributeValue>http://id.incommon.org/category/registered-by-incommon</saml:AttributeValue>
+      </saml:Attribute>
+    </mdattr:EntityAttributes>
+  </Extensions>
+  <SPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+    <md:Extensions xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata">
+      <DiscoveryResponse xmlns="urn:oasis:names:tc:SAML:profiles:SSO:idp-discovery-protocol" Binding="urn:oasis:names:tc:SAML:profiles:SSO:idp-discovery-protocol" Location="https://mfa-auth.dev2.phenoapp.com/Saml2/disco" index="1"/>
+      <mdui:UIInfo xmlns:mdui="urn:oasis:names:tc:SAML:metadata:ui">
+        <mdui:DisplayName xml:lang="en">Incommon Export Example</mdui:DisplayName>
+        <mdui:Description xml:lang="en">Incommon Export Example Description.</mdui:Description>
+        <mdui:InformationURL xml:lang="en">https://incommon.export.example.com/info.html</mdui:InformationURL>
+        <mdui:PrivacyStatementURL xml:lang="en">https://incommon.export.example.com/privacy_statement.html</mdui:PrivacyStatementURL>
+        <mdui:Logo xml:lang="en" width="100" height="100">https://incommon.export.example.com/logo.png</mdui:Logo>
+      </mdui:UIInfo>
+    </md:Extensions>
+    <md:KeyDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata">
+      <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+        <ds:X509Data>
+          <!-- Serial No. 13726033993109987567, expires on Sat May 28 18:01:40 2022 GMT -->
+          <ds:X509Certificate>
+MIIDqjCCApICCQC+fKsxbkHg7zANBgkqhkiG9w0BAQsFADCBljELMAkGA1UEBhMC
+VVMxDTALBgNVBAgMBE9oaW8xETAPBgNVBAcMCENvbHVtYnVzMSEwHwYDVQQKDBhT
+cGluZSBSZXNlYXJjaCBJbnN0aXR1dGUxHTAbBgNVBAsMFFNvZnR3YXJlIEVuZ2lu
+ZWVyaW5nMSMwIQYDVQQDDBptZmEtYXV0aC5kZXYyLnBoZW5vYXBwLmNvbTAeFw0y
+MTA1MjgxODAxNDBaFw0yMjA1MjgxODAxNDBaMIGWMQswCQYDVQQGEwJVUzENMAsG
+A1UECAwET2hpbzERMA8GA1UEBwwIQ29sdW1idXMxITAfBgNVBAoMGFNwaW5lIFJl
+c2VhcmNoIEluc3RpdHV0ZTEdMBsGA1UECwwUU29mdHdhcmUgRW5naW5lZXJpbmcx
+IzAhBgNVBAMMGm1mYS1hdXRoLmRldjIucGhlbm9hcHAuY29tMIIBIjANBgkqhkiG
+9w0BAQEFAAOCAQ8AMIIBCgKCAQEAy3fRJcWRUu7tAiyNhxV+qAwhWf1UqbqaAygD
+pXyyt9evvBLjRzaDV0oRwrxFQBy/BbXw3iqFi7dzCFdApJ6f6YmIoyc7MoO1hXmj
+hxGIwQMhYjgC24zHLXZHRPoVER4bKZhhjluFQe1pcSQOIRvn+ddtmHIrjARWdu2H
+d3Vq+PsRup2xkhUmOtO0hK3ouBvjKRbmimJczAjBuLPcwpFUcvssska2PSMTuWcR
+ngSzkeGALiHvKq0mbGpMlIjmbnPiXi3UORJLKbivtDIoljN6vPibhzC0XBS7QKdW
+jwMUqEPgxoAVUkh3w5cFeGEs8cfGps4GImQDRio/HKMWaLe8bQIDAQABMA0GCSqG
+SIb3DQEBCwUAA4IBAQDIwxlpxNoL97+/RjjYuBNh2cCwjUgMX8B4hcTnXUJxstla
+sVLEzV0f4jAWw9uCxQ7MAZVnVF2qJJr0QO8oa0PUNogAjf2am0iNC9hP4wW35gbX
+OUltpjUzuA1uDFaoOaBTJm6K0dnGQPXJu0LHUq3cYP2usTC/Inanpa2Vrg/Yd9/7
+YYCNkyTNk7BZMmoOCQOmxnZ9EIVoagQlLFOioZm6wH3NkJ/ryLA1BzSzzc4aLcHW
+llqKDN+r3+7V6EhFHi+mdLL0b2hx+WEAD9OsnpnnEK+G9SYufC8bVRLj7zIvPpMX
+H+cY2/VLXuYdr7snyziAlZ6eUgKSeJWDM5axlz/a
+          </ds:X509Certificate>
+        </ds:X509Data>
+      </ds:KeyInfo>
+      <md:EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#aes128-cbc"/>
+    </md:KeyDescriptor>
+    <md:AssertionConsumerService xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" index="1" Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://incommon.export.example.com/Saml2/acs/post"/>
+  </SPSSODescriptor>
+  <Organization>
+    <OrganizationName xml:lang="en">Incommon Export Example Org</OrganizationName>
+    <OrganizationDisplayName xml:lang="en">Incommon Export Example Org Display Name</OrganizationDisplayName>
+    <OrganizationURL xml:lang="en">http://incommon.export.example.com/</OrganizationURL>
+  </Organization>
+  <ContactPerson contactType="administrative">
+    <GivenName>Example Person1</GivenName>
+    <EmailAddress>mailto:example1@incommon.export.example.com</EmailAddress>
+  </ContactPerson>
+  <ContactPerson contactType="technical">
+    <GivenName>Example Person2</GivenName>
+    <EmailAddress>mailto:example2@incommon.export.example.com</EmailAddress>
+  </ContactPerson>
+  <ContactPerson xmlns:remd="http://refeds.org/metadata" contactType="other" remd:contactType="http://refeds.org/metadata/contactType/security">
+    <GivenName>Incommon Export Example Security Team</GivenName>
+    <EmailAddress>mailto:security@incommon.export.example.com</EmailAddress>
+  </ContactPerson>
+</EntityDescriptor>
+</EntitiesDescriptor>
