@@ -223,7 +223,7 @@
         <property name="certificates">
             <list>
                 <bean id="us_incommon_signingCertificate" parent="mda.X509CertificateFactoryBean"
-                    p:resource="classpath:us_incommon/inc-md-cert.pem"/>
+                    p:resource="classpath:us_incommon/inc-md-cert-mdq.pem"/>
             </list>
         </property>
     </bean>
@@ -257,6 +257,9 @@
                         <bean parent="FileSystemResource" c:_0="${inc.production.xml}"/>
                     </property>
                 </bean>
+
+                <!-- change validUntil to 14 days out from today's date (by milliseconds) -->
+                <bean parent="mda.SetValidUntilStage" p:validityDuration="1210000000"/>
 
                 <!-- Sign the aggregate -->
                 <ref bean="signItems" />
